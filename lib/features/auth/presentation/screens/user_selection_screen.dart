@@ -311,6 +311,15 @@ class UserSelectionScreen extends GetView<AuthController> {
     return Column(
       children: [
         _buildRoleCard(
+          profile: MembershipProfile.booking,
+          roleName: 'Guest',
+          title: 'Pay & Play',
+          badgeText: 'GUEST PASS',
+          subtitle: 'Instant court reservations, guest access & equipment',
+          icon: Icons.confirmation_number_outlined,
+        ),
+        SizedBox(height: 12.h),
+        _buildRoleCard(
           profile: MembershipProfile.parents,
           roleName: 'Student',
           title: 'Students',
@@ -326,15 +335,6 @@ class UserSelectionScreen extends GetView<AuthController> {
           badgeText: 'VIP ACCESS',
           subtitle: 'VIP Lounge, court reservations & locker access',
           icon: Icons.military_tech_rounded,
-        ),
-        SizedBox(height: 12.h),
-        _buildRoleCard(
-          profile: MembershipProfile.booking,
-          roleName: 'Guest',
-          title: 'Pay & Play',
-          badgeText: 'GUEST PASS',
-          subtitle: 'Instant court reservations, guest access & equipment',
-          icon: Icons.confirmation_number_outlined,
         ),
       ],
     );
