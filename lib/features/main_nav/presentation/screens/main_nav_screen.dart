@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:curved_nav_bar/curved_nav_bar.dart';
-import '../../../../core/routes/app_routes.dart';
-import '../../../../core/storage/storage_service.dart';
 import 'package:mobile_app/features/home/presentation/screens/home_screen.dart';
 import 'package:mobile_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:mobile_app/features/booking/presentation/screens/court_booking_screen.dart';
 import 'package:mobile_app/features/attendance/presentation/screens/attendance_screen.dart';
-import 'package:mobile_app/features/coaching/presentation/screens/coaching_batches_screen.dart';
 import 'package:mobile_app/features/finance/presentation/screens/payments_invoices_screen.dart';
+import 'package:mobile_app/features/profile/presentation/screens/profile_screen.dart';
 import '../controllers/main_nav_controller.dart';
 
 /// Main scaffold hosting the curved bottom navigation bar and page tabs.
@@ -126,122 +124,6 @@ class _ProfileTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final homeCtrl = Get.isRegistered<HomeController>()
-        ? Get.find<HomeController>()
-        : Get.put(HomeController());
-
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('My Profile', style: TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        children: [
-          Obx(() {
-            final isPayAndPlay = homeCtrl.isPayAndPlay;
-            final name = homeCtrl.greetingName.value.isNotEmpty
-                ? homeCtrl.greetingName.value
-                : (isPayAndPlay ? 'Booking Player' : 'Academy Student');
-            final subtitle = isPayAndPlay ? 'Booking Account' : 'Student Account';
-
-            return ListTile(
-              leading: CircleAvatar(
-                backgroundColor: const Color(0xFFFFFDF5),
-                child: Text(
-                  name.isNotEmpty ? name.substring(0, 1).toUpperCase() : 'U',
-                  style: const TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold),
-                ),
-              ),
-              title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: Text(subtitle),
-            );
-          }),
-          const Divider(),
-          Obx(() {
-            final isPayAndPlay = homeCtrl.isPayAndPlay;
-            return ListTile(
-              leading: const Icon(Icons.confirmation_number_outlined, color: Color(0xFFD4AF37)),
-              title: const Text('Booking History & Passes'),
-              trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
-              onTap: () {
-                final nav = Get.isRegistered<MainNavController>()
-                    ? Get.find<MainNavController>()
-                    : Get.put(MainNavController());
-                nav.changeTab(isPayAndPlay ? 2 : 1);
-              },
-            );
-          }),
-          Obx(() {
-            final isPayAndPlay = homeCtrl.isPayAndPlay;
-            return ListTile(
-              leading: const Icon(Icons.receipt_long_outlined, color: Color(0xFFD4AF37)),
-              title: const Text('Invoices & Payment Receipts'),
-              trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
-              onTap: () {
-                final nav = Get.isRegistered<MainNavController>()
-                    ? Get.find<MainNavController>()
-                    : Get.put(MainNavController());
-                nav.changeTab(isPayAndPlay ? 2 : 3);
-              },
-            );
-          }),
-          // Only show Coaching Batches & Attendance for Academy Students!
-          Obx(() {
-            if (homeCtrl.isPayAndPlay) return const SizedBox.shrink();
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.fitness_center_outlined, color: Color(0xFFD4AF37)),
-                  title: const Text('Coaching Academy & Batches'),
-                  trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
-                  onTap: () => Get.to(() => const CoachingBatchesScreen()),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.calendar_month_outlined, color: Color(0xFFD4AF37)),
-                  title: const Text('Attendance Records'),
-                  trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
-                  onTap: () {
-                    final nav = Get.isRegistered<MainNavController>()
-                        ? Get.find<MainNavController>()
-                        : Get.put(MainNavController());
-                    nav.changeTab(2);
-                  },
-                ),
-              ],
-            );
-          }),
-          ListTile(
-            leading: const Icon(Icons.swap_horiz_rounded, color: Color(0xFFD4AF37)),
-            title: Obx(() => Text(
-                  homeCtrl.isPayAndPlay ? 'Switch to Trainee / Student Mode' : 'Switch to Booking Mode',
-                )),
-            subtitle: Obx(() => Text(
-                  homeCtrl.isPayAndPlay
-                      ? 'Currently: Booking (Home + Payments only)'
-                      : 'Currently: Student (Includes Attendance & Monthly Fees)',
-                )),
-            trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
-            onTap: () => homeCtrl.toggleUserRole(),
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('Logout', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-            onTap: () async {
-              if (Get.isRegistered<StorageService>()) {
-                await Get.find<StorageService>().clearAll();
-              }
-              Get.offAllNamed(AppRoutes.login);
-            },
-          ),
-        ],
-      ),
-    );
+    return const ProfileScreen();
   }
 }
