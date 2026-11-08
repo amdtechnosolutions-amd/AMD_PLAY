@@ -104,20 +104,20 @@ class UserSelectionScreen extends GetView<AuthController> {
                     ),
                     SizedBox(height: 16.h),
 
-                    // Catchy Amenity Badges Row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    // Catchy Amenity Badges Wrap (Never Overflows)
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 8.w,
+                      runSpacing: 6.h,
                       children: [
                         _buildAmenityBadge(
                           icon: Icons.sports_tennis_rounded,
                           label: 'Rackets',
                         ),
-                        SizedBox(width: 8.w),
                         _buildAmenityBadge(
                           icon: Icons.sports_rounded,
                           label: 'Nets',
                         ),
-                        SizedBox(width: 8.w),
                         _buildAmenityBadge(
                           icon: Icons.sports_soccer_rounded,
                           label: 'Arena Turf',
@@ -381,168 +381,188 @@ class UserSelectionScreen extends GetView<AuthController> {
           }
         },
         borderRadius: BorderRadius.circular(18.r),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 15.h),
-          decoration: BoxDecoration(
-            gradient: isFeatured
-                ? const LinearGradient(
-                    colors: [Color(0xFFFFFDF7), Colors.white],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  )
-                : const LinearGradient(
-                    colors: [Colors.white, Color(0xFFFBFBFD)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-            borderRadius: BorderRadius.circular(18.r),
-            border: Border.all(
-              color: isFeatured ? const Color(0x8AD4AF37) : const Color(0x40D4AF37),
-              width: isFeatured ? 1.4 : 1.1,
-            ),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x28D4AF37),
-                blurRadius: 18,
-                spreadRadius: 0,
-                offset: Offset(0, 6),
-              ),
-              BoxShadow(
-                color: Color(0x0C000000),
-                blurRadius: 6,
-                spreadRadius: -1,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              // Vibrant Left Icon Container
-              Container(
-                width: 48.h,
-                height: 48.h,
-                decoration: BoxDecoration(
-                  gradient: iconGradient,
-                  borderRadius: BorderRadius.circular(14.r),
-                  border: isFeatured
-                      ? Border.all(color: Colors.white, width: 1.5)
-                      : Border.all(color: const Color(0x40D4AF37), width: 1),
-                  boxShadow: [
-                    BoxShadow(
-                      color: isFeatured ? const Color(0x40D4AF37) : const Color(0x180F172A),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 15.h),
+              decoration: BoxDecoration(
+                gradient: isFeatured
+                    ? const LinearGradient(
+                        colors: [Color(0xFFFFFDF7), Colors.white],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
+                    : const LinearGradient(
+                        colors: [Colors.white, Color(0xFFFBFBFD)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                borderRadius: BorderRadius.circular(18.r),
+                border: Border.all(
+                  color: isFeatured ? const Color(0x8AD4AF37) : const Color(0x40D4AF37),
+                  width: isFeatured ? 1.4 : 1.1,
                 ),
-                child: Icon(icon, size: 24.sp, color: iconColor),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x28D4AF37),
+                    blurRadius: 18,
+                    spreadRadius: 0,
+                    offset: Offset(0, 6),
+                  ),
+                  BoxShadow(
+                    color: Color(0x0C000000),
+                    blurRadius: 6,
+                    spreadRadius: -1,
+                    offset: Offset(0, 2),
+                  ),
+                ],
               ),
-              SizedBox(width: 14.w),
-
-              // Text Content
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(fontFamily: 'Nunito', 
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w800,
-                            color: darkText,
-                          ),
+              child: Row(
+                children: [
+                  // Vibrant Left Icon Container
+                  Container(
+                    width: 48.h,
+                    height: 48.h,
+                    decoration: BoxDecoration(
+                      gradient: iconGradient,
+                      borderRadius: BorderRadius.circular(14.r),
+                      border: isFeatured
+                          ? Border.all(color: Colors.white, width: 1.5)
+                          : Border.all(color: const Color(0x40D4AF37), width: 1),
+                      boxShadow: [
+                        BoxShadow(
+                          color: isFeatured ? const Color(0x40D4AF37) : const Color(0x180F172A),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
                         ),
-                        SizedBox(width: 8.w),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 7.w,
-                            vertical: 2.5.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0x1FD4AF37),
-                            borderRadius: BorderRadius.circular(6.r),
-                            border: Border.all(
-                              color: const Color(0x80D4AF37),
-                              width: 0.8,
-                            ),
-                          ),
-                          child: Text(
-                            badgeText,
-                            style: TextStyle(fontFamily: 'Nunito', 
-                              fontSize: 9.sp,
-                              fontWeight: FontWeight.w800,
-                              color: const Color(0xFF9E7B1A),
-                              letterSpacing: 0.4,
-                            ),
-                          ),
-                        ),
-                        if (featuredTag != null) ...[
-                          const Spacer(),
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.5.h),
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFFD4AF37), Color(0xFFF59E0B)],
-                              ),
-                              borderRadius: BorderRadius.circular(6.r),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.bolt_rounded, size: 10.sp, color: const Color(0xFF0F172A)),
-                                SizedBox(width: 2.w),
-                                Text(
-                                  featuredTag,
-                                  style: TextStyle(fontFamily: 'Nunito', 
-                                    fontSize: 8.sp,
-                                    fontWeight: FontWeight.w900,
-                                    color: const Color(0xFF0F172A),
-                                    letterSpacing: 0.4,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
                       ],
                     ),
-                    SizedBox(height: 3.h),
-                    Text(
-                      subtitle,
-                      style: TextStyle(fontFamily: 'Nunito', 
-                        fontSize: 11.5.sp,
-                        fontWeight: FontWeight.w400,
-                        color: slateText,
-                        height: 1.3,
+                    child: Icon(icon, size: 24.sp, color: iconColor),
+                  ),
+                  SizedBox(width: 14.w),
+
+                  // Text Content
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 6.w,
+                          runSpacing: 3.h,
+                          children: [
+                            Text(
+                              title,
+                              style: TextStyle(
+                                fontFamily: 'Nunito',
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w800,
+                                color: darkText,
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 6.w,
+                                vertical: 2.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0x1FD4AF37),
+                                borderRadius: BorderRadius.circular(6.r),
+                                border: Border.all(
+                                  color: const Color(0x80D4AF37),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: Text(
+                                badgeText,
+                                style: TextStyle(
+                                  fontFamily: 'Nunito',
+                                  fontSize: 8.5.sp,
+                                  fontWeight: FontWeight.w800,
+                                  color: const Color(0xFF9E7B1A),
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 3.h),
+                        Text(
+                          subtitle,
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 11.5.sp,
+                            fontWeight: FontWeight.w400,
+                            color: slateText,
+                            height: 1.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+
+                  // Action Arrow Button
+                  Container(
+                    width: 32.h,
+                    height: 32.h,
+                    decoration: BoxDecoration(
+                      color: isFeatured ? const Color(0xFFFFF9E6) : const Color(0xFFF8FAFC),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isFeatured ? const Color(0x80D4AF37) : const Color(0x33D4AF37),
+                        width: 1,
                       ),
                     ),
-                  ],
-                ),
+                    child: Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 13.sp,
+                      color: isFeatured ? const Color(0xFF9E7B1A) : darkText,
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(width: 8.w),
-
-              // Action Arrow Button
-              Container(
-                width: 32.h,
-                height: 32.h,
-                decoration: BoxDecoration(
-                  color: isFeatured ? const Color(0xFFFFF9E6) : const Color(0xFFF8FAFC),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isFeatured ? const Color(0x80D4AF37) : const Color(0x33D4AF37),
-                    width: 1,
+            ),
+            if (featuredTag != null)
+              Positioned(
+                top: 0,
+                right: 18.w,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFD4AF37), Color(0xFFF59E0B)],
+                    ),
+                    borderRadius: BorderRadius.vertical(bottom: Radius.circular(7.r)),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x35D4AF37),
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.bolt_rounded, size: 10.sp, color: const Color(0xFF0F172A)),
+                      SizedBox(width: 2.w),
+                      Text(
+                        featuredTag,
+                        style: TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: 8.5.sp,
+                          fontWeight: FontWeight.w900,
+                          color: const Color(0xFF0F172A),
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                child: Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 13.sp,
-                  color: isFeatured ? const Color(0xFF9E7B1A) : darkText,
-                ),
               ),
-            ],
-          ),
+          ],
         ),
       ),
     );
