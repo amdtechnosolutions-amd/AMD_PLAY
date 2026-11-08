@@ -8,6 +8,7 @@ import '../../../../core/storage/storage_service.dart';
 import '../../../home/presentation/controllers/home_controller.dart';
 
 /// Controller for fetching live authenticated profile via GET /api/v1/auth/me.
+/// Strictly presents real data and manages "not registered" / booking required states.
 class ProfileController extends GetxController {
   final StorageService _storage = Get.isRegistered<StorageService>()
       ? Get.find<StorageService>()
@@ -15,6 +16,10 @@ class ProfileController extends GetxController {
   late final ApiClient _apiClient;
 
   final RxBool isLoading = false.obs;
+  final RxBool isRegistered = false.obs;
+  final RxBool hasError = false.obs;
+  final RxString errorMessage = ''.obs;
+
   final RxString fullName = ''.obs;
   final RxString email = ''.obs;
   final RxString phone = ''.obs;
@@ -35,66 +40,38 @@ class ProfileController extends GetxController {
   /// Fetch live user profile from GET /api/v1/auth/me
   Future<void> loadProfile() async {
     isLoading.value = true;
+    hasError.value = false;
+    errorMessage.value = '';
+
     try {
-      // 1. Initial quick load from local storage cache
-      final cachedName = await _storage.getUserName();
-      if (cachedName != null && cachedName.isNotEmpty) {
-        fullName.value = cachedName;
-      }
-      final cachedRole = await _storage.getUserRole();
-      if (cachedRole != null && cachedRole.isNotEmpty) {
-        role.value = cachedRole;
-      }
-      final cachedTenant = await _storage.getTenantId();
-      if (cachedTenant != null && cachedTenant.isNotEmpty) {
-        tenantId.value = cachedTenant;
-      }
-      final cachedStudentId = await _storage.getStudentId();
-      if (cachedStudentId != null && cachedStudentId.isNotEmpty) {
-        memberId.value = cachedStudentId;
+      final token = await _storage.getAccessToken();
+
+      // If user has not logged in / has no access token, they are not registered
+      if (token == null || token.trim().isEmpty) {
+        _clearProfileData();
+        isRegistered.value = false;
+        isLoading.value = false;
+        return;
       }
 
-      // Check cached user JSON
+      // Check cached user JSON temporarily
       try {
         final cachedJson = await _storage.getUserJson();
         if (cachedJson != null && cachedJson.isNotEmpty) {
           final decoded = jsonDecode(cachedJson);
           if (decoded is Map<String, dynamic>) {
             _populateFromUserMap(decoded);
+            isRegistered.value = true;
           }
         }
       } catch (_) {}
 
-      // 2. Fetch LIVE profile from GET /api/v1/auth/me
-      String? token = await _storage.getAccessToken();
-
-      // If token is absent, ensure session through guest registration
-      if (token == null || token.trim().isEmpty) {
-        try {
-          final regRes = await _apiClient.dio.post(
-            ApiEndpoints.guestRegister,
-            data: {
-              'name': 'Guest Player',
-              'phone': '9876543210',
-              'tenantId': ApiEndpoints.defaultTenantId,
-            },
-          );
-          if (regRes.statusCode == 200 || regRes.statusCode == 201) {
-            final body = regRes.data['data'] ?? regRes.data;
-            final guestToken = body['accessToken']?.toString() ?? '';
-            if (guestToken.isNotEmpty) {
-              await _storage.saveTokens(accessToken: guestToken, refreshToken: guestToken);
-              token = guestToken;
-            }
-          }
-        } catch (_) {}
-      }
-
-      // Live request to /api/v1/auth/me
+      // Fetch LIVE profile from GET /api/v1/auth/me
       final response = await _apiClient.dio.get(ApiEndpoints.me);
       if (response.statusCode == 200 && response.data is Map) {
         final body = response.data as Map<String, dynamic>;
         final data = body['data'];
+
         if (data is Map<String, dynamic>) {
           if (data['tenantId'] != null) {
             tenantId.value = data['tenantId'].toString();
@@ -106,11 +83,13 @@ class ProfileController extends GetxController {
           final user = data['user'];
           if (user is Map<String, dynamic>) {
             _populateFromUserMap(user);
+            isRegistered.value = true;
+            hasError.value = false;
 
             // Persist updated user profile to storage
             await _storage.saveUserSession(
-              accessToken: token ?? '',
-              refreshToken: token ?? '',
+              accessToken: token,
+              refreshToken: token,
               tenantId: tenantId.value,
               role: role.value,
               userName: fullName.value,
@@ -118,7 +97,7 @@ class ProfileController extends GetxController {
               userJson: jsonEncode(user),
             );
 
-            // Also keep HomeController in sync
+            // Keep HomeController in sync with real user name
             if (Get.isRegistered<HomeController>()) {
               final homeCtrl = Get.find<HomeController>();
               if (fullName.value.isNotEmpty) {
@@ -128,14 +107,38 @@ class ProfileController extends GetxController {
                 homeCtrl.userRole.value = role.value;
               }
             }
+          } else {
+            // No valid user data returned
+            _clearProfileData();
+            isRegistered.value = false;
           }
+        } else {
+          _clearProfileData();
+          isRegistered.value = false;
         }
+      } else {
+        _clearProfileData();
+        isRegistered.value = false;
       }
     } catch (e) {
-      debugPrint('[ProfileController] Error loading /auth/me: $e');
+      debugPrint('[ProfileController] /auth/me error: $e');
+      // If error or unauthorized, mark as not registered / error
+      hasError.value = true;
+      errorMessage.value = e.toString();
+      _clearProfileData();
+      isRegistered.value = false;
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void _clearProfileData() {
+    fullName.value = '';
+    email.value = '';
+    phone.value = '';
+    role.value = '';
+    memberId.value = '';
+    rawUser.clear();
   }
 
   void _populateFromUserMap(Map<String, dynamic> user) {
@@ -144,31 +147,21 @@ class ProfileController extends GetxController {
     final fName = (user['firstName'] ?? '').toString().trim();
     final lName = (user['lastName'] ?? '').toString().trim();
     final name = (user['fullName'] ?? user['name'] ?? (fName.isNotEmpty ? '$fName $lName' : '')).toString().trim();
-    if (name.isNotEmpty) {
-      fullName.value = name;
-    }
+    fullName.value = name;
 
-    if (user['email'] != null && user['email'].toString().trim().isNotEmpty) {
-      email.value = user['email'].toString().trim();
-    }
-    if (user['phone'] != null && user['phone'].toString().trim().isNotEmpty) {
-      phone.value = user['phone'].toString().trim();
-    }
-    if (user['role'] != null && user['role'].toString().trim().isNotEmpty) {
-      role.value = user['role'].toString().trim();
-    }
-    if (user['status'] != null && user['status'].toString().trim().isNotEmpty) {
-      status.value = user['status'].toString().trim();
-    }
+    email.value = (user['email'] ?? '').toString().trim();
+    phone.value = (user['phone'] ?? '').toString().trim();
+    role.value = (user['role'] ?? '').toString().trim();
+    status.value = (user['status'] ?? 'active').toString().trim();
 
     final id = (user['regNo'] ?? user['cardNo'] ?? user['employeeNo'] ?? user['studentId'] ?? user['id'] ?? user['_id'])?.toString().trim();
-    if (id != null && id.isNotEmpty) {
-      memberId.value = id;
-    }
+    memberId.value = id ?? '';
   }
 
   Future<void> logout() async {
     await _storage.clearAll();
+    _clearProfileData();
+    isRegistered.value = false;
     Get.offAllNamed(AppRoutes.login);
   }
 }

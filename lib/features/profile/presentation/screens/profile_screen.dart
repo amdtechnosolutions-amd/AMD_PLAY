@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import '../../../../core/routes/app_routes.dart';
 import '../../../home/presentation/controllers/home_controller.dart';
 import '../../../main_nav/presentation/controllers/main_nav_controller.dart';
 import '../../../coaching/presentation/screens/coaching_batches_screen.dart';
 import '../controllers/profile_controller.dart';
 
 /// Pixel-perfect Profile Screen powered by live GET /api/v1/auth/me API.
+/// If user is not registered or API responds with error, shows prompt to book a slot.
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
@@ -57,47 +59,357 @@ class ProfileScreen extends StatelessWidget {
             await Get.find<HomeController>().refreshDashboard();
           }
         },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 90.h),
-          child: Column(
-            children: [
-              // 1. Hero Profile Card with #d4af37 drop shadow
-              _buildProfileHeroCard(controller, homeCtrl),
-              SizedBox(height: 16.h),
+        child: Obx(() {
+          if (controller.isLoading.value) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: Color(0xFFD4AF37),
+                  ),
+                  SizedBox(height: 16.h),
+                  Text(
+                    'Loading profile...',
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
 
-              // 2. Account Details Card
-              _buildAccountDetailsCard(controller),
-              SizedBox(height: 16.h),
+          // If user is not registered or API returned error
+          if (!controller.isRegistered.value) {
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 90.h),
+              child: Column(
+                children: [
+                  // Not Registered Banner Card with #d4af37 shadow
+                  _buildNotRegisteredCard(context),
+                  SizedBox(height: 16.h),
 
-              // 3. Quick Actions & Navigation Section
-              _buildQuickActionsCard(controller, homeCtrl),
-              SizedBox(height: 16.h),
+                  // Quick navigation options
+                  _buildQuickActionsCard(controller, homeCtrl),
+                  SizedBox(height: 16.h),
 
-              // 4. System & API Status Card
-              _buildSystemInfoCard(controller),
-              SizedBox(height: 20.h),
+                  // Login option if user already has an existing account
+                  _buildSignInOptionCard(),
+                ],
+              ),
+            );
+          }
 
-              // 5. Logout Button
-              _buildLogoutButton(context, controller),
-            ],
-          ),
-        ),
+          // Registered user view: display REAL data from /auth/me
+          return SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 90.h),
+            child: Column(
+              children: [
+                // 1. Hero Profile Card with #d4af37 drop shadow
+                _buildProfileHeroCard(controller, homeCtrl),
+                SizedBox(height: 16.h),
+
+                // 2. Account Details Card
+                _buildAccountDetailsCard(controller),
+                SizedBox(height: 16.h),
+
+                // 3. Quick Actions & Navigation Section
+                _buildQuickActionsCard(controller, homeCtrl),
+                SizedBox(height: 16.h),
+
+                // 4. System & API Status Card
+                _buildSystemInfoCard(controller),
+                SizedBox(height: 20.h),
+
+                // 5. Logout Button
+                _buildLogoutButton(context, controller),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }
 
   // ===========================================================================
-  // 1. HERO PROFILE CARD
+  // NOT REGISTERED / PROMPT TO BOOK A SLOT CARD
+  // ===========================================================================
+
+  Widget _buildNotRegisteredCard(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(22.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22.r),
+        border: Border.all(
+          color: const Color(0x60D4AF37),
+          width: 1.5,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x28D4AF37),
+            blurRadius: 22,
+            offset: Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Color(0x0C000000),
+            blurRadius: 6,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Circular gold sports badge
+          Container(
+            width: 76.h,
+            height: 76.h,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xFFFFFDF5),
+              border: Border.all(
+                color: const Color(0xFFD4AF37),
+                width: 2,
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x25D4AF37),
+                  blurRadius: 14,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Icon(
+                Icons.sports_tennis_rounded,
+                size: 38.sp,
+                color: const Color(0xFFD4AF37),
+              ),
+            ),
+          ),
+          SizedBox(height: 16.h),
+
+          // Status Badge
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 5.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFFBEB),
+              borderRadius: BorderRadius.circular(20.r),
+              border: Border.all(color: const Color(0xFFF59E0B), width: 1),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 7.w,
+                  height: 7.w,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFF59E0B),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                SizedBox(width: 6.w),
+                Text(
+                  'NOT REGISTERED',
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFFB45309),
+                    letterSpacing: 0.6,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 14.h),
+
+          // Heading
+          Text(
+            'Profile Not Registered',
+            style: TextStyle(
+              fontFamily: 'Nunito',
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF0F172A),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 8.h),
+
+          // Subtitle
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.w),
+            child: Text(
+              'You are not registered in the system yet. Please book a court slot to register your player profile and unlock your entry pass PIN.',
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                fontSize: 13.5.sp,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF64748B),
+                height: 1.45,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          SizedBox(height: 20.h),
+
+          // Primary CTA Button: Pure white with app color border and shadow
+          Container(
+            width: double.infinity,
+            height: 50.h,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16.r),
+              border: Border.all(
+                color: const Color(0xFFD4AF37),
+                width: 1.8,
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x28D4AF37),
+                  blurRadius: 14,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16.r),
+                onTap: () {
+                  if (Get.isRegistered<MainNavController>()) {
+                    Get.find<MainNavController>().changeTab(1); // Bookings tab
+                  }
+                },
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.calendar_month_rounded,
+                        color: const Color(0xFFD4AF37),
+                        size: 20.sp,
+                      ),
+                      SizedBox(width: 8.w),
+                      Text(
+                        'PLEASE BOOK A SLOT',
+                        style: TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.6,
+                          color: const Color(0xFF0F172A),
+                        ),
+                      ),
+                      SizedBox(width: 6.w),
+                      Icon(
+                        Icons.arrow_forward_rounded,
+                        color: const Color(0xFFD4AF37),
+                        size: 18.sp,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSignInOptionCard() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: const Color(0x40D4AF37), width: 1.2),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x18D4AF37),
+            blurRadius: 10,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.login_rounded, size: 20.sp, color: const Color(0xFFD4AF37)),
+              SizedBox(width: 10.w),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Already have an account?',
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF0F172A),
+                    ),
+                  ),
+                  Text(
+                    'Sign in with your phone or credentials',
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 11.5.sp,
+                      color: const Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          TextButton(
+            onPressed: () => Get.toNamed(AppRoutes.login),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFF0F172A),
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+            ),
+            child: Text(
+              'SIGN IN',
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w900,
+                color: const Color(0xFFD4AF37),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ===========================================================================
+  // 1. HERO PROFILE CARD (REAL DATA ONLY)
   // ===========================================================================
 
   Widget _buildProfileHeroCard(ProfileController controller, HomeController homeCtrl) {
     return Obx(() {
       final name = controller.fullName.value.isNotEmpty
           ? controller.fullName.value
-          : (homeCtrl.greetingName.value.isNotEmpty ? homeCtrl.greetingName.value : 'Customer');
-      final email = controller.email.value.isNotEmpty ? controller.email.value : 'Not provided';
-      final phone = controller.phone.value.isNotEmpty ? controller.phone.value : 'Not provided';
+          : 'Player';
+      final email = controller.email.value.isNotEmpty
+          ? controller.email.value
+          : 'Not provided';
+      final phone = controller.phone.value.isNotEmpty
+          ? controller.phone.value
+          : 'Not provided';
       final roleText = controller.role.value.isNotEmpty
           ? controller.role.value.toUpperCase()
           : (homeCtrl.isPayAndPlay ? 'CUSTOMER' : 'STUDENT');
@@ -157,10 +469,10 @@ class ProfileScreen extends StatelessWidget {
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Center(
                         child: Text(
-                          name.isNotEmpty ? name.substring(0, 1).toUpperCase() : 'U',
+                          name.isNotEmpty ? name.substring(0, 1).toUpperCase() : 'P',
                           style: TextStyle(
                             fontFamily: 'Nunito',
-                            fontSize: 24.sp,
+                            fontSize: 22.sp,
                             fontWeight: FontWeight.w900,
                             color: const Color(0xFFD4AF37),
                           ),
@@ -171,35 +483,34 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 SizedBox(width: 14.w),
 
-                // Name, Role & Status
+                // Name & Badges
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        name.toUpperCase(),
                         style: TextStyle(
                           fontFamily: 'Nunito',
-                          fontSize: 18.sp,
+                          fontSize: 17.sp,
                           fontWeight: FontWeight.w900,
                           color: const Color(0xFF0F172A),
+                          letterSpacing: 0.3,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: 5.h),
-                      Wrap(
-                        spacing: 6.w,
-                        runSpacing: 4.h,
+                      SizedBox(height: 6.h),
+                      Row(
                         children: [
-                          // Role Badge
+                          // Role pill
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                            padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 3.h),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFFFDF5),
-                              borderRadius: BorderRadius.circular(8.r),
+                              borderRadius: BorderRadius.circular(6.r),
                               border: Border.all(
-                                color: const Color(0x60D4AF37),
+                                color: const Color(0xFFD4AF37),
                                 width: 1,
                               ),
                             ),
@@ -209,19 +520,20 @@ class ProfileScreen extends StatelessWidget {
                                 fontFamily: 'Nunito',
                                 fontSize: 10.5.sp,
                                 fontWeight: FontWeight.w800,
-                                color: const Color(0xFF9E7B1A),
+                                color: const Color(0xFF9A7B1C),
                                 letterSpacing: 0.5,
                               ),
                             ),
                           ),
-                          // Active status badge
+                          SizedBox(width: 8.w),
+                          // Status pill
                           Container(
                             padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                             decoration: BoxDecoration(
                               color: const Color(0xFFECFDF5),
                               borderRadius: BorderRadius.circular(6.r),
                               border: Border.all(
-                                color: const Color(0xFF10B981).withValues(alpha: 0.3),
+                                color: const Color(0xFF10B981),
                                 width: 1,
                               ),
                             ),
@@ -238,7 +550,7 @@ class ProfileScreen extends StatelessWidget {
                                 ),
                                 SizedBox(width: 4.w),
                                 Text(
-                                  'ACTIVE',
+                                  controller.status.value.toUpperCase(),
                                   style: TextStyle(
                                     fontFamily: 'Nunito',
                                     fontSize: 10.sp,
@@ -260,7 +572,7 @@ class ProfileScreen extends StatelessWidget {
             const Divider(color: Color(0x20D4AF37), height: 1),
             SizedBox(height: 12.h),
 
-            // Contact / ID Chips
+            // Contact / ID Row (Real data)
             Row(
               children: [
                 Expanded(
@@ -310,9 +622,9 @@ class ProfileScreen extends StatelessWidget {
                   'Account ID: $memberId',
                   style: TextStyle(
                     fontFamily: 'Nunito',
-                    fontSize: 11.sp,
-                    color: const Color(0xFF94A3B8),
+                    fontSize: 10.5.sp,
                     fontWeight: FontWeight.w600,
+                    color: const Color(0xFF94A3B8),
                   ),
                 ),
               ),
@@ -324,15 +636,15 @@ class ProfileScreen extends StatelessWidget {
   }
 
   // ===========================================================================
-  // 2. ACCOUNT DETAILS CARD
+  // 2. ACCOUNT DETAILS CARD (REAL DATA ONLY)
   // ===========================================================================
 
   Widget _buildAccountDetailsCard(ProfileController controller) {
     return Obx(() {
-      final email = controller.email.value.isNotEmpty ? controller.email.value : 'admin@amdtechno.in';
-      final phone = controller.phone.value.isNotEmpty ? controller.phone.value : '9876543210';
-      final memberId = controller.memberId.value.isNotEmpty ? controller.memberId.value : '6ad67f8a21c35f3cf2139ef8';
-      final role = controller.role.value.isNotEmpty ? controller.role.value : 'customer';
+      final email = controller.email.value.isNotEmpty ? controller.email.value : 'Not provided';
+      final phone = controller.phone.value.isNotEmpty ? controller.phone.value : 'Not provided';
+      final memberId = controller.memberId.value.isNotEmpty ? controller.memberId.value : '—';
+      final role = controller.role.value.isNotEmpty ? controller.role.value : 'Customer';
 
       return Container(
         width: double.infinity,

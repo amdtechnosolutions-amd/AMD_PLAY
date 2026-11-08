@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import 'core/network/api_client.dart';
+import 'core/network/network_service.dart';
 import 'core/routes/app_pages.dart';
 import 'core/storage/storage_service.dart';
 import 'core/theme/app_theme.dart';
@@ -29,6 +30,7 @@ void main() async {
 
   // Initialize core services
   await Get.putAsync<StorageService>(() => StorageService().init());
+  await Get.putAsync<NetworkService>(() => NetworkService().init());
   Get.put<ApiClient>(ApiClient(), permanent: true);
 
   runApp(const SportsAcademyApp());
