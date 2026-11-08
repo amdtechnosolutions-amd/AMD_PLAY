@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import 'core/network/api_client.dart';
-import 'core/network/network_service.dart';
 import 'core/routes/app_pages.dart';
 import 'core/storage/storage_service.dart';
 import 'core/theme/app_theme.dart';
