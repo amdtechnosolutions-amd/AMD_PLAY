@@ -70,9 +70,25 @@ class AuthController extends GetxController {
     selectProfile(MembershipProfile.booking);
 
     try {
+      String guestToken = '';
+      try {
+        final res = await _apiClient.dio.post(
+          ApiEndpoints.guestRegister,
+          data: {
+            'name': 'Guest Player',
+            'phone': '9876543210',
+            'tenantId': ApiEndpoints.defaultTenantId,
+          },
+        );
+        if (res.statusCode == 200 || res.statusCode == 201) {
+          final body = res.data['data'] ?? res.data;
+          guestToken = body['accessToken']?.toString() ?? '';
+        }
+      } catch (_) {}
+
       await _storage.saveUserSession(
-        accessToken: '',
-        refreshToken: '',
+        accessToken: guestToken,
+        refreshToken: guestToken,
         tenantId: ApiEndpoints.defaultTenantId,
         role: 'customer',
         userName: 'Guest Player',

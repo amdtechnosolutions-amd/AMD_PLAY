@@ -153,7 +153,9 @@ class CourtBookingController extends GetxController {
       final list = await _bookingService.getSports();
       sports.assignAll(list);
       if (sports.isNotEmpty) {
-        selectedSport.value = sports.first;
+        if (selectedSport.value == null || !sports.any((s) => s.id == selectedSport.value?.id)) {
+          selectedSport.value = sports.first;
+        }
         await loadCourts();
       }
     } finally {

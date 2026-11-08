@@ -365,7 +365,7 @@ class CourtBookingScreen extends StatelessWidget {
 
     if (s.contains('badminton')) {
       iconData = Icons.sports_tennis_rounded;
-    } else if (s.contains('tennis') || s.contains('pickleball') || s.contains('squash') || s.contains('table')) {
+    } else if (s.contains('tennis') || s.contains('pickle') || s.contains('squash') || s.contains('table')) {
       iconData = Icons.sports_tennis_rounded;
     } else if (s.contains('foot') || s.contains('soccer') || s.contains('turf')) {
       iconData = Icons.sports_soccer_rounded;

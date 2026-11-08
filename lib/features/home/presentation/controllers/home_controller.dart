@@ -415,7 +415,18 @@ class HomeController extends GetxController {
         }
         if (uniqueSports.isNotEmpty) {
           availableSports.assignAll(uniqueSports.values.toList());
+          return;
         }
+      }
+
+      if (availableSports.isEmpty) {
+        availableSports.assignAll([
+          {'_id': '6ad6bdead33a91a36c41ff5b', 'name': 'Badminton', 'slug': 'badminton'},
+          {'_id': '6ad6be401ee0aaebb67610b2', 'name': 'Basket Ball', 'slug': 'basket-ball'},
+          {'_id': '6ad6be011ee0aaebb67610aa', 'name': 'Cricket', 'slug': 'cricket'},
+          {'_id': '6ad6be1428611d721770eac4', 'name': 'Football', 'slug': 'football'},
+          {'_id': '6ad6be2dd33a91a36c41ff63', 'name': 'Pickle Ball', 'slug': 'pickle-ball'},
+        ]);
       }
     } catch (e) {
       debugPrint('Error fetching sports catalog: $e');
