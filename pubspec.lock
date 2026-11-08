@@ -97,6 +97,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.0.9"
+  curved_nav_bar:
+    dependency: "direct main"
+    description:
+      name: curved_nav_bar
+      sha256: "6eccb2757506172e5ba836abeeaa520f73a785db2f863efd338b06fb60163ecf"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.1.0"
   dio:
     dependency: "direct main"
     description:
