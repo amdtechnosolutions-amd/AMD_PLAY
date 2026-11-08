@@ -7,11 +7,13 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../controllers/auth_controller.dart';
 
-/// Clean, dedicated User Role Selection Screen for INERTIA SPORTS
+/// Clean, catchy User Role Selection Screen for INERTIA SPORTS ACADEMY
 class UserSelectionScreen extends GetView<AuthController> {
   const UserSelectionScreen({super.key});
 
   static const Color goldAccent = Color(0xFFD4AF37);
+  static const Color darkText = Color(0xFF0F172A);
+  static const Color slateText = Color(0xFF64748B);
 
   @override
   Widget build(BuildContext context) {
@@ -29,52 +31,65 @@ class UserSelectionScreen extends GetView<AuthController> {
         child: Column(
           children: [
             // ==========================================
-            // TOP HERO SECTION (CLEAN WHITE WITH GOLD)
+            // TOP HERO SECTION (VIBRANT LUXURY SPORTS BRAND)
             // ==========================================
             Container(
               width: double.infinity,
               padding: EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top + 24.h,
-                bottom: 28.h,
+                top: MediaQuery.of(context).padding.top + 20.h,
+                bottom: 24.h,
                 left: 20.w,
                 right: 20.w,
               ),
-              decoration: const BoxDecoration(color: Colors.white),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+              ),
               child: CustomPaint(
                 painter: _InertiaGridPainter(),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Original Brand Logo
+                    // Brand Logo with Ambient Gold Halo
                     _buildLogo(),
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 12.h),
 
-                    // Brand Title: INERTIA (Top), SPORTS ACADEMY (Bottom)
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'INERTIA',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
-                            fontSize: 28.sp,
-                            fontWeight: FontWeight.w900,
-                            color: const Color(0xFF0F172A),
-                            letterSpacing: 2.0,
-                          ),
+                    // Brand Title
+                    Text(
+                      'INERTIA',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 27.sp,
+                        fontWeight: FontWeight.w900,
+                        color: darkText,
+                        letterSpacing: 3.5,
+                      ),
+                    ),
+                    SizedBox(height: 5.h),
+
+                    // Luxury Sports Academy Pill
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 14.w,
+                        vertical: 3.5.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0x1AD4AF37),
+                        borderRadius: BorderRadius.circular(20.r),
+                        border: Border.all(
+                          color: const Color(0x80D4AF37),
+                          width: 1,
                         ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          'SPORTS ACADEMY',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
-                            fontSize: 17.sp,
-                            fontWeight: FontWeight.w900,
-                            color: goldAccent,
-                            letterSpacing: 3.5,
-                          ),
+                      ),
+                      child: Text(
+                        'SPORTS ACADEMY',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          fontSize: 11.5.sp,
+                          fontWeight: FontWeight.w900,
+                          color: const Color(0xFF9E7B1A),
+                          letterSpacing: 3.0,
                         ),
-                      ],
+                      ),
                     ),
                     SizedBox(height: 10.h),
 
@@ -83,15 +98,15 @@ class UserSelectionScreen extends GetView<AuthController> {
                       'Multi-Sport Training, High Performance &\nArena Bookings',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
-                        fontSize: 13.5.sp,
-                        fontWeight: FontWeight.w400,
-                        color: const Color(0xFF64748B),
+                        fontSize: 12.5.sp,
+                        fontWeight: FontWeight.w500,
+                        color: slateText,
                         height: 1.4,
                       ),
                     ),
-                    SizedBox(height: 18.h),
+                    SizedBox(height: 16.h),
 
-                    // Amenity Badges Row: Rackets, Nets, Arena Turf
+                    // Catchy Amenity Badges Row
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -99,12 +114,12 @@ class UserSelectionScreen extends GetView<AuthController> {
                           icon: Icons.sports_tennis_rounded,
                           label: 'Rackets',
                         ),
-                        SizedBox(width: 10.w),
+                        SizedBox(width: 8.w),
                         _buildAmenityBadge(
                           icon: Icons.sports_rounded,
                           label: 'Nets',
                         ),
-                        SizedBox(width: 10.w),
+                        SizedBox(width: 8.w),
                         _buildAmenityBadge(
                           icon: Icons.sports_soccer_rounded,
                           label: 'Arena Turf',
@@ -124,49 +139,72 @@ class UserSelectionScreen extends GetView<AuthController> {
               decoration: const BoxDecoration(
                 color: Colors.white,
               ),
-              padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 32.h),
+              padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 36.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Subtle divider pill
+                  // Subtle Profile Selector Pill
                   Center(
                     child: Container(
-                      width: 40.w,
-                      height: 4.h,
+                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE2E8F0),
-                        borderRadius: BorderRadius.circular(2.r),
+                        color: const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(20.r),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6.h,
+                            height: 6.h,
+                            decoration: const BoxDecoration(
+                              color: goldAccent,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          SizedBox(width: 6.w),
+                          Text(
+                            'CHOOSE PROFILE',
+                            style: GoogleFonts.inter(
+                              fontSize: 9.5.sp,
+                              fontWeight: FontWeight.w800,
+                              color: const Color(0xFF64748B),
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  SizedBox(height: 18.h),
+                  SizedBox(height: 14.h),
 
                   // Header: Welcome to the Club
                   Center(
                     child: Text(
                       'Welcome to the Club',
                       style: GoogleFonts.inter(
-                        fontSize: 23.sp,
+                        fontSize: 22.sp,
                         fontWeight: FontWeight.w900,
-                        color: const Color(0xFF0F172A),
+                        color: darkText,
                         letterSpacing: -0.4,
                       ),
                     ),
                   ),
-                  SizedBox(height: 4.h),
+                  SizedBox(height: 3.h),
                   Center(
                     child: Text(
                       'Select your membership profile to sign in',
                       style: GoogleFonts.inter(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w500,
-                        color: const Color(0xFF64748B),
+                        color: slateText,
                       ),
                     ),
                   ),
-                  SizedBox(height: 24.h),
+                  SizedBox(height: 20.h),
 
-                  // User Role Selection Cards with #d4af37 Shadow
+                  // Catchy Role Selection Cards
                   _buildRoleSelectionCards(),
                   SizedBox(height: 28.h),
 
@@ -195,15 +233,33 @@ class UserSelectionScreen extends GetView<AuthController> {
   // ==========================================
 
   Widget _buildLogo() {
-    return Image.asset(
-      'assets/logo/logo.png',
-      height: 120.h,
-      fit: BoxFit.contain,
-      errorBuilder: (context, error, stackTrace) => Center(
-        child: Icon(
-          Icons.sports_tennis_rounded,
-          size: 72.sp,
-          color: goldAccent,
+    return Center(
+      child: Container(
+        width: 125.h,
+        height: 125.h,
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(
+            colors: [
+              Color(0x35D4AF37),
+              Color(0x10D4AF37),
+              Colors.transparent,
+            ],
+            stops: [0.0, 0.55, 1.0],
+          ),
+        ),
+        alignment: Alignment.center,
+        child: Image.asset(
+          'assets/logo/logo.png',
+          height: 98.h,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) => Center(
+            child: Icon(
+              Icons.sports_tennis_rounded,
+              size: 68.sp,
+              color: goldAccent,
+            ),
+          ),
         ),
       ),
     );
@@ -211,14 +267,14 @@ class UserSelectionScreen extends GetView<AuthController> {
 
   Widget _buildAmenityBadge({required IconData icon, required String label}) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 6.5.h),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18.r),
         border: Border.all(color: const Color(0x66D4AF37), width: 1.0),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x1FD4AF37),
+            color: Color(0x14D4AF37),
             blurRadius: 8,
             offset: Offset(0, 2),
           ),
@@ -227,12 +283,12 @@ class UserSelectionScreen extends GetView<AuthController> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 15.sp, color: goldAccent),
-          SizedBox(width: 6.w),
+          Icon(icon, size: 14.sp, color: goldAccent),
+          SizedBox(width: 5.w),
           Text(
             label,
             style: GoogleFonts.inter(
-              fontSize: 12.5.sp,
+              fontSize: 12.sp,
               fontWeight: FontWeight.w600,
               color: const Color(0xFF334155),
             ),
@@ -245,15 +301,26 @@ class UserSelectionScreen extends GetView<AuthController> {
   Widget _buildRoleSelectionCards() {
     return Column(
       children: [
+        // 1. BOOKING (FEATURED / QUICK ACCESS)
         _buildRoleCard(
           profile: MembershipProfile.booking,
           roleName: 'Guest',
           title: 'Booking',
           badgeText: 'COURT BOOKING',
+          featuredTag: 'QUICK ACCESS',
           subtitle: 'Instant court reservations, guest access & equipment',
-          icon: Icons.confirmation_number_outlined,
+          icon: Icons.confirmation_number_rounded,
+          isFeatured: true,
+          iconGradient: const LinearGradient(
+            colors: [Color(0xFFD4AF37), Color(0xFFF59E0B)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          iconColor: const Color(0xFF0F172A),
         ),
         SizedBox(height: 14.h),
+
+        // 2. STUDENTS (ACADEMY PORTAL)
         _buildRoleCard(
           profile: MembershipProfile.parents,
           roleName: 'Student',
@@ -261,15 +328,31 @@ class UserSelectionScreen extends GetView<AuthController> {
           badgeText: 'STUDENT PORTAL',
           subtitle: 'Student training batches, attendance, fees & court booking',
           icon: Icons.school_rounded,
+          isFeatured: false,
+          iconGradient: const LinearGradient(
+            colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          iconColor: goldAccent,
         ),
         SizedBox(height: 14.h),
+
+        // 3. MEMBERS (VIP ACCESS)
         _buildRoleCard(
           profile: MembershipProfile.members,
           roleName: 'Member',
           title: 'Members',
-          badgeText: 'VIP ACCESS',
+          badgeText: '★ VIP ACCESS',
           subtitle: 'VIP Lounge, court reservations & locker access',
-          icon: Icons.military_tech_rounded,
+          icon: Icons.workspace_premium_rounded,
+          isFeatured: false,
+          iconGradient: const LinearGradient(
+            colors: [Color(0xFF0F172A), Color(0xFF334155)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          iconColor: goldAccent,
         ),
       ],
     );
@@ -282,129 +365,186 @@ class UserSelectionScreen extends GetView<AuthController> {
     required String badgeText,
     required String subtitle,
     required IconData icon,
+    required bool isFeatured,
+    required LinearGradient iconGradient,
+    required Color iconColor,
+    String? featuredTag,
   }) {
-    return GestureDetector(
-      onTap: () {
-        controller.selectRole(roleName);
-        controller.selectProfile(profile);
-        if (profile == MembershipProfile.booking) {
-          controller.startGuestBookingFlow(goToDashboard: true);
-        } else {
-          Get.toNamed(AppRoutes.login);
-        }
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 15.h),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(
-            color: const Color(0x59D4AF37),
-            width: 1.2,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          controller.selectRole(roleName);
+          controller.selectProfile(profile);
+          if (profile == MembershipProfile.booking) {
+            controller.startGuestBookingFlow(goToDashboard: true);
+          } else {
+            Get.toNamed(AppRoutes.login);
+          }
+        },
+        borderRadius: BorderRadius.circular(18.r),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 15.h),
+          decoration: BoxDecoration(
+            gradient: isFeatured
+                ? const LinearGradient(
+                    colors: [Color(0xFFFFFDF7), Colors.white],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : const LinearGradient(
+                    colors: [Colors.white, Color(0xFFFBFBFD)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+            borderRadius: BorderRadius.circular(18.r),
+            border: Border.all(
+              color: isFeatured ? const Color(0x8AD4AF37) : const Color(0x40D4AF37),
+              width: isFeatured ? 1.4 : 1.1,
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x28D4AF37),
+                blurRadius: 18,
+                spreadRadius: 0,
+                offset: Offset(0, 6),
+              ),
+              BoxShadow(
+                color: Color(0x0C000000),
+                blurRadius: 6,
+                spreadRadius: -1,
+                offset: Offset(0, 2),
+              ),
+            ],
           ),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x38D4AF37),
-              blurRadius: 16,
-              spreadRadius: 1,
-              offset: Offset(0, 5),
-            ),
-            BoxShadow(
-              color: Color(0x08000000),
-              blurRadius: 4,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Role Icon Container
-            Container(
-              width: 44.h,
-              height: 44.h,
-              decoration: BoxDecoration(
-                color: const Color(0xFF0F172A),
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: Icon(icon, size: 22.sp, color: goldAccent),
-            ),
-            SizedBox(width: 14.w),
-
-            // Text Content
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        title,
-                        style: GoogleFonts.inter(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w800,
-                          color: const Color(0xFF0F172A),
-                        ),
-                      ),
-                      SizedBox(width: 8.w),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 7.w,
-                          vertical: 2.5.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0x24D4AF37),
-                          borderRadius: BorderRadius.circular(6.r),
-                          border: Border.all(
-                            color: const Color(0x80D4AF37),
-                            width: 0.8,
-                          ),
-                        ),
-                        child: Text(
-                          badgeText,
-                          style: GoogleFonts.inter(
-                            fontSize: 9.sp,
-                            fontWeight: FontWeight.w800,
-                            color: const Color(0xFF9E7B1A),
-                            letterSpacing: 0.4,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 3.h),
-                  Text(
-                    subtitle,
-                    style: GoogleFonts.inter(
-                      fontSize: 11.5.sp,
-                      fontWeight: FontWeight.w400,
-                      color: const Color(0xFF64748B),
-                      height: 1.3,
+          child: Row(
+            children: [
+              // Vibrant Left Icon Container
+              Container(
+                width: 48.h,
+                height: 48.h,
+                decoration: BoxDecoration(
+                  gradient: iconGradient,
+                  borderRadius: BorderRadius.circular(14.r),
+                  border: isFeatured
+                      ? Border.all(color: Colors.white, width: 1.5)
+                      : Border.all(color: const Color(0x40D4AF37), width: 1),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isFeatured ? const Color(0x40D4AF37) : const Color(0x180F172A),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+                child: Icon(icon, size: 24.sp, color: iconColor),
               ),
-            ),
-            SizedBox(width: 8.w),
+              SizedBox(width: 14.w),
 
-            // Forward Arrow Icon
-            Container(
-              width: 32.h,
-              height: 32.h,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: const Color(0x40D4AF37),
-                  width: 1,
+              // Text Content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          title,
+                          style: GoogleFonts.inter(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w800,
+                            color: darkText,
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 7.w,
+                            vertical: 2.5.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0x1FD4AF37),
+                            borderRadius: BorderRadius.circular(6.r),
+                            border: Border.all(
+                              color: const Color(0x80D4AF37),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Text(
+                            badgeText,
+                            style: GoogleFonts.inter(
+                              fontSize: 9.sp,
+                              fontWeight: FontWeight.w800,
+                              color: const Color(0xFF9E7B1A),
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                        ),
+                        if (featuredTag != null) ...[
+                          const Spacer(),
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.5.h),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFD4AF37), Color(0xFFF59E0B)],
+                              ),
+                              borderRadius: BorderRadius.circular(6.r),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.bolt_rounded, size: 10.sp, color: const Color(0xFF0F172A)),
+                                SizedBox(width: 2.w),
+                                Text(
+                                  featuredTag,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 8.sp,
+                                    fontWeight: FontWeight.w900,
+                                    color: const Color(0xFF0F172A),
+                                    letterSpacing: 0.4,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    SizedBox(height: 3.h),
+                    Text(
+                      subtitle,
+                      style: GoogleFonts.inter(
+                        fontSize: 11.5.sp,
+                        fontWeight: FontWeight.w400,
+                        color: slateText,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              child: const Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: 13,
-                color: Color(0xFF0F172A),
+              SizedBox(width: 8.w),
+
+              // Action Arrow Button
+              Container(
+                width: 32.h,
+                height: 32.h,
+                decoration: BoxDecoration(
+                  color: isFeatured ? const Color(0xFFFFF9E6) : const Color(0xFFF8FAFC),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isFeatured ? const Color(0x80D4AF37) : const Color(0x33D4AF37),
+                    width: 1,
+                  ),
+                ),
+                child: Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 13.sp,
+                  color: isFeatured ? const Color(0xFF9E7B1A) : darkText,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -416,8 +556,8 @@ class _InertiaGridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0x0FD4AF37)
-      ..strokeWidth = 0.8
+      ..color = const Color(0x0AD4AF37)
+      ..strokeWidth = 0.7
       ..style = PaintingStyle.stroke;
 
     const double step = 28.0;
