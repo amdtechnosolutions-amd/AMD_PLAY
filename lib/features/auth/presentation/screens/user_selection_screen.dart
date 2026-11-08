@@ -46,8 +46,8 @@ class UserSelectionScreen extends GetView<AuthController> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Crest / Badge with Glow & EST. 2024 Pill (Enlarged)
-                        _buildCrestBadge(),
+                        // Original Brand Logo
+                        _buildLogo(),
                         SizedBox(height: 18.h),
 
                         // Brand Title: INERTIA (Top), SPORTS ACADEMY (Bottom)
@@ -201,83 +201,18 @@ class UserSelectionScreen extends GetView<AuthController> {
   // HELPER WIDGETS
   // ==========================================
 
-  Widget _buildCrestBadge() {
-    return Stack(
-      alignment: Alignment.center,
-      clipBehavior: Clip.none,
-      children: [
-        // Outer ambient glow ring (Clean shader-safe border)
-        Container(
-          width: 176.h,
-          height: 176.h,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: const Color(0x44F59E0B), width: 1.5),
-          ),
+  Widget _buildLogo() {
+    return Image.asset(
+      'assets/logo/logo.png',
+      height: 120.h,
+      fit: BoxFit.contain,
+      errorBuilder: (context, error, stackTrace) => Center(
+        child: Icon(
+          Icons.sports_tennis_rounded,
+          size: 72.sp,
+          color: const Color(0xFFF59E0B),
         ),
-
-        // Main Emblem (150.h edge-to-edge logo)
-        Container(
-          width: 150.h,
-          height: 150.h,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: const Color(0xFF181C26),
-            border: Border.all(color: const Color(0xFFF59E0B), width: 3.5),
-          ),
-          child: ClipOval(
-            child: Image.asset(
-              'assets/logo/logo.png',
-              width: double.infinity,
-              height: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Center(
-                child: Icon(
-                  Icons.sports_tennis_rounded,
-                  size: 72.sp,
-                  color: const Color(0xFFF59E0B),
-                ),
-              ),
-            ),
-          ),
-        ),
-
-        // EST. 2024 Overlapping Pill
-        Positioned(
-          bottom: -10.h,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 3.5.h),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF59E0B),
-              borderRadius: BorderRadius.circular(14.r),
-              border: Border.all(color: Colors.black26, width: 1),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'EST.',
-                  style: GoogleFonts.inter(
-                    fontSize: 8.5.sp,
-                    fontWeight: FontWeight.w900,
-                    color: const Color(0xFF0F172A),
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                Text(
-                  '2024',
-                  style: GoogleFonts.inter(
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w900,
-                    color: const Color(0xFF0F172A),
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 

@@ -206,88 +206,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   Widget _buildLogoEmblem() {
-    return Stack(
-      alignment: Alignment.center,
-      clipBehavior: Clip.none,
-      children: [
-        // Outer Glowing Orbit Ring (Shader safe)
-        Container(
-          width: 168.h,
-          height: 168.h,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: const Color(0x44F59E0B),
-              width: 1.5,
-            ),
-          ),
+    return Image.asset(
+      'assets/logo/logo.png',
+      height: 120.h,
+      fit: BoxFit.contain,
+      errorBuilder: (context, error, stackTrace) => Center(
+        child: Icon(
+          Icons.sports_tennis_rounded,
+          size: 68.sp,
+          color: const Color(0xFFF59E0B),
         ),
-
-        // Main Circular Emblem Box (140.h)
-        Container(
-          width: 140.h,
-          height: 140.h,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: const Color(0xFF181C26),
-            border: Border.all(
-              color: const Color(0xFFF59E0B),
-              width: 3.5,
-            ),
-          ),
-          child: ClipOval(
-            child: Image.asset(
-              'assets/logo/logo.png',
-              width: double.infinity,
-              height: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Center(
-                child: Icon(
-                  Icons.sports_tennis_rounded,
-                  size: 68.sp,
-                  color: const Color(0xFFF59E0B),
-                ),
-              ),
-            ),
-          ),
-        ),
-
-        // EST. 2024 Pill
-        Positioned(
-          bottom: -8.h,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF59E0B),
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: Colors.black26, width: 1),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'EST.',
-                  style: GoogleFonts.inter(
-                    fontSize: 7.5.sp,
-                    fontWeight: FontWeight.w900,
-                    color: const Color(0xFF0F172A),
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                Text(
-                  '2024',
-                  style: GoogleFonts.inter(
-                    fontSize: 9.sp,
-                    fontWeight: FontWeight.w900,
-                    color: const Color(0xFF0F172A),
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
