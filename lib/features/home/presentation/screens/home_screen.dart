@@ -223,7 +223,7 @@ class HomeScreen extends StatelessWidget {
                 ),
                 SizedBox(width: 5.w),
                 Text(
-                  isPayAndPlay ? 'Pay & Play' : 'Today',
+                  isPayAndPlay ? 'Booking' : 'Today',
                   style: GoogleFonts.inter(
                     fontSize: 12.5.sp,
                     fontWeight: FontWeight.w700,

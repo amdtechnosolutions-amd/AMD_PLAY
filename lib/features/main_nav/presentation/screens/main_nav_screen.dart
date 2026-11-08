@@ -114,10 +114,10 @@ class _ProfileTab extends StatelessWidget {
           Obx(() {
             final isPayAndPlay = homeCtrl.isPayAndPlay;
             final name = homeCtrl.userName.value.isNotEmpty ? homeCtrl.userName.value : (isPayAndPlay ? 'Guest Player' : 'Academy Trainee');
-            final role = isPayAndPlay ? 'PAY & PLAY' : homeCtrl.userRole.value.toUpperCase();
+            final role = isPayAndPlay ? 'BOOKING' : homeCtrl.userRole.value.toUpperCase();
             final stId = homeCtrl.currentStudentId.value;
             final subtitle = isPayAndPlay
-                ? 'Profile: Pay & Play • Instant Court Access'
+                ? 'Profile: Booking • Instant Court Access'
                 : (stId.isNotEmpty
                     ? 'Role: $role • ID: #${stId.substring(stId.length > 6 ? stId.length - 6 : 0).toUpperCase()}'
                     : 'Role: $role • Active Member');
@@ -126,7 +126,7 @@ class _ProfileTab extends StatelessWidget {
               leading: CircleAvatar(
                 backgroundColor: AppColors.primaryLight,
                 child: Text(
-                  name.isNotEmpty ? name[0].toUpperCase() : (isPayAndPlay ? 'P' : 'T'),
+                  name.isNotEmpty ? name[0].toUpperCase() : (isPayAndPlay ? 'B' : 'T'),
                   style: const TextStyle(color: AppColors.accentDark, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -192,11 +192,11 @@ class _ProfileTab extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.swap_horiz_rounded, color: AppColors.primary),
             title: Obx(() => Text(
-                  homeCtrl.isPayAndPlay ? 'Switch to Trainee / Student Mode' : 'Switch to Pay & Play Mode',
+                  homeCtrl.isPayAndPlay ? 'Switch to Trainee / Student Mode' : 'Switch to Booking Mode',
                 )),
             subtitle: Obx(() => Text(
                   homeCtrl.isPayAndPlay
-                      ? 'Currently: Pay & Play (Home + Payments only)'
+                      ? 'Currently: Booking (Home + Payments only)'
                       : 'Currently: Student (Includes Attendance & Monthly Fees)',
                   style: const TextStyle(fontSize: 12),
                 )),

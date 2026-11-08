@@ -313,8 +313,8 @@ class UserSelectionScreen extends GetView<AuthController> {
         _buildRoleCard(
           profile: MembershipProfile.booking,
           roleName: 'Guest',
-          title: 'Pay & Play',
-          badgeText: 'GUEST PASS',
+          title: 'Booking',
+          badgeText: 'COURT BOOKING',
           subtitle: 'Instant court reservations, guest access & equipment',
           icon: Icons.confirmation_number_outlined,
         ),
