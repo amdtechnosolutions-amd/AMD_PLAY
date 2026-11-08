@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/routes/app_routes.dart';
@@ -27,7 +26,7 @@ class AttendanceScreen extends StatelessWidget {
         automaticallyImplyLeading: false,
         title: Text(
           'Attendance History',
-          style: GoogleFonts.inter(
+          style: TextStyle(fontFamily: 'Nunito', 
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
             color: const Color(0xFF0F172A),
@@ -183,7 +182,7 @@ class AttendanceScreen extends StatelessWidget {
           SizedBox(height: 10.h),
           Text(
             value,
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: 'Nunito', 
               fontSize: 20.sp,
               fontWeight: FontWeight.w800,
               color: valueColor,
@@ -192,7 +191,7 @@ class AttendanceScreen extends StatelessWidget {
           SizedBox(height: 2.h),
           Text(
             label,
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: 'Nunito', 
               fontSize: 12.sp,
               fontWeight: FontWeight.w500,
               color: const Color(0xFF64748B),
@@ -213,7 +212,7 @@ class AttendanceScreen extends StatelessWidget {
       children: [
         Text(
           'Filter by Month',
-          style: GoogleFonts.inter(
+          style: TextStyle(fontFamily: 'Nunito', 
             fontSize: 16.sp,
             fontWeight: FontWeight.w700,
             color: const Color(0xFF0F172A),
@@ -237,7 +236,7 @@ class AttendanceScreen extends StatelessWidget {
                 SizedBox(width: 6.w),
                 Text(
                   controller.formattedMonthHeader,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: 'Nunito', 
                     fontSize: 13.5.sp,
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF00D2C2),
@@ -293,7 +292,7 @@ class AttendanceScreen extends StatelessWidget {
                     SizedBox(width: 6.w),
                     Text(
                       'Calendar View',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 13.5.sp,
                         fontWeight: FontWeight.w700,
                         color: isCal ? Colors.white : const Color(0xFF64748B),
@@ -334,7 +333,7 @@ class AttendanceScreen extends StatelessWidget {
                     SizedBox(width: 6.w),
                     Text(
                       'List View',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 13.5.sp,
                         fontWeight: FontWeight.w700,
                         color: !isCal ? Colors.white : const Color(0xFF64748B),
@@ -388,7 +387,7 @@ class AttendanceScreen extends StatelessWidget {
               ),
               Text(
                 controller.formattedMonthHeader,
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: 'Nunito', 
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w800,
                   color: const Color(0xFF0F172A),
@@ -415,7 +414,7 @@ class AttendanceScreen extends StatelessWidget {
                 child: Center(
                   child: Text(
                     day,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: 'Nunito', 
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF64748B),
@@ -465,7 +464,7 @@ class AttendanceScreen extends StatelessWidget {
         SizedBox(width: 6.w),
         Text(
           label,
-          style: GoogleFonts.inter(
+          style: TextStyle(fontFamily: 'Nunito', 
             fontSize: 11.5.sp,
             fontWeight: FontWeight.w500,
             color: const Color(0xFF64748B),
@@ -581,7 +580,7 @@ class AttendanceScreen extends StatelessWidget {
               child: Center(
                 child: Text(
                   '$dayNum',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: 'Nunito', 
                     fontSize: 14.sp,
                     fontWeight: (isPresent || isAbsent || isExcused)
                         ? FontWeight.w700
@@ -637,7 +636,7 @@ class AttendanceScreen extends StatelessWidget {
                   children: [
                     Text(
                       dateStr,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
                         color: const Color(0xFF0F172A),
@@ -646,7 +645,7 @@ class AttendanceScreen extends StatelessWidget {
                     SizedBox(height: 2.h),
                     Text(
                       session?.batchName ?? 'Academy Coaching Session',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 12.5.sp,
                         color: const Color(0xFF64748B),
                       ),
@@ -667,7 +666,7 @@ class AttendanceScreen extends StatelessWidget {
                   ),
                   child: Text(
                     status ?? 'No Session',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: 'Nunito', 
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w700,
                       color: status == 'Present'
@@ -712,7 +711,7 @@ class AttendanceScreen extends StatelessWidget {
                 padding: EdgeInsets.symmetric(vertical: 8.h),
                 child: Text(
                   'No training session or scheduled attendance punch recorded for this day.',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: 'Nunito', 
                     fontSize: 13.sp,
                     color: const Color(0xFF64748B),
                   ),
@@ -734,7 +733,7 @@ class AttendanceScreen extends StatelessWidget {
                 onPressed: () => Get.back(),
                 child: Text(
                   'Close',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: 'Nunito', 
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
@@ -757,7 +756,7 @@ class AttendanceScreen extends StatelessWidget {
         SizedBox(width: 8.w),
         Text(
           '$label: ',
-          style: GoogleFonts.inter(
+          style: TextStyle(fontFamily: 'Nunito', 
             fontSize: 13.sp,
             fontWeight: FontWeight.w600,
             color: const Color(0xFF0F172A),
@@ -766,7 +765,7 @@ class AttendanceScreen extends StatelessWidget {
         Expanded(
           child: Text(
             value,
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: 'Nunito', 
               fontSize: 13.sp,
               color: const Color(0xFF64748B),
             ),
@@ -805,7 +804,7 @@ class AttendanceScreen extends StatelessWidget {
             SizedBox(height: 12.h),
             Text(
               'No Attendance Records Found',
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: 'Nunito', 
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFF0F172A),
@@ -815,7 +814,7 @@ class AttendanceScreen extends StatelessWidget {
             Text(
               'No session logs recorded for ${controller.formattedMonthHeader}.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: 'Nunito', 
                 fontSize: 12.5.sp,
                 color: const Color(0xFF64748B),
               ),
@@ -826,7 +825,7 @@ class AttendanceScreen extends StatelessWidget {
               icon: Icon(Icons.refresh_rounded, size: 16.sp, color: const Color(0xFF00D2C2)),
               label: Text(
                 'Refresh',
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: 'Nunito', 
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF00D2C2),
@@ -896,7 +895,7 @@ class AttendanceScreen extends StatelessWidget {
                         children: [
                           Text(
                             record.formattedDate,
-                            style: GoogleFonts.inter(
+                            style: TextStyle(fontFamily: 'Nunito', 
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w700,
                               color: const Color(0xFF0F172A),
@@ -905,7 +904,7 @@ class AttendanceScreen extends StatelessWidget {
                           SizedBox(height: 3.h),
                           Text(
                             '${record.sport} • ${record.time}',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(fontFamily: 'Nunito', 
                               fontSize: 11.5.sp,
                               color: const Color(0xFF64748B),
                             ),
@@ -915,7 +914,7 @@ class AttendanceScreen extends StatelessWidget {
                             SizedBox(height: 2.h),
                             Text(
                               record.remarks,
-                              style: GoogleFonts.inter(
+                              style: TextStyle(fontFamily: 'Nunito', 
                                 fontSize: 10.5.sp,
                                 fontStyle: FontStyle.italic,
                                 color: const Color(0xFF94A3B8),
@@ -942,7 +941,7 @@ class AttendanceScreen extends StatelessWidget {
                 ),
                 child: Text(
                   record.status,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: 'Nunito', 
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w700,
                     color: isAbsent
@@ -981,7 +980,7 @@ class AttendanceScreen extends StatelessWidget {
             children: [
               Text(
                 'Select Month (${current.year})',
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: 'Nunito', 
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF0F172A),
@@ -1017,7 +1016,7 @@ class AttendanceScreen extends StatelessWidget {
                       child: Center(
                         child: Text(
                           months[index].substring(0, 3),
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: 'Nunito', 
                             fontSize: 13.sp,
                             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                             color: isSelected ? Colors.white : const Color(0xFF0F172A),
@@ -1040,7 +1039,7 @@ class AttendanceScreen extends StatelessWidget {
                     },
                     child: Text(
                       'Current Month',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF00D2C2),
@@ -1051,7 +1050,7 @@ class AttendanceScreen extends StatelessWidget {
                     onPressed: () => Get.back(),
                     child: Text(
                       'Close',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF64748B),

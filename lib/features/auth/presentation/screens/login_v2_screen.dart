@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import '../../../../core/routes/app_routes.dart';
 import '../controllers/auth_controller.dart';
 
@@ -80,7 +78,7 @@ class LoginV2Screen extends GetView<AuthController> {
                   Text(
                     'PLAY   |   TRAIN   |   GROW   |   TOGETHER',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: 'Nunito', 
                       fontSize: 10.5.sp,
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF94A3B8),
@@ -171,7 +169,7 @@ class LoginV2Screen extends GetView<AuthController> {
         children: [
           TextSpan(
             text: 'SPORTS ',
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: 'Nunito', 
               fontSize: 24.sp,
               fontWeight: FontWeight.w900,
               color: Colors.white,
@@ -180,7 +178,7 @@ class LoginV2Screen extends GetView<AuthController> {
           ),
           TextSpan(
             text: 'ACADEMY',
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: 'Nunito', 
               fontSize: 24.sp,
               fontWeight: FontWeight.w900,
               color: const Color(0xFFF59E0B),
@@ -251,7 +249,7 @@ class LoginV2Screen extends GetView<AuthController> {
                       SizedBox(height: 5.h),
                       Text(
                         title,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: 'Nunito', 
                           fontSize: 12.sp,
                           fontWeight:
                               isSelected ? FontWeight.w800 : FontWeight.w600,
@@ -293,7 +291,7 @@ class LoginV2Screen extends GetView<AuthController> {
           // Title: Welcome Back
           Text(
             'Welcome Back',
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: 'Nunito', 
               fontSize: 22.sp,
               fontWeight: FontWeight.w900,
               color: Colors.white,
@@ -305,7 +303,7 @@ class LoginV2Screen extends GetView<AuthController> {
           // Subtitle
           Text(
             'Login to access your dashboard, bookings, trainings and more.',
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: 'Nunito', 
               fontSize: 12.5.sp,
               fontWeight: FontWeight.w400,
               color: const Color(0xFF94A3B8),
@@ -381,7 +379,7 @@ class LoginV2Screen extends GetView<AuthController> {
                       SizedBox(width: 8.w),
                       Text(
                         'Remember me',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: 'Nunito', 
                           fontSize: 12.5.sp,
                           fontWeight: FontWeight.w500,
                           color: const Color(0xFFCBD5E1),
@@ -407,7 +405,7 @@ class LoginV2Screen extends GetView<AuthController> {
                 },
                 child: Text(
                   'Forgot Password?',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: 'Nunito', 
                     fontSize: 12.5.sp,
                     fontWeight: FontWeight.w700,
                     color: const Color(0xFFF59E0B),
@@ -449,7 +447,7 @@ class LoginV2Screen extends GetView<AuthController> {
                           children: [
                             Text(
                               'Login',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(fontFamily: 'Nunito', 
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w900,
                                 color: const Color(0xFF0F172A),
@@ -482,7 +480,7 @@ class LoginV2Screen extends GetView<AuthController> {
                 padding: EdgeInsets.symmetric(horizontal: 12.w),
                 child: Text(
                   'OR CONTINUE WITH',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: 'Nunito', 
                     fontSize: 10.5.sp,
                     fontWeight: FontWeight.w700,
                     color: const Color(0xFF64748B),
@@ -553,7 +551,7 @@ class LoginV2Screen extends GetView<AuthController> {
           Center(
             child: Text(
               'New to Sports Academy?',
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: 'Nunito', 
                 fontSize: 12.5.sp,
                 fontWeight: FontWeight.w500,
                 color: const Color(0xFF94A3B8),
@@ -583,7 +581,7 @@ class LoginV2Screen extends GetView<AuthController> {
                 children: [
                   Text(
                     'Create Account',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: 'Nunito', 
                       fontSize: 14.5.sp,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
@@ -630,7 +628,7 @@ class LoginV2Screen extends GetView<AuthController> {
         controller: controller,
         obscureText: obscureText,
         keyboardType: keyboardType,
-        style: GoogleFonts.inter(
+        style: TextStyle(fontFamily: 'Nunito', 
           fontSize: 14.sp,
           fontWeight: FontWeight.w600,
           color: Colors.white,
@@ -640,7 +638,7 @@ class LoginV2Screen extends GetView<AuthController> {
           contentPadding: EdgeInsets.symmetric(vertical: 13.h, horizontal: 14.w),
           border: InputBorder.none,
           hintText: hintText,
-          hintStyle: GoogleFonts.inter(
+          hintStyle: TextStyle(fontFamily: 'Nunito', 
             fontSize: 13.5.sp,
             fontWeight: FontWeight.w400,
             color: const Color(0xFF64748B),
@@ -687,7 +685,7 @@ class LoginV2Screen extends GetView<AuthController> {
             SizedBox(width: 8.w),
             Text(
               label,
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: 'Nunito', 
                 fontSize: 13.5.sp,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
@@ -709,7 +707,7 @@ class LoginV2Screen extends GetView<AuthController> {
         children: [
           Text(
             'G',
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: 'Nunito', 
               fontSize: 14.sp,
               fontWeight: FontWeight.w900,
               color: const Color(0xFF4285F4),
@@ -805,7 +803,7 @@ class LoginV2Screen extends GetView<AuthController> {
                   children: [
                     Text(
                       title,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 9.5.sp,
                         fontWeight: FontWeight.w900,
                         color: Colors.white,

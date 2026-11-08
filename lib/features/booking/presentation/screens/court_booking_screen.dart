@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -41,7 +40,7 @@ class CourtBookingScreen extends StatelessWidget {
             : null,
         title: Text(
           'Book a Court',
-          style: GoogleFonts.inter(
+          style: TextStyle(fontFamily: 'Nunito', 
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
             color: const Color(0xFF0F172A),
@@ -90,7 +89,7 @@ class CourtBookingScreen extends StatelessWidget {
                       children: [
                         Text(
                           'Select a Sport',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: 'Nunito', 
                             fontSize: 17.sp,
                             fontWeight: FontWeight.w800,
                             color: const Color(0xFF0F172A),
@@ -114,7 +113,7 @@ class CourtBookingScreen extends StatelessWidget {
                       children: [
                         Text(
                           'Select a Court / Turf',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: 'Nunito', 
                             fontSize: 17.sp,
                             fontWeight: FontWeight.w800,
                             color: const Color(0xFF0F172A),
@@ -138,7 +137,7 @@ class CourtBookingScreen extends StatelessWidget {
                       children: [
                         Text(
                           'Select Date',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: 'Nunito', 
                             fontSize: 17.sp,
                             fontWeight: FontWeight.w800,
                             color: const Color(0xFF0F172A),
@@ -146,7 +145,7 @@ class CourtBookingScreen extends StatelessWidget {
                         ),
                         Text(
                           DateFormat('MMMM yyyy').format(controller.selectedDate.value),
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: 'Nunito', 
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF0F172A),
@@ -165,7 +164,7 @@ class CourtBookingScreen extends StatelessWidget {
                         Expanded(
                           child: Text(
                             'Available Slots for ${DateFormat('d MMM').format(controller.selectedDate.value)}',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(fontFamily: 'Nunito', 
                               fontSize: 17.sp,
                               fontWeight: FontWeight.w800,
                               color: const Color(0xFF0F172A),
@@ -187,7 +186,7 @@ class CourtBookingScreen extends StatelessWidget {
                             ),
                             child: Text(
                               '${controller.availableSlots.where((s) => s.isAvailable).length} Available',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(fontFamily: 'Nunito', 
                                 fontSize: 11.sp,
                                 fontWeight: FontWeight.w700,
                                 color: const Color(0xFF10B981),
@@ -241,7 +240,7 @@ class CourtBookingScreen extends StatelessWidget {
             SizedBox(width: 10.w),
             Text(
               'No sports available right now.',
-              style: GoogleFonts.inter(fontSize: 13.sp, color: const Color(0xFF64748B)),
+              style: TextStyle(fontFamily: 'Nunito', fontSize: 13.sp, color: const Color(0xFF64748B)),
             ),
             SizedBox(width: 10.w),
             TextButton(
@@ -296,7 +295,7 @@ class CourtBookingScreen extends StatelessWidget {
                       sport.name,
                       textAlign: TextAlign.center,
                       maxLines: 1,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 11.5.sp,
                         fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                         color: isSelected ? const Color(0xFF0F172A) : const Color(0xFF475569),
@@ -424,7 +423,7 @@ class CourtBookingScreen extends StatelessWidget {
             Expanded(
               child: Text(
                 'No courts available for ${controller.selectedSport.value?.name ?? 'this sport'}',
-                style: GoogleFonts.inter(fontSize: 13.sp, color: const Color(0xFF64748B)),
+                style: TextStyle(fontFamily: 'Nunito', fontSize: 13.sp, color: const Color(0xFF64748B)),
               ),
             ),
           ],
@@ -466,7 +465,7 @@ class CourtBookingScreen extends StatelessWidget {
                   children: [
                     Text(
                       court.name,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 13.5.sp,
                         fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                         color: isSelected ? Colors.white : const Color(0xFF0F172A),
@@ -581,7 +580,7 @@ class CourtBookingScreen extends StatelessWidget {
                 children: [
                   Text(
                     dayLabel,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: 'Nunito', 
                       fontSize: 10.sp,
                       fontWeight: FontWeight.w700,
                       color: isSelected ? const Color(0xFF0F172A) : const Color(0xFF64748B),
@@ -590,7 +589,7 @@ class CourtBookingScreen extends StatelessWidget {
                   SizedBox(height: 2.h),
                   Text(
                     '${date.day}',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: 'Nunito', 
                       fontSize: 17.sp,
                       fontWeight: FontWeight.w800,
                       color: const Color(0xFF0F172A),
@@ -630,7 +629,7 @@ class CourtBookingScreen extends StatelessWidget {
             SizedBox(height: 12.h),
             Text(
               isToday ? 'No More Slots Available Today' : 'No Slots Available',
-              style: GoogleFonts.inter(fontSize: 15.sp, fontWeight: FontWeight.w700, color: const Color(0xFF0F172A)),
+              style: TextStyle(fontFamily: 'Nunito', fontSize: 15.sp, fontWeight: FontWeight.w700, color: const Color(0xFF0F172A)),
             ),
             SizedBox(height: 4.h),
             Text(
@@ -638,7 +637,7 @@ class CourtBookingScreen extends StatelessWidget {
                   ? 'All bookable hours for today have passed. Please select tomorrow to discover available slots.'
                   : 'Please select another court or date to discover bookable hours.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(fontSize: 12.sp, color: const Color(0xFF64748B)),
+              style: TextStyle(fontFamily: 'Nunito', fontSize: 12.sp, color: const Color(0xFF64748B)),
             ),
             if (controller.selectedCourt.value != null) ...[
               SizedBox(height: 14.h),
@@ -749,7 +748,7 @@ class CourtBookingScreen extends StatelessWidget {
                             slot.timeText,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.inter(
+                            style: TextStyle(fontFamily: 'Nunito', 
                               fontSize: 12.sp,
                               fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                               color: textColor,
@@ -904,7 +903,7 @@ class CourtBookingScreen extends StatelessWidget {
                     SizedBox(width: 6.w),
                     Text(
                       'Slots Held for ${controller.holdTimeFormatted}',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 11.5.sp,
                         fontWeight: FontWeight.w700,
                         color: const Color(0xFFD92D20),
@@ -937,7 +936,7 @@ class CourtBookingScreen extends StatelessWidget {
                         children: [
                           Text(
                             '${item.courtName} • ${item.timeText}',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(fontFamily: 'Nunito', 
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w600,
                               color: const Color(0xFF0F172A),
@@ -982,7 +981,7 @@ class CourtBookingScreen extends StatelessWidget {
                             '$count ${count == 1 ? "Slot" : "Slots"} Selected',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.inter(
+                            style: TextStyle(fontFamily: 'Nunito', 
                               fontSize: 14.5.sp,
                               fontWeight: FontWeight.w800,
                               color: const Color(0xFF0F172A),
@@ -994,7 +993,7 @@ class CourtBookingScreen extends StatelessWidget {
                               onTap: () => controller.releaseActiveHold(),
                               child: Text(
                                 'Clear',
-                                style: GoogleFonts.inter(
+                                style: TextStyle(fontFamily: 'Nunito', 
                                   fontSize: 11.5.sp,
                                   fontWeight: FontWeight.w600,
                                   color: const Color(0xFFEF4444),
@@ -1007,7 +1006,7 @@ class CourtBookingScreen extends StatelessWidget {
                       SizedBox(height: 2.h),
                       Text(
                         court != null ? '${court.sport} • ${court.name}' : 'Multi-Slot Cart',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: 'Nunito', 
                           fontSize: 12.sp,
                           color: const Color(0xFF64748B),
                         ),
@@ -1021,7 +1020,7 @@ class CourtBookingScreen extends StatelessWidget {
                   children: [
                     Text(
                       '₹${grandTotal.toInt()}',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w900,
                         color: const Color(0xFF0F172A),
@@ -1029,7 +1028,7 @@ class CourtBookingScreen extends StatelessWidget {
                     ),
                     Text(
                       'Incl. GST (₹${grandTax.toInt()})',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 10.sp,
                         color: const Color(0xFF94A3B8),
                       ),
@@ -1059,7 +1058,7 @@ class CourtBookingScreen extends StatelessWidget {
                 children: [
                   Text(
                     'PROCEED TO CHECKOUT • ₹${grandTotal.toInt()}',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: 'Nunito', 
                       fontSize: 13.5.sp,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.5,

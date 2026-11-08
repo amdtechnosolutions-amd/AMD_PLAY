@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart' hide Response, FormData, MultipartFile;
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/routes/app_routes.dart';
@@ -271,7 +270,7 @@ class AuthController extends GetxController {
           children: [
             Text(
               'Select Trainee Profile',
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: 'Nunito', 
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w800,
                 color: Colors.white,
@@ -280,7 +279,7 @@ class AuthController extends GetxController {
             SizedBox(height: 6.h),
             Text(
               'Multiple student profiles found for this family contact. Choose student to continue:',
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: 'Nunito', 
                 fontSize: 12.sp,
                 color: const Color(0xFF94A3B8),
               ),

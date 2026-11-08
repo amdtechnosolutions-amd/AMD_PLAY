@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../controllers/splash_controller.dart';
 
 /// Premium animated splash screen for INERTIA SPORTS ACADEMY
@@ -120,7 +119,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         Text(
                           'INERTIA',
                           textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: 'Nunito', 
                             fontSize: 28.sp,
                             fontWeight: FontWeight.w900,
                             color: Colors.white,
@@ -131,7 +130,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         Text(
                           'SPORTS ACADEMY',
                           textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: 'Nunito', 
                             fontSize: 17.sp,
                             fontWeight: FontWeight.w900,
                             color: const Color(0xFFF59E0B),
@@ -155,7 +154,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       ),
                       child: Text(
                         'GATEWAY TO SPORTS EXCELLENCE',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: 'Nunito', 
                           color: const Color(0xFF94A3B8),
                           fontWeight: FontWeight.w700,
                           letterSpacing: 1.8,
@@ -189,7 +188,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   SizedBox(height: 14.h),
                   Text(
                     'MULTI-SPORT TRAINING & ARENA BOOKINGS',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: 'Nunito', 
                       fontSize: 10.sp,
                       fontWeight: FontWeight.w600,
                       color: const Color(0x66FFFFFF),

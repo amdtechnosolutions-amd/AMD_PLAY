@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/storage/storage_service.dart';
 import '../../../main_nav/presentation/controllers/main_nav_controller.dart';
@@ -40,7 +38,7 @@ class HomeScreen extends StatelessWidget {
         automaticallyImplyLeading: false,
         title: Text(
           'Dashboard',
-          style: GoogleFonts.inter(
+          style: TextStyle(fontFamily: 'Nunito', 
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
             color: const Color(0xFF0F172A),
@@ -176,7 +174,7 @@ class HomeScreen extends StatelessWidget {
                       errorBuilder: (context, error, stackTrace) => Center(
                         child: Text(
                           name.isNotEmpty ? name.substring(0, 1) : (isPayAndPlay ? 'P' : 'S'),
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: 'Nunito', 
                             fontSize: 20.sp,
                             fontWeight: FontWeight.w800,
                             color: isPayAndPlay ? const Color(0xFF1D4ED8) : const Color(0xFFD97706),
@@ -194,7 +192,7 @@ class HomeScreen extends StatelessWidget {
                     'Hi, $name!',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: 'Nunito', 
                       fontSize: 22.sp,
                       fontWeight: FontWeight.w800,
                       color: const Color(0xFF0F172A),
@@ -224,7 +222,7 @@ class HomeScreen extends StatelessWidget {
                 SizedBox(width: 5.w),
                 Text(
                   isPayAndPlay ? 'Booking' : 'Today',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: 'Nunito', 
                     fontSize: 12.5.sp,
                     fontWeight: FontWeight.w700,
                     color: isPayAndPlay ? const Color(0xFF2563EB) : const Color(0xFFD97706),
@@ -300,7 +298,7 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   Text(
                     'Book a Court',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: 'Nunito', 
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w800,
                       color: const Color(0xFF0F172A),
@@ -310,7 +308,7 @@ class HomeScreen extends StatelessWidget {
                   SizedBox(height: 3.h),
                   Text(
                     'Reserve your slot now',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: 'Nunito', 
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF0F172A).withValues(alpha: 0.8),
@@ -353,7 +351,7 @@ class HomeScreen extends StatelessWidget {
           children: [
             Text(
               'My Sports',
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: 'Nunito', 
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w800,
                 color: const Color(0xFF0F172A),
@@ -363,7 +361,7 @@ class HomeScreen extends StatelessWidget {
               if (controller.mySports.length > 1) {
                 return Text(
                   'Tap to switch profile',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: 'Nunito', 
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFFD97706),
@@ -405,7 +403,7 @@ class HomeScreen extends StatelessWidget {
                   Expanded(
                     child: Text(
                       'No active sports enrollments found.',
-                      style: GoogleFonts.inter(fontSize: 13.sp, color: const Color(0xFF64748B)),
+                      style: TextStyle(fontFamily: 'Nunito', fontSize: 13.sp, color: const Color(0xFF64748B)),
                     ),
                   ),
                 ],
@@ -479,7 +477,7 @@ class HomeScreen extends StatelessWidget {
                   errorBuilder: (context, error, stackTrace) => Center(
                     child: Text(
                       sportItem.name.isNotEmpty ? sportItem.name.substring(0, 1) : 'S',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w700,
                         color: sportItem.isCurrent
@@ -502,7 +500,7 @@ class HomeScreen extends StatelessWidget {
                     children: [
                       Text(
                         sportItem.name,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: 'Nunito', 
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w800,
                           color: const Color(0xFF0F172A),
@@ -518,7 +516,7 @@ class HomeScreen extends StatelessWidget {
                           ),
                           child: Text(
                             'Active',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(fontFamily: 'Nunito', 
                               fontSize: 10.sp,
                               fontWeight: FontWeight.w700,
                               color: const Color(0xFFD97706),
@@ -539,7 +537,7 @@ class HomeScreen extends StatelessWidget {
                       SizedBox(width: 5.w),
                       Text(
                         sportItem.sport,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: 'Nunito', 
                           fontSize: 12.5.sp,
                           fontWeight: FontWeight.w500,
                           color: const Color(0xFF64748B),
@@ -559,7 +557,7 @@ class HomeScreen extends StatelessWidget {
                       Expanded(
                         child: Text(
                           sportItem.schedule,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: 'Nunito', 
                             fontSize: 12.5.sp,
                             fontWeight: FontWeight.w500,
                             color: const Color(0xFF64748B),
@@ -598,7 +596,7 @@ class HomeScreen extends StatelessWidget {
           children: [
             Text(
               "Today's Attendance",
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: 'Nunito', 
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w800,
                 color: const Color(0xFF0F172A),
@@ -614,7 +612,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   child: Text(
                     '${controller.attendancePercentage.value}% Overall',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: 'Nunito', 
                       fontSize: 11.5.sp,
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFFD97706),
@@ -659,7 +657,7 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     Text(
                       todayDate.isNotEmpty ? todayDate : 'Today',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 13.5.sp,
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF64748B),
@@ -675,7 +673,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       child: Text(
                         isChecked ? 'Checked In' : 'Not Checked In',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: 'Nunito', 
                           fontSize: 11.5.sp,
                           fontWeight: FontWeight.w700,
                           color: isChecked
@@ -691,7 +689,7 @@ class HomeScreen extends StatelessWidget {
                 // Title
                 Text(
                   title,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: 'Nunito', 
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w800,
                     color: const Color(0xFF0F172A),
@@ -702,7 +700,7 @@ class HomeScreen extends StatelessWidget {
                 // Subtitle
                 Text(
                   subtitle,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: 'Nunito', 
                     fontSize: 12.5.sp,
                     fontWeight: FontWeight.w400,
                     color: const Color(0xFF64748B),
@@ -737,7 +735,7 @@ class HomeScreen extends StatelessWidget {
                                   )
                                 : Text(
                                     isChecked ? 'Check In Again' : 'Check In',
-                                    style: GoogleFonts.inter(
+                                    style: TextStyle(fontFamily: 'Nunito', 
                                       fontSize: 14.sp,
                                       fontWeight: FontWeight.w700,
                                       color: const Color(0xFF0F172A),
@@ -766,7 +764,7 @@ class HomeScreen extends StatelessWidget {
                           child: Center(
                             child: Text(
                               'Check Out',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(fontFamily: 'Nunito', 
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w600,
                                 color: const Color(0xFF475569),
@@ -796,7 +794,7 @@ class HomeScreen extends StatelessWidget {
       children: [
         Text(
           'Monthly Fees',
-          style: GoogleFonts.inter(
+          style: TextStyle(fontFamily: 'Nunito', 
             fontSize: 18.sp,
             fontWeight: FontWeight.w800,
             color: const Color(0xFF0F172A),
@@ -833,7 +831,7 @@ class HomeScreen extends StatelessWidget {
                   Expanded(
                     child: Text(
                       'All caught up! No pending fees for this month.',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 13.5.sp,
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF0F172A),
@@ -928,7 +926,7 @@ class HomeScreen extends StatelessWidget {
                       Expanded(
                         child: Text(
                           fee.title,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: 'Nunito', 
                             fontSize: 14.5.sp,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF0F172A),
@@ -958,7 +956,7 @@ class HomeScreen extends StatelessWidget {
                   SizedBox(height: 4.h),
                   Text(
                     isPaid ? (fee.paidAt != null ? 'Paid: ${fee.paidAt}' : fee.dueDate) : fee.dueDate,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: 'Nunito', 
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w400,
                       color: const Color(0xFF64748B),
@@ -967,7 +965,7 @@ class HomeScreen extends StatelessWidget {
                   SizedBox(height: 8.h),
                   Text(
                     '₹${fee.amount}',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: 'Nunito', 
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w800,
                       color: isPaid ? const Color(0xFF10B981) : const Color(0xFFD97706),
@@ -1055,7 +1053,7 @@ class HomeScreen extends StatelessWidget {
                   )
                 : Text(
                     hasSelection ? 'Pay ₹$totalAmount' : 'Select fees to pay',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: 'Nunito', 
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w700,
                       color: hasSelection
@@ -1091,7 +1089,7 @@ class HomeScreen extends StatelessWidget {
             Expanded(
               child: Text(
                 'Select Sport',
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: 'Nunito', 
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w800,
                   color: const Color(0xFF0F172A),
@@ -1111,7 +1109,7 @@ class HomeScreen extends StatelessWidget {
               },
               child: Text(
                 'View All Courts →',
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: 'Nunito', 
                   fontSize: 12.5.sp,
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFFD97706),
@@ -1170,7 +1168,7 @@ class HomeScreen extends StatelessWidget {
                         textAlign: TextAlign.center,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: 'Nunito', 
                           fontSize: 11.5.sp,
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFF0F172A),
@@ -1203,7 +1201,7 @@ class HomeScreen extends StatelessWidget {
             children: [
               Text(
                 'My Active Passes',
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: 'Nunito', 
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w800,
                   color: const Color(0xFF0F172A),
@@ -1218,7 +1216,7 @@ class HomeScreen extends StatelessWidget {
                   },
                   child: Text(
                     'All Passes (${passes.length})',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: 'Nunito', 
                       fontSize: 12.5.sp,
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFFD97706),
@@ -1243,7 +1241,7 @@ class HomeScreen extends StatelessWidget {
                   SizedBox(height: 8.h),
                   Text(
                     'No Active Court Passes',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: 'Nunito', 
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFF334155),
@@ -1253,7 +1251,7 @@ class HomeScreen extends StatelessWidget {
                   Text(
                     'Book a court to receive your digital PIN & entry turnstile QR code.',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(fontSize: 12.sp, color: const Color(0xFF64748B)),
+                    style: TextStyle(fontFamily: 'Nunito', fontSize: 12.sp, color: const Color(0xFF64748B)),
                   ),
                   SizedBox(height: 12.h),
                   ElevatedButton(
@@ -1311,7 +1309,7 @@ class HomeScreen extends StatelessWidget {
                 ),
                 child: Text(
                   pass.sportName.toUpperCase(),
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: 'Nunito', 
                     fontSize: 10.5.sp,
                     fontWeight: FontWeight.w800,
                     color: const Color(0xFFD97706),
@@ -1339,7 +1337,7 @@ class HomeScreen extends StatelessWidget {
           SizedBox(height: 10.h),
           Text(
             pass.courtName,
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: 'Nunito', 
               fontSize: 17.sp,
               fontWeight: FontWeight.w800,
               color: Colors.white,
@@ -1352,7 +1350,7 @@ class HomeScreen extends StatelessWidget {
               SizedBox(width: 5.w),
               Text(
                 '${pass.dateText} • ${pass.timeWindow}',
-                style: GoogleFonts.inter(fontSize: 12.sp, color: const Color(0xFFCBD5E1)),
+                style: TextStyle(fontFamily: 'Nunito', fontSize: 12.sp, color: const Color(0xFFCBD5E1)),
               ),
             ],
           ),
@@ -1371,7 +1369,7 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     Text(
                       'GATE ACCESS PIN',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 9.5.sp,
                         fontWeight: FontWeight.w700,
                         color: const Color(0xFF94A3B8),
@@ -1381,7 +1379,7 @@ class HomeScreen extends StatelessWidget {
                     SizedBox(height: 2.h),
                     Text(
                       pass.accessPin,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w900,
                         color: const Color(0xFFF9D106),
@@ -1427,7 +1425,7 @@ class HomeScreen extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Recent Payments',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: 'Nunito', 
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w800,
                     color: const Color(0xFF0F172A),
@@ -1445,7 +1443,7 @@ class HomeScreen extends StatelessWidget {
                 },
                 child: Text(
                   'View All Invoices →',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: 'Nunito', 
                     fontSize: 12.5.sp,
                     fontWeight: FontWeight.w700,
                     color: const Color(0xFFD97706),
@@ -1467,7 +1465,7 @@ class HomeScreen extends StatelessWidget {
               child: Center(
                 child: Text(
                   'No past payment transactions recorded yet.',
-                  style: GoogleFonts.inter(fontSize: 13.sp, color: const Color(0xFF64748B)),
+                  style: TextStyle(fontFamily: 'Nunito', fontSize: 13.sp, color: const Color(0xFF64748B)),
                 ),
               ),
             )
@@ -1499,7 +1497,7 @@ class HomeScreen extends StatelessWidget {
                               fee.title,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.inter(
+                              style: TextStyle(fontFamily: 'Nunito', 
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w700,
                                 color: const Color(0xFF0F172A),
@@ -1508,7 +1506,7 @@ class HomeScreen extends StatelessWidget {
                             SizedBox(height: 2.h),
                             Text(
                               'Paid via Razorpay Gateway • ${fee.dueDate}',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(fontFamily: 'Nunito', 
                                 fontSize: 11.sp,
                                 color: const Color(0xFF64748B),
                               ),
@@ -1522,7 +1520,7 @@ class HomeScreen extends StatelessWidget {
                         children: [
                           Text(
                             '₹${fee.amount}',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(fontFamily: 'Nunito', 
                               fontSize: 15.sp,
                               fontWeight: FontWeight.w800,
                               color: const Color(0xFF0F172A),
@@ -1533,7 +1531,7 @@ class HomeScreen extends StatelessWidget {
                             onTap: () => PaymentReceiptDialog.show(context, fee: fee),
                             child: Text(
                               'Receipt',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(fontFamily: 'Nunito', 
                                 fontSize: 11.5.sp,
                                 fontWeight: FontWeight.w700,
                                 color: const Color(0xFF2563EB),

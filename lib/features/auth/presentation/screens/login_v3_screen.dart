@@ -86,7 +86,7 @@ class LoginV3Screen extends GetView<AuthController> {
                   quarterTurns: 3,
                   child: AnimatedDefaultTextStyle(
                     duration: const Duration(milliseconds: 250),
-                    style: GoogleFonts.outfit(
+                    style: TextStyle(fontFamily: 'Nunito', 
                       fontSize: !isSignUp ? 19.sp : 16.sp,
                       fontWeight:
                           !isSignUp ? FontWeight.w900 : FontWeight.w600,
@@ -113,7 +113,7 @@ class LoginV3Screen extends GetView<AuthController> {
                   quarterTurns: 3,
                   child: AnimatedDefaultTextStyle(
                     duration: const Duration(milliseconds: 250),
-                    style: GoogleFonts.outfit(
+                    style: TextStyle(fontFamily: 'Nunito', 
                       fontSize: isSignUp ? 19.sp : 16.sp,
                       fontWeight:
                           isSignUp ? FontWeight.w900 : FontWeight.w600,
@@ -240,7 +240,7 @@ class LoginV3Screen extends GetView<AuthController> {
                 // Section Title: "Log in" / "Sign up"
                 Text(
                   isSignUp ? 'Sign up' : 'Log in',
-                  style: GoogleFonts.outfit(
+                  style: TextStyle(fontFamily: 'Nunito', 
                     fontSize: 24.sp,
                     fontWeight: FontWeight.w900,
                     color: Colors.white,
@@ -330,7 +330,7 @@ class LoginV3Screen extends GetView<AuthController> {
             children: [
               Text(
                 'Welcome',
-                style: GoogleFonts.outfit(
+                style: TextStyle(fontFamily: 'Nunito', 
                   fontSize: 27.sp,
                   fontWeight: FontWeight.w900,
                   color: Colors.white,
@@ -340,7 +340,7 @@ class LoginV3Screen extends GetView<AuthController> {
               ),
               Text(
                 isSignUp ? 'to Inertia...' : 'back...',
-                style: GoogleFonts.outfit(
+                style: TextStyle(fontFamily: 'Nunito', 
                   fontSize: 27.sp,
                   fontWeight: FontWeight.w900,
                   color: Colors.white,
@@ -353,7 +353,7 @@ class LoginV3Screen extends GetView<AuthController> {
                 isSignUp
                     ? 'Start your sports journey today'
                     : 'Sports Academy & Arena',
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: 'Nunito', 
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w500,
                   color: Colors.white.withValues(alpha: 0.9),
@@ -412,7 +412,7 @@ class LoginV3Screen extends GetView<AuthController> {
                 ),
                 child: Text(
                   'INERTIA',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: 'Nunito', 
                     fontSize: 8.5.sp,
                     fontWeight: FontWeight.w900,
                     color: const Color(0xFFB45309),
@@ -516,7 +516,7 @@ class LoginV3Screen extends GetView<AuthController> {
               controller: controller,
               obscureText: obscureText,
               keyboardType: keyboardType,
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: 'Nunito', 
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFF1E293B),
@@ -526,7 +526,7 @@ class LoginV3Screen extends GetView<AuthController> {
                 contentPadding: EdgeInsets.symmetric(vertical: 13.h),
                 border: InputBorder.none,
                 hintText: hintText,
-                hintStyle: GoogleFonts.inter(
+                hintStyle: TextStyle(fontFamily: 'Nunito', 
                   fontSize: 13.5.sp,
                   fontWeight: FontWeight.w400,
                   color: const Color(0xFF9E9E9E),
@@ -582,7 +582,7 @@ class LoginV3Screen extends GetView<AuthController> {
                 SizedBox(width: 7.w),
                 Text(
                   'Remember me',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: 'Nunito', 
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
@@ -609,7 +609,7 @@ class LoginV3Screen extends GetView<AuthController> {
             },
             child: Text(
               'Forgot password',
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: 'Nunito', 
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
@@ -662,7 +662,7 @@ class LoginV3Screen extends GetView<AuthController> {
                     )
                   : Text(
                       isSignUp ? 'SIGN UP' : 'SIGN IN',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w900,
                         color: const Color(0xFFD97706),
@@ -693,7 +693,7 @@ class LoginV3Screen extends GetView<AuthController> {
           padding: EdgeInsets.symmetric(horizontal: 10.w),
           child: Text(
             'OR',
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: 'Nunito', 
               fontSize: 12.sp,
               fontWeight: FontWeight.w800,
               color: Colors.white,
@@ -742,7 +742,7 @@ class LoginV3Screen extends GetView<AuthController> {
               children: [
                 TextSpan(
                   text: 'G',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: 'Nunito', 
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w900,
                     color: const Color(0xFF4285F4),
@@ -750,7 +750,7 @@ class LoginV3Screen extends GetView<AuthController> {
                 ),
                 TextSpan(
                   text: '+',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: 'Nunito', 
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w900,
                     color: const Color(0xFFEA4335),

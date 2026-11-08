@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 import 'app_radius.dart';
 
@@ -14,7 +13,13 @@ class AppTheme {
       brightness: Brightness.light,
       primaryColor: AppColors.primary,
       scaffoldBackgroundColor: AppColors.background,
-      fontFamily: GoogleFonts.inter().fontFamily,
+      fontFamily: 'Nunito',
+      textTheme: ThemeData.light().textTheme.apply(
+        fontFamily: 'Nunito',
+      ),
+      primaryTextTheme: ThemeData.light().textTheme.apply(
+        fontFamily: 'Nunito',
+      ),
       colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
         onPrimary: AppColors.textInverse,

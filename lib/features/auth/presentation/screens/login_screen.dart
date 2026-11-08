@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import '../../../../core/routes/app_routes.dart';
 import '../controllers/auth_controller.dart';
 
@@ -38,7 +36,7 @@ class LoginScreen extends GetView<AuthController> {
                 quarterTurns: 3,
                 child: Text(
                   'LOGIN',
-                  style: GoogleFonts.outfit(
+                  style: TextStyle(fontFamily: 'Nunito', 
                     fontSize: 58.sp,
                     fontWeight: FontWeight.w900,
                     color: const Color(0x30FFFFFF),
@@ -97,7 +95,7 @@ class LoginScreen extends GetView<AuthController> {
                             'Skip to Booking',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.inter(
+                            style: TextStyle(fontFamily: 'Nunito', 
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w800,
                               color: Colors.white,
@@ -119,7 +117,7 @@ class LoginScreen extends GetView<AuthController> {
                   // Tagline: Gateway to Sports Excellence
                   Text(
                     'Gateway to Sports Excellence',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: 'Nunito', 
                       fontSize: 20.sp,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
@@ -132,7 +130,7 @@ class LoginScreen extends GetView<AuthController> {
                   // User Id Field
                   Text(
                     'User Id',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: 'Nunito', 
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
@@ -154,7 +152,7 @@ class LoginScreen extends GetView<AuthController> {
                   // Password Field
                   Text(
                     'Password',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: 'Nunito', 
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
@@ -198,7 +196,7 @@ class LoginScreen extends GetView<AuthController> {
                       },
                       child: Text(
                         'Forgot Password?',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: 'Nunito', 
                           fontSize: 13.5.sp,
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
@@ -358,7 +356,7 @@ class LoginScreen extends GetView<AuthController> {
         obscureText: obscureText,
         keyboardType: keyboardType,
         cursorColor: const Color(0xFF0F172A),
-        style: GoogleFonts.inter(
+        style: TextStyle(fontFamily: 'Nunito', 
           fontSize: 14.5.sp,
           fontWeight: FontWeight.w600,
           color: const Color(0xFF0F172A),
@@ -380,7 +378,7 @@ class LoginScreen extends GetView<AuthController> {
           focusedErrorBorder: InputBorder.none,
           disabledBorder: InputBorder.none,
           hintText: hintText,
-          hintStyle: GoogleFonts.inter(
+          hintStyle: TextStyle(fontFamily: 'Nunito', 
             fontSize: 14.sp,
             fontWeight: FontWeight.w400,
             color: const Color(0xFF94A3B8),

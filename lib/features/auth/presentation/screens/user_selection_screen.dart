@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import '../../../../core/routes/app_routes.dart';
 import '../controllers/auth_controller.dart';
 
@@ -57,7 +55,7 @@ class UserSelectionScreen extends GetView<AuthController> {
                     Text(
                       'INERTIA',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 27.sp,
                         fontWeight: FontWeight.w900,
                         color: darkText,
@@ -83,7 +81,7 @@ class UserSelectionScreen extends GetView<AuthController> {
                       child: Text(
                         'SPORTS ACADEMY',
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: 'Nunito', 
                           fontSize: 11.5.sp,
                           fontWeight: FontWeight.w900,
                           color: const Color(0xFF9E7B1A),
@@ -97,7 +95,7 @@ class UserSelectionScreen extends GetView<AuthController> {
                     Text(
                       'Multi-Sport Training, High Performance &\nArena Bookings',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 12.5.sp,
                         fontWeight: FontWeight.w500,
                         color: slateText,
@@ -166,7 +164,7 @@ class UserSelectionScreen extends GetView<AuthController> {
                           SizedBox(width: 6.w),
                           Text(
                             'CHOOSE PROFILE',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(fontFamily: 'Nunito', 
                               fontSize: 9.5.sp,
                               fontWeight: FontWeight.w800,
                               color: const Color(0xFF64748B),
@@ -183,7 +181,7 @@ class UserSelectionScreen extends GetView<AuthController> {
                   Center(
                     child: Text(
                       'Welcome to the Club',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 22.sp,
                         fontWeight: FontWeight.w900,
                         color: darkText,
@@ -195,7 +193,7 @@ class UserSelectionScreen extends GetView<AuthController> {
                   Center(
                     child: Text(
                       'Select your membership profile to sign in',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w500,
                         color: slateText,
@@ -287,7 +285,7 @@ class UserSelectionScreen extends GetView<AuthController> {
           SizedBox(width: 5.w),
           Text(
             label,
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: 'Nunito', 
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
               color: const Color(0xFF334155),
@@ -450,7 +448,7 @@ class UserSelectionScreen extends GetView<AuthController> {
                       children: [
                         Text(
                           title,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: 'Nunito', 
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w800,
                             color: darkText,
@@ -472,7 +470,7 @@ class UserSelectionScreen extends GetView<AuthController> {
                           ),
                           child: Text(
                             badgeText,
-                            style: GoogleFonts.inter(
+                            style: TextStyle(fontFamily: 'Nunito', 
                               fontSize: 9.sp,
                               fontWeight: FontWeight.w800,
                               color: const Color(0xFF9E7B1A),
@@ -497,7 +495,7 @@ class UserSelectionScreen extends GetView<AuthController> {
                                 SizedBox(width: 2.w),
                                 Text(
                                   featuredTag,
-                                  style: GoogleFonts.inter(
+                                  style: TextStyle(fontFamily: 'Nunito', 
                                     fontSize: 8.sp,
                                     fontWeight: FontWeight.w900,
                                     color: const Color(0xFF0F172A),
@@ -513,7 +511,7 @@ class UserSelectionScreen extends GetView<AuthController> {
                     SizedBox(height: 3.h),
                     Text(
                       subtitle,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 11.5.sp,
                         fontWeight: FontWeight.w400,
                         color: slateText,
