@@ -24,7 +24,7 @@ class MainNavScreen extends StatelessWidget {
         : Get.put(HomeController());
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       body: Obx(() {
         final isPayAndPlay = homeCtrl.isPayAndPlay;
 

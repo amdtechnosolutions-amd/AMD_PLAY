@@ -30,9 +30,10 @@ class HomeScreen extends StatelessWidget {
         : Get.put(HomeController());
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         automaticallyImplyLeading: false,
@@ -161,11 +162,18 @@ class HomeScreen extends StatelessWidget {
                   height: 46.h,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isPayAndPlay ? const Color(0xFFEFF6FF) : const Color(0xFFFFF9DB),
+                    color: Colors.white,
                     border: Border.all(
-                      color: isPayAndPlay ? const Color(0xFF3B82F6) : const Color(0xFFF9D106),
+                      color: const Color(0xFFD4AF37),
                       width: 1.5,
                     ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x18D4AF37),
+                        blurRadius: 6,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: ClipOval(
                     child: Image.asset(
@@ -173,11 +181,11 @@ class HomeScreen extends StatelessWidget {
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Center(
                         child: Text(
-                          name.isNotEmpty ? name.substring(0, 1) : (isPayAndPlay ? 'P' : 'S'),
+                          name.isNotEmpty ? name.substring(0, 1) : (isPayAndPlay ? 'B' : 'S'),
                           style: TextStyle(fontFamily: 'Nunito', 
                             fontSize: 20.sp,
                             fontWeight: FontWeight.w800,
-                            color: isPayAndPlay ? const Color(0xFF1D4ED8) : const Color(0xFFD97706),
+                            color: const Color(0xFFD4AF37),
                           ),
                         ),
                       ),
@@ -207,25 +215,33 @@ class HomeScreen extends StatelessWidget {
 
           // Role / "Today" Badge
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+            padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 5.h),
             decoration: BoxDecoration(
-              color: isPayAndPlay ? const Color(0xFFEFF6FF) : const Color(0xFFFFF9DB),
+              color: const Color(0xFFFFFDF5),
               borderRadius: BorderRadius.circular(16.r),
+              border: Border.all(color: const Color(0x66D4AF37), width: 1.0),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x14D4AF37),
+                  blurRadius: 6,
+                  offset: Offset(0, 2),
+                ),
+              ],
             ),
             child: Row(
               children: [
                 Icon(
                   isPayAndPlay ? Icons.sports_tennis_rounded : Icons.calendar_today_outlined,
                   size: 13.sp,
-                  color: isPayAndPlay ? const Color(0xFF2563EB) : const Color(0xFFD97706),
+                  color: const Color(0xFFD4AF37),
                 ),
                 SizedBox(width: 5.w),
                 Text(
                   isPayAndPlay ? 'Booking' : 'Today',
                   style: TextStyle(fontFamily: 'Nunito', 
                     fontSize: 12.5.sp,
-                    fontWeight: FontWeight.w700,
-                    color: isPayAndPlay ? const Color(0xFF2563EB) : const Color(0xFFD97706),
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF9E7B1A),
                   ),
                 ),
               ],
@@ -255,19 +271,29 @@ class HomeScreen extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             colors: [
-              Color(0xFFFFDE38),
-              Color(0xFFF9D106),
-              Color(0xFFE5BE00),
+              Color(0xFFFFFDF7),
+              Colors.white,
             ],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(20.r),
-          boxShadow: [
+          border: Border.all(
+            color: const Color(0x70D4AF37),
+            width: 1.3,
+          ),
+          boxShadow: const [
             BoxShadow(
-              color: const Color(0xFFF9D106).withValues(alpha: 0.35),
-              blurRadius: 14,
-              offset: const Offset(0, 6),
+              color: Color(0x28D4AF37),
+              blurRadius: 18,
+              spreadRadius: 0,
+              offset: Offset(0, 6),
+            ),
+            BoxShadow(
+              color: Color(0x0C000000),
+              blurRadius: 6,
+              spreadRadius: -1,
+              offset: Offset(0, 2),
             ),
           ],
         ),
@@ -275,16 +301,27 @@ class HomeScreen extends StatelessWidget {
           children: [
             // Left Search / Racket Icon Box
             Container(
-              width: 52.h,
-              height: 52.h,
+              width: 50.h,
+              height: 50.h,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.30),
-                borderRadius: BorderRadius.circular(16.r),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFD4AF37), Color(0xFFF59E0B)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(15.r),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x35D4AF37),
+                    blurRadius: 8,
+                    offset: Offset(0, 3),
+                  ),
+                ],
               ),
               child: Center(
                 child: Icon(
                   Icons.sports_tennis_rounded,
-                  size: 28.sp,
+                  size: 26.sp,
                   color: const Color(0xFF0F172A),
                 ),
               ),
@@ -311,7 +348,7 @@ class HomeScreen extends StatelessWidget {
                     style: TextStyle(fontFamily: 'Nunito', 
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF0F172A).withValues(alpha: 0.8),
+                      color: const Color(0xFF64748B),
                     ),
                   ),
                 ],
@@ -322,9 +359,16 @@ class HomeScreen extends StatelessWidget {
             Container(
               width: 36.h,
               height: 36.h,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(0xFF0F172A),
+                color: const Color(0xFF0F172A),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x200F172A),
+                    blurRadius: 6,
+                    offset: Offset(0, 2),
+                  ),
+                ],
               ),
               child: Icon(
                 Icons.arrow_forward_rounded,
@@ -446,15 +490,20 @@ class HomeScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(18.r),
           border: Border.all(
             color: sportItem.isCurrent
-                ? const Color(0xFFF9D106)
-                : const Color(0xFFF1F5F9),
+                ? const Color(0xFFD4AF37)
+                : const Color(0x38D4AF37),
             width: sportItem.isCurrent ? 1.5 : 1.2,
           ),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
+              color: Color(0x20D4AF37),
               blurRadius: 10,
-              offset: const Offset(0, 3),
+              offset: Offset(0, 3),
+            ),
+            BoxShadow(
+              color: Color(0x06000000),
+              blurRadius: 4,
+              offset: Offset(0, 1),
             ),
           ],
         ),
@@ -639,12 +688,17 @@ class HomeScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(color: const Color(0xFFF1F5F9), width: 1.2),
-              boxShadow: [
+              border: Border.all(color: const Color(0x40D4AF37), width: 1.2),
+              boxShadow: const [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.03),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
+                  color: Color(0x22D4AF37),
+                  blurRadius: 12,
+                  offset: Offset(0, 4),
+                ),
+                BoxShadow(
+                  color: Color(0x08000000),
+                  blurRadius: 4,
+                  offset: Offset(0, 1),
                 ),
               ],
             ),
@@ -899,17 +953,22 @@ class HomeScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(18.r),
           border: Border.all(
             color: isPaid
-                ? const Color(0xFFE2E8F0)
-                : (isSelected ? const Color(0xFFF9D106) : const Color(0xFFF1F5F9)),
+                ? const Color(0x40D4AF37)
+                : (isSelected ? const Color(0xFFD4AF37) : const Color(0x30D4AF37)),
             width: isSelected ? 1.8 : 1.2,
           ),
           boxShadow: [
             BoxShadow(
               color: isSelected
-                  ? const Color(0xFFF9D106).withValues(alpha: 0.15)
-                  : Colors.black.withValues(alpha: 0.03),
-              blurRadius: 10,
+                  ? const Color(0x35D4AF37)
+                  : const Color(0x1AD4AF37),
+              blurRadius: isSelected ? 12 : 8,
               offset: const Offset(0, 3),
+            ),
+            const BoxShadow(
+              color: Color(0x06000000),
+              blurRadius: 4,
+              offset: Offset(0, 1),
             ),
           ],
         ),
@@ -1141,12 +1200,18 @@ class HomeScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16.r),
-                    border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
-                    boxShadow: [
+                    border: Border.all(color: const Color(0x40D4AF37), width: 1.2),
+                    boxShadow: const [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                        color: Color(0x20D4AF37),
+                        blurRadius: 10,
+                        spreadRadius: 0,
+                        offset: Offset(0, 3),
+                      ),
+                      BoxShadow(
+                        color: Color(0x08000000),
+                        blurRadius: 4,
+                        offset: Offset(0, 1),
                       ),
                     ],
                   ),
@@ -1155,12 +1220,16 @@ class HomeScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        padding: EdgeInsets.all(7.w),
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFFFF9DB),
+                        padding: EdgeInsets.all(8.w),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFFDF5),
                           shape: BoxShape.circle,
+                          border: Border.all(
+                            color: const Color(0x40D4AF37),
+                            width: 1,
+                          ),
                         ),
-                        child: Icon(sp['icon'] as IconData, size: 22.sp, color: const Color(0xFFD97706)),
+                        child: Icon(sp['icon'] as IconData, size: 22.sp, color: const Color(0xFFD4AF37)),
                       ),
                       SizedBox(height: 6.h),
                       Text(
@@ -1233,11 +1302,18 @@ class HomeScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(18.r),
-                border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
+                border: Border.all(color: const Color(0x40D4AF37), width: 1.2),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x1AD4AF37),
+                    blurRadius: 12,
+                    offset: Offset(0, 3),
+                  ),
+                ],
               ),
               child: Column(
                 children: [
-                  Icon(Icons.confirmation_number_outlined, size: 40.sp, color: const Color(0xFF94A3B8)),
+                  Icon(Icons.confirmation_number_outlined, size: 40.sp, color: const Color(0xFFD4AF37)),
                   SizedBox(height: 8.h),
                   Text(
                     'No Active Court Passes',
@@ -1263,12 +1339,12 @@ class HomeScreen extends StatelessWidget {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFF9D106),
+                      backgroundColor: const Color(0xFFD4AF37),
                       foregroundColor: const Color(0xFF0F172A),
                       elevation: 0,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                     ),
-                    child: const Text('Book Court Now', style: TextStyle(fontWeight: FontWeight.w800)),
+                    child: const Text('Book Court Now', style: TextStyle(fontFamily: 'Nunito', fontWeight: FontWeight.w800, color: Color(0xFF0F172A))),
                   ),
                 ],
               ),
@@ -1285,13 +1361,24 @@ class HomeScreen extends StatelessWidget {
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [
+        border: Border.all(
+          color: const Color(0x60D4AF37),
+          width: 1.3,
+        ),
+        boxShadow: const [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
+            color: Color(0x28D4AF37),
+            blurRadius: 18,
+            spreadRadius: 0,
+            offset: Offset(0, 6),
+          ),
+          BoxShadow(
+            color: Color(0x0C000000),
+            blurRadius: 6,
+            spreadRadius: -1,
+            offset: Offset(0, 2),
           ),
         ],
       ),
@@ -1304,15 +1391,19 @@ class HomeScreen extends StatelessWidget {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFF9DB),
+                  color: const Color(0xFFFFFDF5),
                   borderRadius: BorderRadius.circular(8.r),
+                  border: Border.all(
+                    color: const Color(0x60D4AF37),
+                    width: 1,
+                  ),
                 ),
                 child: Text(
                   pass.sportName.toUpperCase(),
                   style: TextStyle(fontFamily: 'Nunito', 
                     fontSize: 10.5.sp,
                     fontWeight: FontWeight.w800,
-                    color: const Color(0xFFD97706),
+                    color: const Color(0xFF9E7B1A),
                     letterSpacing: 0.8,
                   ),
                 ),
@@ -1320,15 +1411,19 @@ class HomeScreen extends StatelessWidget {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF10B981).withValues(alpha: 0.2),
+                  color: const Color(0xFF10B981).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(6.r),
+                  border: Border.all(
+                    color: const Color(0xFF10B981).withValues(alpha: 0.3),
+                    width: 1,
+                  ),
                 ),
                 child: Text(
                   pass.status,
-                  style: TextStyle(
+                  style: TextStyle(fontFamily: 'Nunito',
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF10B981),
+                    color: const Color(0xFF059669),
                   ),
                 ),
               ),
@@ -1340,26 +1435,30 @@ class HomeScreen extends StatelessWidget {
             style: TextStyle(fontFamily: 'Nunito', 
               fontSize: 17.sp,
               fontWeight: FontWeight.w800,
-              color: Colors.white,
+              color: const Color(0xFF0F172A),
             ),
           ),
           SizedBox(height: 4.h),
           Row(
             children: [
-              Icon(Icons.calendar_today_rounded, size: 13.sp, color: const Color(0xFF94A3B8)),
+              Icon(Icons.calendar_today_rounded, size: 13.sp, color: const Color(0xFFD4AF37)),
               SizedBox(width: 5.w),
               Text(
                 '${pass.dateText} • ${pass.timeWindow}',
-                style: TextStyle(fontFamily: 'Nunito', fontSize: 12.sp, color: const Color(0xFFCBD5E1)),
+                style: TextStyle(fontFamily: 'Nunito', fontSize: 12.sp, color: const Color(0xFF64748B), fontWeight: FontWeight.w600),
               ),
             ],
           ),
           SizedBox(height: 14.h),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
             decoration: BoxDecoration(
-              color: const Color(0xFF1E293B),
-              borderRadius: BorderRadius.circular(12.r),
+              color: const Color(0xFFFFFDF7),
+              borderRadius: BorderRadius.circular(14.r),
+              border: Border.all(
+                color: const Color(0x40D4AF37),
+                width: 1.2,
+              ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1372,7 +1471,7 @@ class HomeScreen extends StatelessWidget {
                       style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 9.5.sp,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF94A3B8),
+                        color: const Color(0xFF64748B),
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -1380,9 +1479,9 @@ class HomeScreen extends StatelessWidget {
                     Text(
                       pass.accessPin,
                       style: TextStyle(fontFamily: 'Nunito', 
-                        fontSize: 18.sp,
+                        fontSize: 19.sp,
                         fontWeight: FontWeight.w900,
-                        color: const Color(0xFFF9D106),
+                        color: const Color(0xFF0F172A),
                         letterSpacing: 4.0,
                       ),
                     ),
@@ -1390,13 +1489,20 @@ class HomeScreen extends StatelessWidget {
                 ),
                 ElevatedButton.icon(
                   onPressed: () => Get.to(() => DigitalPassScreen(pass: pass)),
-                  icon: const Icon(Icons.qr_code_rounded, size: 16),
-                  label: const Text('View Pass'),
+                  icon: const Icon(Icons.qr_code_rounded, size: 16, color: Color(0xFF0F172A)),
+                  label: const Text(
+                    'View Pass',
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFF9D106),
+                    backgroundColor: const Color(0xFFD4AF37),
                     foregroundColor: const Color(0xFF0F172A),
                     elevation: 0,
-                    padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+                    padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 9.h),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
                   ),
                 ),
@@ -1460,7 +1566,14 @@ class HomeScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(18.r),
-                border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
+                border: Border.all(color: const Color(0x40D4AF37), width: 1.2),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x1AD4AF37),
+                    blurRadius: 10,
+                    offset: Offset(0, 3),
+                  ),
+                ],
               ),
               child: Center(
                 child: Text(
@@ -1476,7 +1589,19 @@ class HomeScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16.r),
-                    border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
+                    border: Border.all(color: const Color(0x40D4AF37), width: 1.2),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x18D4AF37),
+                        blurRadius: 10,
+                        offset: Offset(0, 3),
+                      ),
+                      BoxShadow(
+                        color: Color(0x06000000),
+                        blurRadius: 4,
+                        offset: Offset(0, 1),
+                      ),
+                    ],
                   ),
                   child: Row(
                     children: [
