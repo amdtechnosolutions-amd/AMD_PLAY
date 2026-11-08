@@ -473,9 +473,10 @@ class _PaymentsInvoicesScreenState extends State<PaymentsInvoicesScreen> with Si
                         style: TextStyle(fontFamily: 'Nunito', fontWeight: FontWeight.w800, color: Color(0xFF0F172A)),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFF9D106),
+                        backgroundColor: Colors.white,
                         foregroundColor: const Color(0xFF0F172A),
                         elevation: 0,
+                        side: const BorderSide(color: Color(0xFFD4AF37), width: 1.4),
                         padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
                       ),

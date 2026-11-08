@@ -1453,13 +1453,17 @@ class HomeScreen extends StatelessWidget {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
             decoration: BoxDecoration(
-              color: const Color(0xFF0F172A),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(14.r),
+              border: Border.all(
+                color: const Color(0x60D4AF37),
+                width: 1.2,
+              ),
               boxShadow: const [
                 BoxShadow(
-                  color: Color(0x180F172A),
+                  color: Color(0x14D4AF37),
                   blurRadius: 8,
-                  offset: Offset(0, 3),
+                  offset: Offset(0, 2),
                 ),
               ],
             ),
@@ -1474,7 +1478,7 @@ class HomeScreen extends StatelessWidget {
                       style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 9.5.sp,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF94A3B8),
+                        color: const Color(0xFF64748B),
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -1484,7 +1488,7 @@ class HomeScreen extends StatelessWidget {
                       style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 19.sp,
                         fontWeight: FontWeight.w900,
-                        color: const Color(0xFFF9D106),
+                        color: const Color(0xFF0F172A),
                         letterSpacing: 4.0,
                       ),
                     ),
@@ -1493,19 +1497,23 @@ class HomeScreen extends StatelessWidget {
                 ElevatedButton.icon(
                   onPressed: () => Get.to(() => DigitalPassScreen(pass: pass)),
                   icon: const Icon(Icons.qr_code_rounded, size: 16, color: Color(0xFF0F172A)),
-                  label: const Text(
+                  label: Text(
                     'View Pass',
                     style: TextStyle(
                       fontFamily: 'Nunito',
                       fontWeight: FontWeight.w800,
-                      fontSize: 12.5,
-                      color: Color(0xFF0F172A),
+                      fontSize: 12.5.sp,
+                      color: const Color(0xFF0F172A),
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFF9D106),
+                    backgroundColor: Colors.white,
                     foregroundColor: const Color(0xFF0F172A),
                     elevation: 0,
+                    side: const BorderSide(
+                      color: Color(0xFFD4AF37),
+                      width: 1.4,
+                    ),
                     padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 9.h),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
                   ),
