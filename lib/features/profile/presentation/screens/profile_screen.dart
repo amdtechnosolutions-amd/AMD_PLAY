@@ -755,66 +755,71 @@ class ProfileScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        children: [
-          _buildActionTile(
-            icon: Icons.confirmation_number_outlined,
-            title: 'Booking History & Passes',
-            subtitle: 'View active reservations & entry PINs',
-            onTap: () {
-              if (Get.isRegistered<MainNavController>()) {
-                Get.find<MainNavController>().changeTab(1); // Bookings
-              }
-            },
-          ),
-          const Divider(color: Color(0x1AD4AF37), height: 1),
-          _buildActionTile(
-            icon: Icons.receipt_long_outlined,
-            title: 'Invoices & Payment Receipts',
-            subtitle: 'Download receipts & settlement history',
-            onTap: () {
-              if (Get.isRegistered<MainNavController>()) {
-                Get.find<MainNavController>().changeTab(homeCtrl.isPayAndPlay ? 2 : 3);
-              }
-            },
-          ),
-          Obx(() {
-            if (homeCtrl.isPayAndPlay) return const SizedBox.shrink();
-            return Column(
-              children: [
-                const Divider(color: Color(0x1AD4AF37), height: 1),
-                _buildActionTile(
-                  icon: Icons.fitness_center_outlined,
-                  title: 'Coaching Academy & Batches',
-                  subtitle: 'Training schedules & coach assignments',
-                  onTap: () => Get.to(() => const CoachingBatchesScreen()),
-                ),
-                const Divider(color: Color(0x1AD4AF37), height: 1),
-                _buildActionTile(
-                  icon: Icons.calendar_month_outlined,
-                  title: 'Attendance Records',
-                  subtitle: 'Daily check-in stats & history',
-                  onTap: () {
-                    if (Get.isRegistered<MainNavController>()) {
-                      Get.find<MainNavController>().changeTab(2);
-                    }
-                  },
-                ),
-              ],
-            );
-          }),
-          const Divider(color: Color(0x1AD4AF37), height: 1),
-          Obx(() => _buildActionTile(
-                icon: Icons.swap_horiz_rounded,
-                title: homeCtrl.isPayAndPlay
-                    ? 'Switch to Trainee / Student Mode'
-                    : 'Switch to Booking Mode',
-                subtitle: homeCtrl.isPayAndPlay
-                    ? 'Current: Booking (Court reservations & equipment)'
-                    : 'Current: Student (Batches, Attendance & Monthly fees)',
-                onTap: () => homeCtrl.toggleUserRole(),
-              )),
-        ],
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(18.r),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          children: [
+            _buildActionTile(
+              icon: Icons.confirmation_number_outlined,
+              title: 'Booking History & Passes',
+              subtitle: 'View active reservations & entry PINs',
+              onTap: () {
+                if (Get.isRegistered<MainNavController>()) {
+                  Get.find<MainNavController>().changeTab(1); // Bookings
+                }
+              },
+            ),
+            const Divider(color: Color(0x1AD4AF37), height: 1),
+            _buildActionTile(
+              icon: Icons.receipt_long_outlined,
+              title: 'Invoices & Payment Receipts',
+              subtitle: 'Download receipts & settlement history',
+              onTap: () {
+                if (Get.isRegistered<MainNavController>()) {
+                  Get.find<MainNavController>().changeTab(homeCtrl.isPayAndPlay ? 2 : 3);
+                }
+              },
+            ),
+            Obx(() {
+              if (homeCtrl.isPayAndPlay) return const SizedBox.shrink();
+              return Column(
+                children: [
+                  const Divider(color: Color(0x1AD4AF37), height: 1),
+                  _buildActionTile(
+                    icon: Icons.fitness_center_outlined,
+                    title: 'Coaching Academy & Batches',
+                    subtitle: 'Training schedules & coach assignments',
+                    onTap: () => Get.to(() => const CoachingBatchesScreen()),
+                  ),
+                  const Divider(color: Color(0x1AD4AF37), height: 1),
+                  _buildActionTile(
+                    icon: Icons.calendar_month_outlined,
+                    title: 'Attendance Records',
+                    subtitle: 'Daily check-in stats & history',
+                    onTap: () {
+                      if (Get.isRegistered<MainNavController>()) {
+                        Get.find<MainNavController>().changeTab(2);
+                      }
+                    },
+                  ),
+                ],
+              );
+            }),
+            const Divider(color: Color(0x1AD4AF37), height: 1),
+            Obx(() => _buildActionTile(
+                  icon: Icons.swap_horiz_rounded,
+                  title: homeCtrl.isPayAndPlay
+                      ? 'Switch to Trainee / Student Mode'
+                      : 'Switch to Booking Mode',
+                  subtitle: homeCtrl.isPayAndPlay
+                      ? 'Current: Booking (Court reservations & equipment)'
+                      : 'Current: Student (Batches, Attendance & Monthly fees)',
+                  onTap: () => homeCtrl.toggleUserRole(),
+                )),
+          ],
+        ),
       ),
     );
   }
@@ -825,40 +830,43 @@ class ProfileScreen extends StatelessWidget {
     required String subtitle,
     required VoidCallback onTap,
   }) {
-    return ListTile(
-      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-      leading: Container(
-        padding: EdgeInsets.all(8.w),
-        decoration: BoxDecoration(
-          color: const Color(0xFFFFFDF5),
-          shape: BoxShape.circle,
-          border: Border.all(color: const Color(0x40D4AF37), width: 1),
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+        leading: Container(
+          padding: EdgeInsets.all(8.w),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFFDF5),
+            shape: BoxShape.circle,
+            border: Border.all(color: const Color(0x40D4AF37), width: 1),
+          ),
+          child: Icon(icon, size: 20.sp, color: const Color(0xFFD4AF37)),
         ),
-        child: Icon(icon, size: 20.sp, color: const Color(0xFFD4AF37)),
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontFamily: 'Nunito',
-          fontSize: 14.sp,
-          fontWeight: FontWeight.w800,
-          color: const Color(0xFF0F172A),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontFamily: 'Nunito',
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w800,
+            color: const Color(0xFF0F172A),
+          ),
         ),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: TextStyle(
-          fontFamily: 'Nunito',
-          fontSize: 11.5.sp,
-          color: const Color(0xFF64748B),
+        subtitle: Text(
+          subtitle,
+          style: TextStyle(
+            fontFamily: 'Nunito',
+            fontSize: 11.5.sp,
+            color: const Color(0xFF64748B),
+          ),
         ),
+        trailing: Icon(
+          Icons.arrow_forward_ios_rounded,
+          size: 13.sp,
+          color: const Color(0xFF94A3B8),
+        ),
+        onTap: onTap,
       ),
-      trailing: Icon(
-        Icons.arrow_forward_ios_rounded,
-        size: 13.sp,
-        color: const Color(0xFF94A3B8),
-      ),
-      onTap: onTap,
     );
   }
 
