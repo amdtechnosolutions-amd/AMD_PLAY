@@ -6,13 +6,15 @@ import '../../../../core/storage/storage_service.dart';
 class OnboardingItem {
   final String headline;
   final String subtitle;
-  final String imageUrl;
+  final String sportBadge;
+  final String assetPath;
   final IconData sportIcon;
 
   const OnboardingItem({
     required this.headline,
     required this.subtitle,
-    required this.imageUrl,
+    required this.sportBadge,
+    required this.assetPath,
     required this.sportIcon,
   });
 }
@@ -25,21 +27,24 @@ class OnboardingController extends GetxController {
   final List<OnboardingItem> items = const [
     OnboardingItem(
       headline: 'PLAY YOUR GAME',
-      subtitle: 'Book courts, turfs and sports facilities in seconds with instant confirmation.',
-      imageUrl: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=800&q=80',
+      subtitle: 'Book world-class badminton courts in seconds with instant slot confirmation.',
+      sportBadge: '🏸 Badminton Arena',
+      assetPath: 'assets/images/1.jpeg',
       sportIcon: Icons.sports_tennis_rounded,
     ),
     OnboardingItem(
       headline: 'TRAIN. IMPROVE. WIN.',
-      subtitle: 'Join top coaching programs, track attendance and manage your sports journey.',
-      imageUrl: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=80',
-      sportIcon: Icons.fitness_center_rounded,
+      subtitle: 'Experience FIFA-grade turf grounds, elite training and live game sessions.',
+      sportBadge: '⚽ Premium Sports Turf',
+      assetPath: 'assets/images/2.webp',
+      sportIcon: Icons.sports_soccer_rounded,
     ),
     OnboardingItem(
       headline: 'ONE APP. EVERY SPORT.',
-      subtitle: 'Badminton, Football, Pickleball, Cricket, Tennis, Swimming, Gym and more.',
-      imageUrl: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&q=80',
-      sportIcon: Icons.sports_soccer_rounded,
+      subtitle: 'Fast-paced Pickleball, Turf, Badminton, Cricket, Gym and more under one roof.',
+      sportBadge: '🏓 Pro Pickleball Court',
+      assetPath: 'assets/images/picleball.webp',
+      sportIcon: Icons.sports_baseball_rounded,
     ),
   ];
 
@@ -50,8 +55,8 @@ class OnboardingController extends GetxController {
   void next() {
     if (currentPage.value < items.length - 1) {
       pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeInOutCubic,
       );
     } else {
       finishOnboarding();

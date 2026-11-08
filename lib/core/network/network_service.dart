@@ -96,3 +96,4 @@ class NetworkService extends GetxService {
     super.onClose();
   }
 }
+
