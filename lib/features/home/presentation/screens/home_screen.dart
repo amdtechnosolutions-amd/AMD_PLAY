@@ -144,8 +144,13 @@ class HomeScreen extends StatelessWidget {
       final isPayAndPlay = controller.isPayAndPlay;
       var rawName = controller.greetingName.value.trim();
 
-      // Ensure that in Pay & Play mode, we never display 'TRAINEE'
-      if (rawName.isEmpty || (isPayAndPlay && rawName.toUpperCase() == 'TRAINEE')) {
+      // Ensure that unauthenticated / guest sessions default to clean player identity
+      if (rawName.isEmpty ||
+          rawName.toUpperCase() == 'AMD' ||
+          rawName.toUpperCase() == 'GUEST' ||
+          (isPayAndPlay &&
+              (rawName.toUpperCase() == 'TRAINEE' ||
+                  rawName.toUpperCase() == 'GUEST PLAYER'))) {
         rawName = isPayAndPlay ? 'PLAYER' : 'TRAINEE';
       }
       final name = rawName;

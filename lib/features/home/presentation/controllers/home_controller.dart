@@ -262,10 +262,17 @@ class HomeController extends GetxController {
 
   /// 1. Load Live User Profile Info
   Future<void> _loadUserProfile() async {
-    final name = await _storage.getUserName();
+    var name = await _storage.getUserName();
     final role = await _storage.getUserRole();
     final stId = await _storage.getStudentId();
     final userJson = await _storage.getUserJson();
+
+    // Discard legacy mock debug data
+    if (name != null &&
+        (name.trim().toUpperCase() == 'AMD' ||
+            name.trim().toLowerCase() == 'guest player')) {
+      name = null;
+    }
 
     if (stId != null && stId.isNotEmpty) {
       currentStudentId.value = stId;

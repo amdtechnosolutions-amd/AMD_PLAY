@@ -20,39 +20,8 @@ class BookingService {
     return ApiClient();
   }
 
-  /// Ensure a valid authorization token exists before calling endpoints requiring auth
-  Future<void> _ensureGuestToken() async {
-    try {
-      if (Get.isRegistered<StorageService>()) {
-        final storage = Get.find<StorageService>();
-        final token = await storage.getAccessToken();
-        if (token == null || token.isEmpty) {
-          final res = await _apiClient.dio.post(
-            ApiEndpoints.guestRegister,
-            data: {
-              'name': 'Guest Player',
-              'phone': '9876543210',
-              'tenantId': ApiEndpoints.defaultTenantId,
-            },
-          );
-          if (res.statusCode == 200 || res.statusCode == 201) {
-            final body = res.data['data'] ?? res.data;
-            final newToken = body['accessToken']?.toString() ?? '';
-            if (newToken.isNotEmpty) {
-              await storage.saveTokens(
-                accessToken: newToken,
-                refreshToken: newToken,
-              );
-            }
-          }
-        }
-      }
-    } catch (_) {}
-  }
-
   /// 1. Fetch Sports Catalog from `/api/v1/sports` with automatic fallback to `/api/v1/resources/active`
   Future<List<SportItem>> getSports() async {
-    await _ensureGuestToken();
 
     try {
       final res = await _apiClient.dio.get(ApiEndpoints.sports);

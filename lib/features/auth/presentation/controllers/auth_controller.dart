@@ -70,33 +70,10 @@ class AuthController extends GetxController {
     selectProfile(MembershipProfile.booking);
 
     try {
-      String guestToken = '';
-      try {
-        final res = await _apiClient.dio.post(
-          ApiEndpoints.guestRegister,
-          data: {
-            'name': 'Guest Player',
-            'phone': '9876543210',
-            'tenantId': ApiEndpoints.defaultTenantId,
-          },
-        );
-        if (res.statusCode == 200 || res.statusCode == 201) {
-          final body = res.data['data'] ?? res.data;
-          guestToken = body['accessToken']?.toString() ?? '';
-        }
-      } catch (_) {}
-
-      await _storage.saveUserSession(
-        accessToken: guestToken,
-        refreshToken: guestToken,
-        tenantId: ApiEndpoints.defaultTenantId,
-        role: 'customer',
-        userName: 'Guest Player',
-      );
       if (Get.isRegistered<HomeController>()) {
         final homeCtrl = Get.find<HomeController>();
         homeCtrl.userRole.value = 'customer';
-        homeCtrl.userName.value = 'Guest Player';
+        homeCtrl.userName.value = 'Player';
         homeCtrl.greetingName.value = 'PLAYER';
         await homeCtrl.refreshDashboard();
       }
@@ -401,7 +378,7 @@ class AuthController extends GetxController {
           'firstName': firstName,
           'lastName': lastName,
           'email': email,
-          'phone': phoneController.text.trim().isNotEmpty ? phoneController.text.trim() : '9876543210',
+          'phone': phoneController.text.trim(),
           'password': pass,
         },
       );
