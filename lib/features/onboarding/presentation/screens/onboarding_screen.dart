@@ -263,10 +263,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                       key: ValueKey<String>('${item.headline}_$index'),
                                       style: TextStyle(
                                         fontFamily: 'Nunito',
-                                        fontSize: 26.sp,
+                                        fontSize: 23.sp,
                                         fontWeight: FontWeight.w900,
                                         color: const Color(0xFF0F172A),
-                                        letterSpacing: -0.3,
+                                        letterSpacing: -0.2,
                                       ),
                                       textAlign: TextAlign.center,
                                     ),

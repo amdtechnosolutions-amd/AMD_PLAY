@@ -26,23 +26,23 @@ class OnboardingController extends GetxController {
 
   final List<OnboardingItem> items = const [
     OnboardingItem(
-      headline: 'PLAY YOUR GAME',
-      subtitle: 'Book world-class badminton courts in seconds with instant slot confirmation.',
+      headline: 'PRO BADMINTON COURTS',
+      subtitle: 'Book BWF-standard synthetic and wooden badminton courts with anti-glare lighting and instant gate PIN access.',
       sportBadge: '🏸 Badminton Arena',
       assetPath: 'assets/images/1.jpeg',
       sportIcon: Icons.sports_tennis_rounded,
     ),
     OnboardingItem(
-      headline: 'TRAIN. IMPROVE. WIN.',
-      subtitle: 'Experience FIFA-grade turf grounds, elite training and live game sessions.',
-      sportBadge: '⚽ Premium Sports Turf',
+      headline: 'FIFA-GRADE SPORTS TURF',
+      subtitle: 'Play 5v5 football and box cricket on lush, high-density cushioned turf with night floodlights and dugout seating.',
+      sportBadge: '⚽ Multi-Sport Turf Ground',
       assetPath: 'assets/images/2.webp',
       sportIcon: Icons.sports_soccer_rounded,
     ),
     OnboardingItem(
-      headline: 'ONE APP. EVERY SPORT.',
-      subtitle: 'Fast-paced Pickleball, Turf, Badminton, Cricket, Gym and more under one roof.',
-      sportBadge: '🏓 Pro Pickleball Court',
+      headline: 'TRENDING PICKLEBALL ACTION',
+      subtitle: 'Serve, volley, and dink on dedicated pro pickleball courts with paddle rentals, community matches, and open play.',
+      sportBadge: '🏓 Pro Pickleball Arena',
       assetPath: 'assets/images/picleball.webp',
       sportIcon: Icons.sports_baseball_rounded,
     ),
