@@ -1339,7 +1339,7 @@ class HomeScreen extends StatelessWidget {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFD4AF37),
+                      backgroundColor: const Color(0xFFF9D106),
                       foregroundColor: const Color(0xFF0F172A),
                       elevation: 0,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
@@ -1453,12 +1453,15 @@ class HomeScreen extends StatelessWidget {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFFDF7),
+              color: const Color(0xFF0F172A),
               borderRadius: BorderRadius.circular(14.r),
-              border: Border.all(
-                color: const Color(0x40D4AF37),
-                width: 1.2,
-              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x180F172A),
+                  blurRadius: 8,
+                  offset: Offset(0, 3),
+                ),
+              ],
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1471,7 +1474,7 @@ class HomeScreen extends StatelessWidget {
                       style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 9.5.sp,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF64748B),
+                        color: const Color(0xFF94A3B8),
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -1481,7 +1484,7 @@ class HomeScreen extends StatelessWidget {
                       style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 19.sp,
                         fontWeight: FontWeight.w900,
-                        color: const Color(0xFF0F172A),
+                        color: const Color(0xFFF9D106),
                         letterSpacing: 4.0,
                       ),
                     ),
@@ -1495,11 +1498,12 @@ class HomeScreen extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: 'Nunito',
                       fontWeight: FontWeight.w800,
+                      fontSize: 12.5,
                       color: Color(0xFF0F172A),
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFD4AF37),
+                    backgroundColor: const Color(0xFFF9D106),
                     foregroundColor: const Color(0xFF0F172A),
                     elevation: 0,
                     padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 9.h),

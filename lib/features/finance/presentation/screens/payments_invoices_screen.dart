@@ -465,14 +465,20 @@ class _PaymentsInvoicesScreenState extends State<PaymentsInvoicesScreen> with Si
                       'PIN: ${pass.accessPin}',
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFF9D106), letterSpacing: 2),
                     ),
-                    ElevatedButton(
+                    ElevatedButton.icon(
                       onPressed: () => Get.to(() => DigitalPassScreen(pass: pass)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: const Color(0xFF0F172A),
-                        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+                      icon: const Icon(Icons.qr_code_rounded, size: 16, color: Color(0xFF0F172A)),
+                      label: const Text(
+                        'View Pass',
+                        style: TextStyle(fontFamily: 'Nunito', fontWeight: FontWeight.w800, color: Color(0xFF0F172A)),
                       ),
-                      child: const Text('View Pass', style: TextStyle(fontWeight: FontWeight.bold)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFF9D106),
+                        foregroundColor: const Color(0xFF0F172A),
+                        elevation: 0,
+                        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                      ),
                     ),
                   ],
                 ),
