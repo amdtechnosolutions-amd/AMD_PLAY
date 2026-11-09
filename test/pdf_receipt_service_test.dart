@@ -51,7 +51,7 @@ void main() {
       title: 'VIP Gold Annual Pass',
       sportName: 'All Arena Sports',
       schedule: 'Nov 2026 - Nov 2027',
-      customerName: 'Girish Kumar',
+      customerName: 'Academy Member',
       customerPhone: '9876543210',
       dateText: 'Nov 09, 2026',
       totalAmount: 15000,

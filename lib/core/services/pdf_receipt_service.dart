@@ -110,12 +110,12 @@ class PdfReceiptService {
                             ),
                           ),
                           pw.Text(
-                            'GIRISH BADMINTON & SPORTS ARENA',
+                            'MULTI-SPORT TRAINING & ARENA BOOKINGS',
                             style: pw.TextStyle(
                               font: ttfBold,
-                              fontSize: 10,
+                              fontSize: 9.5,
                               color: goldColor,
-                              letterSpacing: 1.2,
+                              letterSpacing: 1.1,
                             ),
                           ),
                           pw.Text(
