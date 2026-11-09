@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../controllers/coach_evaluation_controller.dart';
+import '../widgets/direct_student_password_reset_dialog.dart';
 
 /// Screen for Coaches to inspect all student performance evaluations,
 /// filter by batch, search by student, and record new assessments.
@@ -147,7 +148,7 @@ class CoachEvaluationsScreen extends StatelessWidget {
                   itemCount: list.length,
                   itemBuilder: (context, index) {
                     final item = list[index];
-                    return _buildEvaluationCard(item, controller);
+                    return _buildEvaluationCard(context, item, controller);
                   },
                 );
               }),
@@ -287,6 +288,7 @@ class CoachEvaluationsScreen extends StatelessWidget {
   // ===========================================================================
 
   Widget _buildEvaluationCard(
+    BuildContext context,
     Map<String, dynamic> item,
     CoachEvaluationController controller,
   ) {
@@ -491,51 +493,87 @@ class CoachEvaluationsScreen extends StatelessWidget {
 
           SizedBox(height: 14.h),
 
-          // Action Button: View Full Spider Radar & Parameter Card
-          GestureDetector(
-            onTap: () {
-              final report = controller.convertToReport(item);
-              Get.toNamed(
-                AppRoutes.coachingReport,
-                arguments: {
-                  'report': report,
-                  'studentName': studentName,
-                  'studentId': student is Map ? student['_id'] : null,
-                },
-              );
-            },
-            child: Container(
-              width: double.infinity,
-              height: 40.h,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: goldAccent, width: 1.2),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.radar_rounded, size: 16.sp, color: const Color(0xFF9E7B1A)),
-                  SizedBox(width: 8.w),
-                  Text(
-                    'VIEW RADAR CHART & 24 PARAMETERS',
-                    style: TextStyle(
-                      fontFamily: 'Nunito',
-                      fontSize: 11.5.sp,
-                      fontWeight: FontWeight.w800,
-                      color: const Color(0xFF0F172A),
-                      letterSpacing: 0.3,
+          // Action Row: View Full Spider Radar & Direct Reset Password
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    final report = controller.convertToReport(item);
+                    Get.toNamed(
+                      AppRoutes.coachingReport,
+                      arguments: {
+                        'report': report,
+                        'studentName': studentName,
+                        'studentId': student is Map ? (student['_id'] ?? student['id']) : null,
+                      },
+                    );
+                  },
+                  child: Container(
+                    height: 40.h,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(color: goldAccent, width: 1.2),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.radar_rounded, size: 16.sp, color: const Color(0xFF9E7B1A)),
+                        SizedBox(width: 6.w),
+                        Text(
+                          '24 PARAMETERS & RADAR',
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF0F172A),
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  SizedBox(width: 4.w),
-                  Icon(
-                    Icons.arrow_forward_rounded,
-                    size: 14.sp,
-                    color: const Color(0xFF9E7B1A),
-                  ),
-                ],
+                ),
               ),
-            ),
+              if (student is Map && (student['_id'] != null || student['id'] != null)) ...[
+                SizedBox(width: 8.w),
+                GestureDetector(
+                  onTap: () {
+                    final sId = (student['_id'] ?? student['id']).toString();
+                    DirectStudentPasswordResetDialog.show(
+                      context: context,
+                      studentId: sId,
+                      studentName: studentName,
+                    );
+                  },
+                  child: Container(
+                    height: 40.h,
+                    padding: EdgeInsets.symmetric(horizontal: 10.w),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFFDF5),
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(color: const Color(0x60D4AF37), width: 1.0),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.vpn_key_outlined, size: 15.sp, color: const Color(0xFF9E7B1A)),
+                        SizedBox(width: 4.w),
+                        Text(
+                          'Reset Pass',
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF9E7B1A),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
         ],
       ),

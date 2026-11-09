@@ -46,6 +46,13 @@ class ApiEndpoints {
   static const String refreshToken = '/auth/refresh';
   static const String me = '/auth/me';
 
+  // Password Management & Recovery
+  static const String resetPassword = '/auth/reset-password';
+  static const String studentResetPassword = '/auth/student/reset-password';
+  static const String changePassword = '/auth/change-password';
+  static String userDirectResetPassword(String id) => '/users/$id/reset-password';
+  static String studentDirectResetPassword(String id) => '/students/$id/reset-password';
+
   // Students & Trainees
   static const String studentAttendance = '/students/my/attendance';
   static const String studentSiblings = '/students/my/siblings';

@@ -5,6 +5,7 @@ import '../../../../core/routes/app_routes.dart';
 import '../../../home/presentation/controllers/home_controller.dart';
 import '../../../main_nav/presentation/controllers/main_nav_controller.dart';
 import '../../../coaching/presentation/screens/coaching_batches_screen.dart';
+import '../../../auth/presentation/widgets/change_password_sheet.dart';
 import '../controllers/profile_controller.dart';
 
 /// Pixel-perfect Profile Screen powered by live GET /api/v1/auth/me API.
@@ -96,7 +97,7 @@ class ProfileScreen extends StatelessWidget {
                   SizedBox(height: 16.h),
 
                   // Quick navigation options
-                  _buildQuickActionsCard(controller, homeCtrl),
+                  _buildQuickActionsCard(context, controller, homeCtrl),
                   SizedBox(height: 16.h),
 
                   // Login option if user already has an existing account
@@ -121,7 +122,7 @@ class ProfileScreen extends StatelessWidget {
                 SizedBox(height: 16.h),
 
                 // 3. Quick Actions & Navigation Section
-                _buildQuickActionsCard(controller, homeCtrl),
+                _buildQuickActionsCard(context, controller, homeCtrl),
                 SizedBox(height: 16.h),
 
                 // 4. System & API Status Card
@@ -737,7 +738,8 @@ class ProfileScreen extends StatelessWidget {
   // 3. QUICK ACTIONS & NAVIGATION
   // ===========================================================================
 
-  Widget _buildQuickActionsCard(ProfileController controller, HomeController homeCtrl) {
+  Widget _buildQuickActionsCard(
+      BuildContext context, ProfileController controller, HomeController homeCtrl) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -841,6 +843,18 @@ class ProfileScreen extends StatelessWidget {
                 ],
               );
             }),
+            const Divider(color: Color(0x1AD4AF37), height: 1),
+            _buildActionTile(
+              icon: Icons.password_rounded,
+              title: 'Change Password',
+              subtitle: 'Update your account login password',
+              onTap: () {
+                ChangePasswordBottomSheet.show(
+                  context: context,
+                  isStudent: !homeCtrl.isCoach && !homeCtrl.isPayAndPlay,
+                );
+              },
+            ),
             const Divider(color: Color(0x1AD4AF37), height: 1),
             Obx(() => _buildActionTile(
                   icon: Icons.swap_horiz_rounded,
