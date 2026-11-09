@@ -38,8 +38,8 @@ class BookingPassModel {
     required this.taxAmount,
     required this.totalAmount,
     this.status = 'CONFIRMED',
-    this.venueName = 'Apex Sports Arena, Central Flagship',
-    this.venueAddress = '100ft Road, Indiranagar, Bangalore',
+    this.venueName = 'Inertia Sports Academy',
+    this.venueAddress = '',
     this.razorpayPaymentId,
     this.razorpayOrderId,
     this.playerName,
@@ -71,34 +71,37 @@ class BookingPassModel {
     final bookingRef = json['bookingNumber']?.toString() ??
         json['bookingReference']?.toString() ??
         grpNum ??
-        'APX-78210';
+        json['_id']?.toString() ??
+        '';
     final courtName = res?['name']?.toString() ??
         json['courtName']?.toString() ??
-        (parsedSubs.isNotEmpty ? parsedSubs.first.courtName : 'Court 01');
+        (parsedSubs.isNotEmpty ? parsedSubs.first.courtName : '');
     final sportName = sport?['name']?.toString() ??
         json['sportName']?.toString() ??
-        (parsedSubs.isNotEmpty ? parsedSubs.first.sportName : 'Badminton');
+        (parsedSubs.isNotEmpty ? parsedSubs.first.sportName : '');
     final date = json['date']?.toString() ??
         json['dateText']?.toString() ??
-        (parsedSubs.isNotEmpty ? parsedSubs.first.dateText : 'Today');
+        (parsedSubs.isNotEmpty ? parsedSubs.first.dateText : '');
 
     final startTime = json['startTime']?.toString() ?? '';
     final endTime = json['endTime']?.toString() ?? '';
     final timeWin = (startTime.isNotEmpty && endTime.isNotEmpty)
         ? '$startTime - $endTime'
-        : (json['timeWindow']?.toString() ?? (parsedSubs.isNotEmpty ? parsedSubs.first.timeWindow : '07:00 PM - 08:00 PM'));
+        : (json['timeWindow']?.toString() ?? (parsedSubs.isNotEmpty ? parsedSubs.first.timeWindow : ''));
 
     final accessPin = json['accessCode']?.toString() ??
         json['accessPin']?.toString() ??
         json['pin']?.toString() ??
-        (parsedSubs.isNotEmpty ? parsedSubs.first.accessPin : '519283');
+        (parsedSubs.isNotEmpty ? parsedSubs.first.accessPin : '');
 
     final qrUrl = json['qrCodeUrl']?.toString() ??
         json['qrPassUrl']?.toString() ??
         json['qrCode']?.toString() ??
-        (parsedSubs.isNotEmpty ? parsedSubs.first.qrPassUrl : 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=APX-PASS-$accessPin');
+        (accessPin.isNotEmpty
+            ? 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=PASS-$accessPin'
+            : (parsedSubs.isNotEmpty ? parsedSubs.first.qrPassUrl : ''));
 
-    final baseAmt = (pricing?['basePrice'] ?? pricing?['finalPrice'] ?? json['amount'] ?? json['basePrice'] ?? 600).toDouble();
+    final baseAmt = (pricing?['basePrice'] ?? pricing?['finalPrice'] ?? json['amount'] ?? json['basePrice'] ?? 0).toDouble();
     final taxAmt = (pricing?['taxAmount'] ?? json['taxAmount'] ?? 0).toDouble();
     final totalAmt = (pricing?['totalAmount'] ?? json['totalAmount'] ?? (baseAmt + taxAmt)).toDouble();
 
@@ -110,10 +113,10 @@ class BookingPassModel {
 
     final branchName = branch?['name']?.toString() ??
         json['venueName']?.toString() ??
-        'Apex Sports Arena, Central Flagship';
+        'Inertia Sports Academy';
     final branchAddr = branch?['address']?.toString() ??
         json['venueAddress']?.toString() ??
-        '100ft Road, Indiranagar, Bangalore';
+        '';
 
     final user = json['userId'] is Map ? json['userId'] as Map<String, dynamic> : null;
     final fName = user?['firstName']?.toString() ?? '';

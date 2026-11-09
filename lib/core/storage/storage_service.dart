@@ -27,17 +27,18 @@ class StorageService extends GetxService {
       _cache.addAll(all);
 
       // Auto-sanitize legacy debug mock sessions (e.g. AMD Superadmin dummy registration)
-      if (_cache[keyUserName]?.toUpperCase() == 'AMD' ||
-          _cache[keyUserName]?.toLowerCase() == 'guest player') {
-        _cache.remove(keyUserName);
-        _cache.remove(keyUserJson);
-        _cache.remove(keyAccessToken);
-        _cache.remove(keyRefreshToken);
+      final storedName = _cache[keyUserName]?.toUpperCase() ?? '';
+      final storedJson = _cache[keyUserJson] ?? '';
+      final isLegacyMockSession = storedName == 'AMD' ||
+          storedName == 'GUEST PLAYER' ||
+          storedJson.contains('9876543210') ||
+          storedJson.contains('admin@amdtechno.in') ||
+          storedJson.contains('6ad67f8a21c35f3cf2139ef8');
+
+      if (isLegacyMockSession) {
+        _cache.clear();
         try {
-          await _secureStorage.delete(key: keyUserName);
-          await _secureStorage.delete(key: keyUserJson);
-          await _secureStorage.delete(key: keyAccessToken);
-          await _secureStorage.delete(key: keyRefreshToken);
+          await _secureStorage.deleteAll();
         } catch (_) {}
       }
     } catch (_) {}

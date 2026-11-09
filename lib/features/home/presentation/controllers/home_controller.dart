@@ -110,7 +110,7 @@ class HomeController extends GetxController {
   final RxString currentStudentId = ''.obs;
   final RxString userRole = 'customer'.obs;
   final RxString todayDateFormatted = ''.obs;
-  final RxString selectedBranch = 'Central Sports Complex, Indiranagar'.obs;
+  final RxString selectedBranch = 'Inertia Sports Academy - Main Branch'.obs;
 
   /// Safely update user identity, uppercase greeting and sync with storage
   void updateUserName(String name) {
@@ -274,6 +274,14 @@ class HomeController extends GetxController {
       name = null;
     }
 
+    if (userJson != null &&
+        (userJson.contains('9876543210') ||
+            userJson.contains('admin@amdtechno.in') ||
+            userJson.contains('6ad67f8a21c35f3cf2139ef8'))) {
+      await _storage.clearAll();
+      name = null;
+    }
+
     if (stId != null && stId.isNotEmpty) {
       currentStudentId.value = stId;
     }
@@ -314,6 +322,19 @@ class HomeController extends GetxController {
           final data = res.data['data'];
           final user = data?['user'];
           if (user is Map) {
+            final uPhone = (user['phone'] ?? '').toString().trim();
+            final uEmail = (user['email'] ?? '').toString().trim();
+            final uId = (user['_id'] ?? user['id'] ?? '').toString().trim();
+
+            if (uPhone == '9876543210' ||
+                uEmail == 'admin@amdtechno.in' ||
+                uId == '6ad67f8a21c35f3cf2139ef8') {
+              await _storage.clearAll();
+              userName.value = 'Player';
+              greetingName.value = 'PLAYER';
+              return;
+            }
+
             final fName = (user['firstName'] ?? '').toString().trim();
             final lName = (user['lastName'] ?? '').toString().trim();
             final full = (user['fullName'] ?? user['name'] ?? (fName.isNotEmpty ? '$fName $lName' : '')).toString().trim();
@@ -407,16 +428,40 @@ class HomeController extends GetxController {
         }
       }
 
-      // Dynamic fallback to active resources if sports catalog returned empty
+      // Dynamic extraction from live active resources
       final resResources = await _apiClient.dio.get(ApiEndpoints.resourcesActive);
       if (resResources.data != null && resResources.data['data'] is List) {
         final Map<String, Map<String, dynamic>> uniqueSports = {};
         for (final item in (resResources.data['data'] as List)) {
-          if (item is Map && item['sportId'] is Map) {
-            final sMap = Map<String, dynamic>.from(item['sportId']);
-            final sId = (sMap['_id'] ?? sMap['id'] ?? '').toString();
-            if (sId.isNotEmpty && !uniqueSports.containsKey(sId)) {
-              uniqueSports[sId] = sMap;
+          if (item is Map) {
+            // Extract live branch name if available
+            if (item['branchId'] is Map && item['branchId']['name'] != null) {
+              final bName = item['branchId']['name'].toString().trim();
+              if (bName.isNotEmpty && (selectedBranch.value.isEmpty || selectedBranch.value.contains('Indiranagar'))) {
+                selectedBranch.value = bName;
+              }
+            }
+
+            // Extract primary sportId
+            if (item['sportId'] is Map) {
+              final sMap = Map<String, dynamic>.from(item['sportId']);
+              final sId = (sMap['_id'] ?? sMap['id'] ?? '').toString();
+              if (sId.isNotEmpty && !uniqueSports.containsKey(sId)) {
+                uniqueSports[sId] = sMap;
+              }
+            }
+
+            // Extract secondary sportIds (e.g. Cricket, Football on multi-sport turf)
+            if (item['sportIds'] is List) {
+              for (final s in (item['sportIds'] as List)) {
+                if (s is Map) {
+                  final sMap = Map<String, dynamic>.from(s);
+                  final sId = (sMap['_id'] ?? sMap['id'] ?? '').toString();
+                  if (sId.isNotEmpty && !uniqueSports.containsKey(sId)) {
+                    uniqueSports[sId] = sMap;
+                  }
+                }
+              }
             }
           }
         }
@@ -424,16 +469,6 @@ class HomeController extends GetxController {
           availableSports.assignAll(uniqueSports.values.toList());
           return;
         }
-      }
-
-      if (availableSports.isEmpty) {
-        availableSports.assignAll([
-          {'_id': '6ad6bdead33a91a36c41ff5b', 'name': 'Badminton', 'slug': 'badminton'},
-          {'_id': '6ad6be401ee0aaebb67610b2', 'name': 'Basket Ball', 'slug': 'basket-ball'},
-          {'_id': '6ad6be011ee0aaebb67610aa', 'name': 'Cricket', 'slug': 'cricket'},
-          {'_id': '6ad6be1428611d721770eac4', 'name': 'Football', 'slug': 'football'},
-          {'_id': '6ad6be2dd33a91a36c41ff63', 'name': 'Pickle Ball', 'slug': 'pickle-ball'},
-        ]);
       }
     } catch (e) {
       debugPrint('Error fetching sports catalog: $e');
@@ -1196,9 +1231,7 @@ class HomeController extends GetxController {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            _branchOption('Central Sports Complex, Indiranagar'),
-            _branchOption('Elite Arena, Koramangala'),
-            _branchOption('Apex Sports Hub, Whitefield'),
+            _branchOption('Inertia Sports Academy - Main Branch'),
           ],
         ),
       ),

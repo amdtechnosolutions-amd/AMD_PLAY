@@ -57,6 +57,19 @@ class BookingService {
                   uniqueSports[sport.id] = sport;
                 }
               }
+
+              // Extract secondary sportIds (e.g. Cricket, Football on multi-sport turf)
+              final secondarySports = item['sportIds'];
+              if (secondarySports is List) {
+                for (final s in secondarySports) {
+                  if (s is Map) {
+                    final sport = SportItem.fromJson(Map<String, dynamic>.from(s));
+                    if (sport.id.isNotEmpty && !uniqueSports.containsKey(sport.id)) {
+                      uniqueSports[sport.id] = sport;
+                    }
+                  }
+                }
+              }
             }
           }
           if (uniqueSports.isNotEmpty) {
@@ -65,42 +78,10 @@ class BookingService {
         }
       }
     } catch (_) {
-      // Return fallback
+      // Fall through to empty return
     }
 
-    // Default complete catalog matching backend database
-    return const [
-      SportItem(
-        id: '6ad6bdead33a91a36c41ff5b',
-        name: 'Badminton',
-        slug: 'badminton',
-        type: 'court',
-      ),
-      SportItem(
-        id: '6ad6be401ee0aaebb67610b2',
-        name: 'Basket Ball',
-        slug: 'basket-ball',
-        type: 'turf',
-      ),
-      SportItem(
-        id: '6ad6be011ee0aaebb67610aa',
-        name: 'Cricket',
-        slug: 'cricket',
-        type: 'turf',
-      ),
-      SportItem(
-        id: '6ad6be1428611d721770eac4',
-        name: 'Football',
-        slug: 'football',
-        type: 'turf',
-      ),
-      SportItem(
-        id: '6ad6be2dd33a91a36c41ff63',
-        name: 'Pickle Ball',
-        slug: 'pickle-ball',
-        type: 'turf',
-      ),
-    ];
+    return const [];
   }
 
   /// 2. Fetch Active Courts / Resources from `/api/v1/resources/active` or `/api/v1/resources`

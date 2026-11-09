@@ -60,8 +60,12 @@ class ProfileController extends GetxController {
         if (cachedJson != null && cachedJson.isNotEmpty) {
           final decoded = jsonDecode(cachedJson);
           if (decoded is Map<String, dynamic>) {
-            _populateFromUserMap(decoded);
-            isRegistered.value = true;
+            final uPhone = (decoded['phone'] ?? '').toString().trim();
+            final uEmail = (decoded['email'] ?? '').toString().trim();
+            if (uPhone != '9876543210' && uEmail != 'admin@amdtechno.in') {
+              _populateFromUserMap(decoded);
+              isRegistered.value = true;
+            }
           }
         }
       } catch (_) {}
@@ -82,6 +86,21 @@ class ProfileController extends GetxController {
 
           final user = data['user'];
           if (user is Map<String, dynamic>) {
+            final userPhone = (user['phone'] ?? '').toString().trim();
+            final userEmail = (user['email'] ?? '').toString().trim();
+            final userId = (user['_id'] ?? user['id'] ?? '').toString().trim();
+
+            // Guard against legacy tenant admin account being treated as logged in user
+            if (userPhone == '9876543210' ||
+                userEmail == 'admin@amdtechno.in' ||
+                userId == '6ad67f8a21c35f3cf2139ef8') {
+              await _storage.clearAll();
+              _clearProfileData();
+              isRegistered.value = false;
+              isLoading.value = false;
+              return;
+            }
+
             _populateFromUserMap(user);
             isRegistered.value = true;
             hasError.value = false;

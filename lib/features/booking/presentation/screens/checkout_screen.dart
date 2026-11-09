@@ -202,7 +202,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     _summaryRow(Icons.access_time_rounded, slot.timeText),
                   ],
                   SizedBox(height: 4.h),
-                  _summaryRow(Icons.location_on_outlined, 'Apex Sports Complex, Indiranagar'),
+                  _summaryRow(Icons.location_on_outlined, 'Inertia Sports Academy - Main Branch'),
                 ],
               ),
             ),
