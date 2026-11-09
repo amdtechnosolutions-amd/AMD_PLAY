@@ -7,3 +7,4 @@ class StudentEvaluationBinding extends Bindings {
     Get.lazyPut<StudentEvaluationController>(() => StudentEvaluationController());
   }
 }
+

@@ -1,7 +1,8 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../data/models/student_evaluation_model.dart';
+import 'package:mobile_app/features/coaching/data/models/student_evaluation_model.dart';
 
 /// Interactive Spider / Radar Chart for Coaching Evaluation categories
 /// (Physical, Mental, Skill, Attitude)
@@ -60,7 +61,11 @@ class EvaluationRadarChart extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(Icons.radar_rounded, size: 20.sp, color: const Color(0xFFD4AF37)),
+                  Icon(
+                    Icons.radar_rounded,
+                    size: 20.sp,
+                    color: const Color(0xFFD4AF37),
+                  ),
                   SizedBox(width: 8.w),
                   Text(
                     'Performance Radar',
@@ -116,7 +121,10 @@ class EvaluationRadarChart extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: cat.color.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(10.r),
-                  border: Border.all(color: cat.color.withValues(alpha: 0.4), width: 1),
+                  border: Border.all(
+                    color: cat.color.withValues(alpha: 0.4),
+                    width: 1,
+                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -183,10 +191,7 @@ class _RadarChartPainter extends CustomPainter {
 
     final polygonFillPaint = Paint()
       ..shader = const RadialGradient(
-        colors: [
-          Color(0x55D4AF37),
-          Color(0x25D4AF37),
-        ],
+        colors: [Color(0x55D4AF37), Color(0x25D4AF37)],
       ).createShader(Rect.fromCircle(center: center, radius: radius))
       ..style = PaintingStyle.fill;
 
@@ -264,7 +269,13 @@ class _RadarChartPainter extends CustomPainter {
     }
   }
 
-  void _drawVertexLabel(Canvas canvas, RadarCategoryData cat, double x, double y, double angle) {
+  void _drawVertexLabel(
+    Canvas canvas,
+    RadarCategoryData cat,
+    double x,
+    double y,
+    double angle,
+  ) {
     final textPainter = TextPainter(
       text: TextSpan(
         text: cat.category,

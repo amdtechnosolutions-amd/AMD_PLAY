@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../data/models/student_evaluation_model.dart';
-import '../../data/services/student_evaluation_service.dart';
+import 'package:mobile_app/features/coaching/data/models/student_evaluation_model.dart';
+import 'package:mobile_app/features/coaching/data/services/student_evaluation_service.dart';
 
 /// Controller for Student Coaching Performance Reports & Scorecard
 class StudentEvaluationController extends GetxController {
@@ -48,7 +48,9 @@ class StudentEvaluationController extends GetxController {
   List<ParameterCardModel> get filteredParameters {
     final all = report.value?.parameterCards ?? [];
     if (selectedCategoryFilter.value == 'ALL') return all;
-    return all.where((p) => p.category.toUpperCase() == selectedCategoryFilter.value).toList();
+    return all
+        .where((p) => p.category.toUpperCase() == selectedCategoryFilter.value)
+        .toList();
   }
 
   /// Get list of available categories

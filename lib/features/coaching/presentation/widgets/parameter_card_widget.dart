@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../data/models/student_evaluation_model.dart';
+import 'package:mobile_app/features/coaching/data/models/student_evaluation_model.dart';
 
 /// Clean card displaying individual parameter evaluation metric
 class ParameterCardWidget extends StatelessWidget {
   final ParameterCardModel parameter;
 
-  const ParameterCardWidget({
-    super.key,
-    required this.parameter,
-  });
+  const ParameterCardWidget({super.key, required this.parameter});
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +29,7 @@ class ParameterCardWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: const Color(0x50D4AF37),
-          width: 1.2,
-        ),
+        border: Border.all(color: const Color(0x50D4AF37), width: 1.2),
         boxShadow: const [
           BoxShadow(
             color: Color(0x12D4AF37),
@@ -69,7 +63,10 @@ class ParameterCardWidget extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: categoryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8.r),
-                  border: Border.all(color: categoryColor.withValues(alpha: 0.4), width: 0.8),
+                  border: Border.all(
+                    color: categoryColor.withValues(alpha: 0.4),
+                    width: 0.8,
+                  ),
                 ),
                 child: Text(
                   parameter.category.toUpperCase(),

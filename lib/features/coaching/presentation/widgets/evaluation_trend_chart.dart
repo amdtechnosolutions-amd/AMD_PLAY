@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../data/models/student_evaluation_model.dart';
+import 'package:mobile_app/features/coaching/data/models/student_evaluation_model.dart';
 
 /// Progress tracking line chart displaying historical performance trends
 class EvaluationTrendChart extends StatelessWidget {
@@ -65,7 +65,11 @@ class EvaluationTrendChart extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(Icons.trending_up_rounded, size: 22.sp, color: const Color(0xFFD4AF37)),
+                  Icon(
+                    Icons.trending_up_rounded,
+                    size: 22.sp,
+                    color: const Color(0xFFD4AF37),
+                  ),
                   SizedBox(width: 8.w),
                   Text(
                     'Progress Trend',
@@ -80,15 +84,25 @@ class EvaluationTrendChart extends StatelessWidget {
               ),
               if (trend.isNotEmpty)
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 10.w,
+                    vertical: 4.h,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFECFDF5),
                     borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: const Color(0xFF10B981), width: 1),
+                    border: Border.all(
+                      color: const Color(0xFF10B981),
+                      width: 1,
+                    ),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.arrow_upward_rounded, size: 12.sp, color: const Color(0xFF047857)),
+                      Icon(
+                        Icons.arrow_upward_rounded,
+                        size: 12.sp,
+                        color: const Color(0xFF047857),
+                      ),
                       SizedBox(width: 2.w),
                       Text(
                         '${trend.last.overallPercentage.toStringAsFixed(1)}% LATEST',
@@ -110,9 +124,7 @@ class EvaluationTrendChart extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             height: height.h,
-            child: CustomPaint(
-              painter: _TrendLineChartPainter(trend: trend),
-            ),
+            child: CustomPaint(painter: _TrendLineChartPainter(trend: trend)),
           ),
         ],
       ),
@@ -172,10 +184,7 @@ class _TrendLineChartPainter extends CustomPainter {
 
       final areaPaint = Paint()
         ..shader = LinearGradient(
-          colors: [
-            const Color(0x50D4AF37),
-            const Color(0x05D4AF37),
-          ],
+          colors: [const Color(0x50D4AF37), const Color(0x05D4AF37)],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ).createShader(Rect.fromLTWH(0, topPadding, chartWidth, chartHeight))
@@ -209,25 +218,13 @@ class _TrendLineChartPainter extends CustomPainter {
       final item = trend[i];
 
       // Outer glow circle
-      canvas.drawCircle(
-        pt,
-        6.0,
-        Paint()..color = const Color(0x40D4AF37),
-      );
+      canvas.drawCircle(pt, 6.0, Paint()..color = const Color(0x40D4AF37));
 
       // Inner solid circle
-      canvas.drawCircle(
-        pt,
-        4.0,
-        Paint()..color = const Color(0xFF0F172A),
-      );
+      canvas.drawCircle(pt, 4.0, Paint()..color = const Color(0xFF0F172A));
 
       // White dot center
-      canvas.drawCircle(
-        pt,
-        2.0,
-        Paint()..color = Colors.white,
-      );
+      canvas.drawCircle(pt, 2.0, Paint()..color = Colors.white);
 
       // Value pill above point
       final valPainter = TextPainter(
@@ -242,7 +239,10 @@ class _TrendLineChartPainter extends CustomPainter {
         ),
         textDirection: TextDirection.ltr,
       )..layout();
-      valPainter.paint(canvas, Offset(pt.dx - (valPainter.width / 2), pt.dy - 16));
+      valPainter.paint(
+        canvas,
+        Offset(pt.dx - (valPainter.width / 2), pt.dy - 16),
+      );
 
       // Date label at the bottom axis
       final dateText = item.date.isNotEmpty ? item.date : '#${i + 1}';
@@ -260,7 +260,10 @@ class _TrendLineChartPainter extends CustomPainter {
       )..layout();
       datePainter.paint(
         canvas,
-        Offset(pt.dx - (datePainter.width / 2), size.height - bottomPadding + 8),
+        Offset(
+          pt.dx - (datePainter.width / 2),
+          size.height - bottomPadding + 8,
+        ),
       );
     }
   }
