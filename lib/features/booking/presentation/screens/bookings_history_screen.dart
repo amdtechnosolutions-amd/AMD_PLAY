@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../data/models/booking_pass_model.dart';
@@ -16,7 +17,8 @@ class BookingsHistoryScreen extends StatefulWidget {
   State<BookingsHistoryScreen> createState() => _BookingsHistoryScreenState();
 }
 
-class _BookingsHistoryScreenState extends State<BookingsHistoryScreen> with SingleTickerProviderStateMixin {
+class _BookingsHistoryScreenState extends State<BookingsHistoryScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final BookingService _bookingService = BookingService();
   List<BookingPassModel> _passes = [];
@@ -43,7 +45,10 @@ class _BookingsHistoryScreenState extends State<BookingsHistoryScreen> with Sing
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('My Bookings & Passes', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'My Bookings & Passes',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.white,
         elevation: 0.5,
         bottom: TabBar(
@@ -59,37 +64,74 @@ class _BookingsHistoryScreenState extends State<BookingsHistoryScreen> with Sing
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            )
           : TabBarView(
               controller: _tabController,
               children: [
-                _buildPassList(_passes.where((p) => p.status.toUpperCase() == 'CONFIRMED' || p.status.toUpperCase() == 'CHECKED_IN').toList(), isActive: true),
-                _buildPassList(_passes.where((p) => p.status.toUpperCase() != 'CONFIRMED' && p.status.toUpperCase() != 'CHECKED_IN').toList(), isActive: false),
+                _buildPassList(
+                  _passes
+                      .where(
+                        (p) =>
+                            p.status.toUpperCase() == 'CONFIRMED' ||
+                            p.status.toUpperCase() == 'CHECKED_IN',
+                      )
+                      .toList(),
+                  isActive: true,
+                ),
+                _buildPassList(
+                  _passes
+                      .where(
+                        (p) =>
+                            p.status.toUpperCase() != 'CONFIRMED' &&
+                            p.status.toUpperCase() != 'CHECKED_IN',
+                      )
+                      .toList(),
+                  isActive: false,
+                ),
               ],
             ),
     );
   }
 
-  Widget _buildPassList(List<BookingPassModel> items, {required bool isActive}) {
+  Widget _buildPassList(
+    List<BookingPassModel> items, {
+    required bool isActive,
+  }) {
     if (items.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.confirmation_number_outlined, size: 56, color: Colors.grey.shade400),
+            Icon(
+              Icons.confirmation_number_outlined,
+              size: 56,
+              color: Colors.grey.shade400,
+            ),
             SizedBox(height: 12.h),
             Text(
               isActive ? 'No active court passes' : 'No past bookings found',
-              style: AppTypography.cardTitle.copyWith(color: AppColors.textSecondary),
+              style: AppTypography.cardTitle.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
             SizedBox(height: 16.h),
             ElevatedButton(
               onPressed: () => Get.to(() => const CourtBookingScreen()),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              child: const Text('BOOK A COURT NOW', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              child: const Text(
+                'BOOK A COURT NOW',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         ),
@@ -126,7 +168,10 @@ class _BookingsHistoryScreenState extends State<BookingsHistoryScreen> with Sing
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8.w,
+                            vertical: 4.h,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.primaryLight,
                             borderRadius: BorderRadius.circular(6.r),
@@ -142,28 +187,44 @@ class _BookingsHistoryScreenState extends State<BookingsHistoryScreen> with Sing
                         ),
                         Text(
                           'Ref: ${pass.bookingReference}',
-                          style: TextStyle(fontSize: 11.sp, color: AppColors.textSecondary, fontFamily: 'monospace'),
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            color: AppColors.textSecondary,
+                            fontFamily: 'monospace',
+                          ),
                         ),
                       ],
                     ),
                     SizedBox(height: 10.h),
                     Text(pass.courtName, style: AppTypography.cardTitle),
                     SizedBox(height: 8.h),
-                      Row(
-                        children: [
-                          const Icon(Icons.calendar_today_rounded, size: 14, color: AppColors.textSecondary),
-                          SizedBox(width: 6.w),
-                          Expanded(
-                            child: Text('${pass.dateText} • ${pass.timeWindow}',
-                                style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary)),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.calendar_today_rounded,
+                          size: 14,
+                          color: AppColors.textSecondary,
+                        ),
+                        SizedBox(width: 6.w),
+                        Expanded(
+                          child: Text(
+                            '${pass.dateText} • ${pass.timeWindow}',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
+                    ),
 
                     if (isActive) ...[
                       SizedBox(height: 14.h),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 8.h,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFF8FAFC),
                           borderRadius: BorderRadius.circular(10.r),
@@ -174,7 +235,11 @@ class _BookingsHistoryScreenState extends State<BookingsHistoryScreen> with Sing
                           children: [
                             Text(
                               'DOOR ACCESS PIN:',
-                              style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: AppColors.textSecondary),
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textSecondary,
+                              ),
                             ),
                             Text(
                               pass.accessPin,
@@ -196,7 +261,9 @@ class _BookingsHistoryScreenState extends State<BookingsHistoryScreen> with Sing
               Container(
                 decoration: BoxDecoration(
                   color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(16.r)),
+                  borderRadius: BorderRadius.vertical(
+                    bottom: Radius.circular(16.r),
+                  ),
                   border: Border(top: BorderSide(color: Colors.grey.shade200)),
                 ),
                 padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
@@ -205,19 +272,29 @@ class _BookingsHistoryScreenState extends State<BookingsHistoryScreen> with Sing
                   children: [
                     Text(
                       'Paid: ₹${pass.totalAmount.toInt()}',
-                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         TextButton.icon(
-                          icon: const Icon(Icons.receipt_long_rounded, size: 15),
+                          icon: const Icon(
+                            Icons.receipt_long_rounded,
+                            size: 15,
+                          ),
                           label: const Text('RECEIPT'),
                           style: TextButton.styleFrom(
                             foregroundColor: const Color(0xFFD4AF37),
                             visualDensity: VisualDensity.compact,
                           ),
-                          onPressed: () => PaymentReceiptDialog.showBooking(context, pass: pass),
+                          onPressed: () => PaymentReceiptDialog.showBooking(
+                            context,
+                            pass: pass,
+                          ),
                         ),
                         SizedBox(width: 4.w),
                         TextButton.icon(
@@ -227,7 +304,8 @@ class _BookingsHistoryScreenState extends State<BookingsHistoryScreen> with Sing
                             foregroundColor: AppColors.primary,
                             visualDensity: VisualDensity.compact,
                           ),
-                          onPressed: () => Get.to(() => DigitalPassScreen(pass: pass)),
+                          onPressed: () =>
+                              Get.to(() => DigitalPassScreen(pass: pass)),
                         ),
                       ],
                     ),

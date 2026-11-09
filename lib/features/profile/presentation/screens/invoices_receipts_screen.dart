@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import '../../../../core/services/pdf_receipt_service.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../booking/data/models/booking_pass_model.dart';
 import '../../../booking/data/services/booking_service.dart';
@@ -465,20 +466,91 @@ class _InvoicesReceiptsScreenState extends State<InvoicesReceiptsScreen> {
                 SizedBox(width: 10.w),
                 IconButton(
                   icon: Icon(Icons.download_rounded, color: const Color(0xFF9E7B1A), size: 22.sp),
-                  tooltip: 'Download Invoice',
-                  onPressed: () {
-                    Get.snackbar(
-                      'Invoice Downloaded',
-                      'Tax invoice ${item.receiptNumber} has been saved to your device.',
-                      snackPosition: SnackPosition.BOTTOM,
-                      backgroundColor: Colors.white,
-                      colorText: darkText,
-                      borderColor: const Color(0xFF10B981),
-                      borderWidth: 1.2,
-                      margin: const EdgeInsets.all(16),
-                      borderRadius: 14,
-                      icon: const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981)),
-                    );
+                  tooltip: 'Download Invoice PDF',
+                  onPressed: () async {
+                    try {
+                      if (item.type == 'Booking' && item.bookingPass != null) {
+                        final p = item.bookingPass!;
+                        final ref = p.bookingReference.isNotEmpty ? p.bookingReference : p.id;
+                        final rcpNo = 'RCP-${ref.replaceAll('-', '').toUpperCase()}';
+                        await PdfReceiptService.downloadOrShareReceipt(
+                          receiptNumber: rcpNo,
+                          receiptType: 'Booking',
+                          title: '${p.sportName} - ${p.courtName}',
+                          sportName: p.sportName,
+                          schedule: '${p.dateText} • ${p.timeWindow}',
+                          customerName: (p.playerName != null && p.playerName!.isNotEmpty) ? p.playerName! : 'Academy Player',
+                          dateText: p.dateText,
+                          totalAmount: p.totalAmount.round(),
+                          baseAmount: p.amount.round(),
+                          taxAmount: p.taxAmount.round(),
+                          status: p.status.toUpperCase() == 'CONFIRMED' ? 'PAID' : p.status.toUpperCase(),
+                          razorpayPaymentId: p.razorpayPaymentId ?? 'pay_rzp_${ref.replaceAll('-', '_')}',
+                          razorpayOrderId: p.razorpayOrderId,
+                          notes: 'Court Reservation PIN: ${p.accessPin}',
+                        );
+                      } else if (item.type == 'Fee' && item.feeItem != null) {
+                        final f = item.feeItem!;
+                        await PdfReceiptService.downloadOrShareReceipt(
+                          receiptNumber: f.receiptNumber,
+                          receiptType: 'Fee',
+                          title: f.title,
+                          sportName: f.sportName ?? 'Badminton',
+                          schedule: f.formattedPeriod,
+                          customerName: f.studentName ?? 'Academy Trainee',
+                          customerPhone: f.studentPhone ?? '',
+                          dateText: f.paidAt ?? f.dueDate,
+                          totalAmount: f.paidAmount > 0 ? f.paidAmount : f.amount,
+                          baseAmount: f.baseFee > 0 ? f.baseFee : f.amount,
+                          discountAmount: f.discountAmount,
+                          status: f.status.toUpperCase(),
+                          razorpayPaymentId: f.razorpayPaymentId ?? 'pay_live_settled',
+                          razorpayOrderId: f.razorpayOrderId,
+                          notes: f.notes ?? 'Monthly Coaching Academy Subscription',
+                        );
+                      } else {
+                        await PdfReceiptService.downloadOrShareReceipt(
+                          receiptNumber: item.receiptNumber,
+                          receiptType: 'Membership',
+                          title: item.title,
+                          sportName: 'All Sports Access',
+                          schedule: item.subtitle,
+                          customerName: 'Academy Member',
+                          dateText: item.dateText,
+                          totalAmount: item.amount,
+                          baseAmount: item.amount,
+                          status: item.status,
+                          razorpayPaymentId: item.paymentId,
+                          notes: 'VIP Academy Facility Pass',
+                        );
+                      }
+
+                      Get.snackbar(
+                        'Invoice Saved & Shared',
+                        'Tax invoice ${item.receiptNumber} generated successfully.',
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: Colors.white,
+                        colorText: darkText,
+                        borderColor: const Color(0xFF10B981),
+                        borderWidth: 1.2,
+                        margin: const EdgeInsets.all(16),
+                        borderRadius: 14,
+                        icon: const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981)),
+                      );
+                    } catch (e) {
+                      Get.snackbar(
+                        'Download Error',
+                        'Failed to generate invoice PDF: $e',
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: Colors.white,
+                        colorText: const Color(0xFFEF4444),
+                        borderColor: const Color(0xFFEF4444),
+                        borderWidth: 1.2,
+                        margin: const EdgeInsets.all(16),
+                        borderRadius: 14,
+                        icon: const Icon(Icons.error_outline_rounded, color: Color(0xFFEF4444)),
+                      );
+                    }
                   },
                 ),
               ],
@@ -517,3 +589,4 @@ class _UnifiedReceiptItem {
     this.feeItem,
   });
 }
+

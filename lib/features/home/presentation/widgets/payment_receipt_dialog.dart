@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:mobile_app/core/services/pdf_receipt_service.dart';
 import 'package:mobile_app/features/booking/data/models/booking_pass_model.dart';
 import '../controllers/home_controller.dart';
 
@@ -9,7 +10,7 @@ import '../controllers/home_controller.dart';
 /// 1. Booking Payments (court reservations & slot passes)
 /// 2. Fee Payments (academy student monthly fees)
 /// 3. Member Fees (VIP membership subscriptions & packages)
-class PaymentReceiptDialog extends StatelessWidget {
+class PaymentReceiptDialog extends StatefulWidget {
   final String receiptNumber;
   final String receiptType; // 'Booking', 'Fee', or 'Membership'
   final String title;
@@ -210,16 +211,121 @@ class PaymentReceiptDialog extends StatelessWidget {
   }
 
   @override
+  State<PaymentReceiptDialog> createState() => _PaymentReceiptDialogState();
+}
+
+class _PaymentReceiptDialogState extends State<PaymentReceiptDialog> {
+  bool _isDownloading = false;
+  bool _isPrinting = false;
+
+  Future<void> _handleDownload() async {
+    setState(() => _isDownloading = true);
+    try {
+      final path = await PdfReceiptService.downloadOrShareReceipt(
+        receiptNumber: widget.receiptNumber,
+        receiptType: widget.receiptType,
+        title: widget.title,
+        sportName: widget.sportName,
+        schedule: widget.schedule,
+        customerName: widget.customerName,
+        customerPhone: widget.customerPhone,
+        dateText: widget.dateText,
+        totalAmount: widget.totalAmount,
+        baseAmount: widget.baseAmount,
+        discountAmount: widget.discountAmount,
+        taxAmount: widget.taxAmount,
+        status: widget.status,
+        razorpayPaymentId: widget.razorpayPaymentId,
+        razorpayOrderId: widget.razorpayOrderId,
+        notes: widget.notes,
+      );
+
+      Get.snackbar(
+        'Invoice Saved',
+        path.isNotEmpty
+            ? 'PDF saved to storage and opened for sharing: ${widget.receiptNumber}'
+            : 'PDF invoice ${widget.receiptNumber} ready and saved.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.white,
+        colorText: const Color(0xFF0F172A),
+        borderColor: const Color(0xFF10B981),
+        borderWidth: 1.2,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 14,
+        icon: const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981)),
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Download Error',
+        'Could not generate receipt PDF: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.white,
+        colorText: const Color(0xFFEF4444),
+        borderColor: const Color(0xFFEF4444),
+        borderWidth: 1.2,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 14,
+        icon: const Icon(Icons.error_outline_rounded, color: Color(0xFFEF4444)),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isDownloading = false);
+      }
+    }
+  }
+
+  Future<void> _handlePrint() async {
+    setState(() => _isPrinting = true);
+    try {
+      await PdfReceiptService.layoutPrintReceipt(
+        receiptNumber: widget.receiptNumber,
+        receiptType: widget.receiptType,
+        title: widget.title,
+        sportName: widget.sportName,
+        schedule: widget.schedule,
+        customerName: widget.customerName,
+        customerPhone: widget.customerPhone,
+        dateText: widget.dateText,
+        totalAmount: widget.totalAmount,
+        baseAmount: widget.baseAmount,
+        discountAmount: widget.discountAmount,
+        taxAmount: widget.taxAmount,
+        status: widget.status,
+        razorpayPaymentId: widget.razorpayPaymentId,
+        razorpayOrderId: widget.razorpayOrderId,
+        notes: widget.notes,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Print Error',
+        'Could not launch print layout: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.white,
+        colorText: const Color(0xFFEF4444),
+        borderColor: const Color(0xFFEF4444),
+        borderWidth: 1.2,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 14,
+        icon: const Icon(Icons.error_outline_rounded, color: Color(0xFFEF4444)),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isPrinting = false);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     Color typeColor = const Color(0xFF10B981); // Emerald
     IconData typeIcon = Icons.check_circle_rounded;
     String typeLabel = 'TAX INVOICE';
 
-    if (receiptType == 'Booking') {
+    if (widget.receiptType == 'Booking') {
       typeColor = const Color(0xFFD4AF37); // Gold
       typeIcon = Icons.sports_tennis_rounded;
       typeLabel = 'COURT BOOKING INVOICE';
-    } else if (receiptType == 'Membership') {
+    } else if (widget.receiptType == 'Membership') {
       typeColor = const Color(0xFF8B5CF6); // Purple
       typeIcon = Icons.card_membership_rounded;
       typeLabel = 'MEMBERSHIP INVOICE';
@@ -295,6 +401,20 @@ class PaymentReceiptDialog extends StatelessWidget {
                     ),
                   ),
                   IconButton(
+                    icon: _isPrinting
+                        ? SizedBox(
+                            width: 18.sp,
+                            height: 18.sp,
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Icon(Icons.print_rounded, color: Colors.white),
+                    tooltip: 'Print / Save PDF',
+                    onPressed: _isPrinting ? null : _handlePrint,
+                  ),
+                  IconButton(
                     icon: const Icon(Icons.close_rounded, color: Colors.white),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
@@ -328,7 +448,7 @@ class PaymentReceiptDialog extends StatelessWidget {
                             ),
                             SizedBox(height: 2.h),
                             Text(
-                              receiptNumber,
+                              widget.receiptNumber,
                               style: TextStyle(
                                 fontFamily: 'Nunito',
                                 fontSize: 13.sp,
@@ -353,7 +473,7 @@ class PaymentReceiptDialog extends StatelessWidget {
                             ),
                             SizedBox(height: 2.h),
                             Text(
-                              dateText.isNotEmpty ? dateText : 'Confirmed',
+                              widget.dateText.isNotEmpty ? widget.dateText : 'Confirmed',
                               style: TextStyle(
                                 fontFamily: 'Nunito',
                                 fontSize: 12.sp,
@@ -372,9 +492,9 @@ class PaymentReceiptDialog extends StatelessWidget {
 
                     // Customer / Student / Member Details
                     Text(
-                      receiptType == 'Fee'
+                      widget.receiptType == 'Fee'
                           ? 'STUDENT / TRAINEE'
-                          : (receiptType == 'Membership' ? 'MEMBER DETAILS' : 'BOOKED BY'),
+                          : (widget.receiptType == 'Membership' ? 'MEMBER DETAILS' : 'BOOKED BY'),
                       style: TextStyle(
                         fontFamily: 'Nunito',
                         fontSize: 10.sp,
@@ -390,7 +510,7 @@ class PaymentReceiptDialog extends StatelessWidget {
                           radius: 16.r,
                           backgroundColor: const Color(0xFFFFFDF5),
                           child: Text(
-                            customerName.isNotEmpty ? customerName[0].toUpperCase() : 'U',
+                            widget.customerName.isNotEmpty ? widget.customerName[0].toUpperCase() : 'U',
                             style: TextStyle(
                               fontFamily: 'Nunito',
                               color: const Color(0xFF9E7B1A),
@@ -405,7 +525,7 @@ class PaymentReceiptDialog extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                customerName,
+                                widget.customerName,
                                 style: TextStyle(
                                   fontFamily: 'Nunito',
                                   fontSize: 14.sp,
@@ -413,9 +533,9 @@ class PaymentReceiptDialog extends StatelessWidget {
                                   color: const Color(0xFF0F172A),
                                 ),
                               ),
-                              if (customerPhone.isNotEmpty)
+                              if (widget.customerPhone.isNotEmpty)
                                 Text(
-                                  customerPhone,
+                                  widget.customerPhone,
                                   style: TextStyle(
                                     fontFamily: 'Nunito',
                                     fontSize: 12.sp,
@@ -433,7 +553,7 @@ class PaymentReceiptDialog extends StatelessWidget {
                             border: Border.all(color: const Color(0x60D4AF37), width: 1),
                           ),
                           child: Text(
-                            receiptType.toUpperCase(),
+                            widget.receiptType.toUpperCase(),
                             style: TextStyle(
                               fontFamily: 'Nunito',
                               fontSize: 10.sp,
@@ -462,17 +582,17 @@ class PaymentReceiptDialog extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 8.h),
-                    _buildRow('Description', title),
-                    if (sportName != null && sportName!.isNotEmpty)
-                      _buildRow('Sport Category', sportName!),
-                    if (schedule != null && schedule!.isNotEmpty)
-                      _buildRow(receiptType == 'Fee' ? 'Billing Period' : 'Session Schedule', schedule!),
+                    _buildRow('Description', widget.title),
+                    if (widget.sportName != null && widget.sportName!.isNotEmpty)
+                      _buildRow('Sport Category', widget.sportName!),
+                    if (widget.schedule != null && widget.schedule!.isNotEmpty)
+                      _buildRow(widget.receiptType == 'Fee' ? 'Billing Period' : 'Session Schedule', widget.schedule!),
                     _buildRow('Payment Gateway', 'Razorpay UPI / Online Gateway'),
-                    _buildRow('Payment ID', razorpayPaymentId, isMono: true),
-                    if (razorpayOrderId != null && razorpayOrderId!.isNotEmpty && razorpayOrderId != 'null')
-                      _buildRow('Order ID', razorpayOrderId!, isMono: true),
-                    if (notes != null && notes!.isNotEmpty)
-                      _buildRow('Reference Notes', notes!),
+                    _buildRow('Payment ID', widget.razorpayPaymentId, isMono: true),
+                    if (widget.razorpayOrderId != null && widget.razorpayOrderId!.isNotEmpty && widget.razorpayOrderId != 'null')
+                      _buildRow('Order ID', widget.razorpayOrderId!, isMono: true),
+                    if (widget.notes != null && widget.notes!.isNotEmpty)
+                      _buildRow('Reference Notes', widget.notes!),
 
                     SizedBox(height: 14.h),
                     const Divider(color: Color(0xFFE2E8F0)),
@@ -490,11 +610,11 @@ class PaymentReceiptDialog extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 8.h),
-                    _buildRow('Base Amount', '₹$baseAmount'),
-                    if (taxAmount > 0)
-                      _buildRow('Taxes & GST (Included)', '₹$taxAmount'),
-                    if (discountAmount > 0)
-                      _buildRow('Special Discount / Sibling', '-₹$discountAmount', isDiscount: true),
+                    _buildRow('Base Amount', '₹${widget.baseAmount}'),
+                    if (widget.taxAmount > 0)
+                      _buildRow('Taxes & GST (Included)', '₹${widget.taxAmount}'),
+                    if (widget.discountAmount > 0)
+                      _buildRow('Special Discount / Sibling', '-₹${widget.discountAmount}', isDiscount: true),
                     SizedBox(height: 8.h),
 
                     // Total Amount Banner
@@ -527,7 +647,7 @@ class PaymentReceiptDialog extends StatelessWidget {
                                   border: Border.all(color: const Color(0xFFA7F3D0)),
                                 ),
                                 child: Text(
-                                  status.toUpperCase(),
+                                  widget.status.toUpperCase(),
                                   style: TextStyle(
                                     fontFamily: 'Nunito',
                                     fontSize: 11.sp,
@@ -538,7 +658,7 @@ class PaymentReceiptDialog extends StatelessWidget {
                               ),
                               SizedBox(width: 8.w),
                               Text(
-                                '₹$totalAmount',
+                                '₹${widget.totalAmount}',
                                 style: TextStyle(
                                   fontFamily: 'Nunito',
                                   fontSize: 19.sp,
@@ -587,9 +707,18 @@ class PaymentReceiptDialog extends StatelessWidget {
                         side: const BorderSide(color: Color(0xFFD4AF37)),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                       ),
-                      icon: Icon(Icons.download_rounded, size: 18.sp, color: const Color(0xFF9E7B1A)),
+                      icon: _isDownloading
+                          ? SizedBox(
+                              width: 16.sp,
+                              height: 16.sp,
+                              child: const CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Color(0xFF9E7B1A),
+                              ),
+                            )
+                          : Icon(Icons.download_rounded, size: 18.sp, color: const Color(0xFF9E7B1A)),
                       label: Text(
-                        'Download PDF',
+                        _isDownloading ? 'Downloading...' : 'Download PDF',
                         style: TextStyle(
                           fontFamily: 'Nunito',
                           fontSize: 13.sp,
@@ -597,20 +726,7 @@ class PaymentReceiptDialog extends StatelessWidget {
                           color: const Color(0xFF0F172A),
                         ),
                       ),
-                      onPressed: () {
-                        Get.snackbar(
-                          'Invoice Saved',
-                          'PDF invoice $receiptNumber has been generated and saved to your device.',
-                          snackPosition: SnackPosition.BOTTOM,
-                          backgroundColor: Colors.white,
-                          colorText: const Color(0xFF0F172A),
-                          borderColor: const Color(0xFF10B981),
-                          borderWidth: 1.2,
-                          margin: const EdgeInsets.all(16),
-                          borderRadius: 14,
-                          icon: const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981)),
-                        );
-                      },
+                      onPressed: _isDownloading ? null : _handleDownload,
                     ),
                   ),
                   SizedBox(width: 12.w),
