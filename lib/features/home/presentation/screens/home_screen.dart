@@ -134,7 +134,7 @@ class HomeScreen extends StatelessWidget {
                   SizedBox(height: 24.h),
 
                   // Coaching Performance Report & Evaluation Scorecard
-                  _buildCoachingReportSection(context),
+                  _buildCoachingReportSection(controller, context),
                   SizedBox(height: 24.h),
 
                   _buildMonthlyFeesSection(controller, context),
@@ -865,7 +865,7 @@ class HomeScreen extends StatelessWidget {
   // 4B. COACHING PERFORMANCE REPORT SECTION
   // ===========================================================================
 
-  Widget _buildCoachingReportSection(BuildContext context) {
+  Widget _buildCoachingReportSection(HomeController controller, BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -882,7 +882,10 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             GestureDetector(
-              onTap: () => Get.toNamed(AppRoutes.coachingReport),
+              onTap: () => Get.toNamed(
+                AppRoutes.coachingReport,
+                arguments: {'studentName': controller.userName.value},
+              ),
               child: Row(
                 children: [
                   Text(
@@ -1052,7 +1055,10 @@ class HomeScreen extends StatelessWidget {
                   color: Colors.transparent,
                   child: InkWell(
                     borderRadius: BorderRadius.circular(14.r),
-                    onTap: () => Get.toNamed(AppRoutes.coachingReport),
+                    onTap: () => Get.toNamed(
+                      AppRoutes.coachingReport,
+                      arguments: {'studentName': controller.userName.value},
+                    ),
                     child: Center(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,

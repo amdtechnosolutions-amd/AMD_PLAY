@@ -823,7 +823,10 @@ class ProfileScreen extends StatelessWidget {
                     icon: Icons.assessment_outlined,
                     title: 'Coaching Performance Report',
                     subtitle: 'Skill radar, 24-parameter metrics & scorecards',
-                    onTap: () => Get.toNamed(AppRoutes.coachingReport),
+                    onTap: () => Get.toNamed(
+                      AppRoutes.coachingReport,
+                      arguments: {'studentName': controller.fullName.value},
+                    ),
                   ),
                   const Divider(color: Color(0x1AD4AF37), height: 1),
                   _buildActionTile(

@@ -5,6 +5,7 @@ import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/widgets/empty_state.dart';
+import '../../../home/presentation/controllers/home_controller.dart';
 
 /// Live Coaching Batches Screen powered by GET /api/v1/coaching/batches.
 /// Strictly displays live server data with pure white background and gold styling.
@@ -82,7 +83,16 @@ class _CoachingBatchesScreenState extends State<CoachingBatchesScreen> {
           ),
           IconButton(
             icon: Icon(Icons.assessment_outlined, size: 22.sp, color: const Color(0xFFD4AF37)),
-            onPressed: () => Get.toNamed(AppRoutes.coachingReport),
+            onPressed: () {
+              String? name;
+              if (Get.isRegistered<HomeController>()) {
+                name = Get.find<HomeController>().userName.value;
+              }
+              Get.toNamed(
+                AppRoutes.coachingReport,
+                arguments: name != null && name.isNotEmpty ? {'studentName': name} : null,
+              );
+            },
             tooltip: 'Performance Report',
           ),
           IconButton(

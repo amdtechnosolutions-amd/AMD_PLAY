@@ -13,6 +13,7 @@ class EvaluationSummary {
   final String coachName;
   final String batchName;
   final String sportName;
+  final String studentName;
 
   const EvaluationSummary({
     required this.overallScore,
@@ -26,6 +27,7 @@ class EvaluationSummary {
     required this.coachName,
     required this.batchName,
     required this.sportName,
+    this.studentName = '',
   });
 
   factory EvaluationSummary.fromJson(Map<String, dynamic> json) {
@@ -45,6 +47,10 @@ class EvaluationSummary {
       coachName: json['coachName']?.toString() ?? (json['coachId'] is Map ? json['coachId']['name']?.toString() : null) ?? 'Head Coach',
       batchName: json['batchName']?.toString() ?? (json['batchId'] is Map ? json['batchId']['name']?.toString() : null) ?? 'Academy Batch',
       sportName: json['sportName']?.toString() ?? (json['sportId'] is Map ? json['sportId']['name']?.toString() : null) ?? 'Badminton',
+      studentName: json['studentName']?.toString() ??
+          (json['student'] is Map ? (json['student']['name'] ?? json['student']['fullName'])?.toString() : null) ??
+          (json['studentId'] is Map ? (json['studentId']['name'] ?? json['studentId']['fullName'])?.toString() : null) ??
+          '',
     );
   }
 }
@@ -370,6 +376,7 @@ class StudentEvaluationReport {
   final List<ParameterCardModel> parameterCards;
   final List<EvaluationTrendItem> trend;
   final Map<String, dynamic> latestEvaluation;
+  final String studentName;
 
   const StudentEvaluationReport({
     required this.summary,
@@ -377,6 +384,7 @@ class StudentEvaluationReport {
     required this.parameterCards,
     required this.trend,
     required this.latestEvaluation,
+    this.studentName = '',
   });
 
   factory StudentEvaluationReport.fromJson(Map<String, dynamic> json) {
@@ -486,12 +494,20 @@ class StudentEvaluationReport {
       }
     }
 
+    final resolvedStudentName = json['studentName']?.toString() ??
+        (json['student'] is Map ? (json['student']['name'] ?? json['student']['fullName'])?.toString() : null) ??
+        (json['studentId'] is Map ? (json['studentId']['name'] ?? json['studentId']['fullName'])?.toString() : null) ??
+        (latest['student'] is Map ? (latest['student']['name'] ?? latest['student']['fullName'])?.toString() : null) ??
+        (latest['studentName']?.toString()) ??
+        summary.studentName;
+
     return StudentEvaluationReport(
       summary: summary,
       radarData: radarList,
       parameterCards: cards,
       trend: trendItems,
       latestEvaluation: latest,
+      studentName: resolvedStudentName,
     );
   }
 }

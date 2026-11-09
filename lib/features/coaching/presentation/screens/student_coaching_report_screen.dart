@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../../../core/widgets/empty_state.dart';
+import '../../../home/presentation/controllers/home_controller.dart';
 import '../../data/models/student_evaluation_model.dart';
 import '../controllers/student_evaluation_controller.dart';
 import '../widgets/evaluation_radar_chart.dart';
@@ -10,7 +11,7 @@ import '../widgets/parameter_card_widget.dart';
 
 /// Screen displaying Student Coaching Performance Report & 24-Parameter Scorecard
 /// Formatted to match the official Academy Report UI:
-/// - Academy Title Header: GIRISH BADMINTON ACADEMY
+/// - Dynamic Student Header with Student Name & Coaching Batch
 /// - Categorized parameter lists: Physical :, mental :, skill :, attitude :
 /// - Exact 24 parameters with custom illustrations, descriptions & bold score
 /// - Collapsible Radar Chart, historical progress trend & coach remarks
@@ -145,8 +146,8 @@ class _StudentCoachingReportScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. Academy Header: GIRISH BADMINTON ACADEMY
-                _buildAcademyHeader(summary, controller),
+                // 1. Dynamic Student Profile Header
+                _buildStudentHeader(summary, controller),
                 SizedBox(height: 12.h),
 
                 // 2. Quick Score Bar & Toggle for Spider Radar / Trend Charts
@@ -189,84 +190,122 @@ class _StudentCoachingReportScreenState
   }
 
   // ==========================================
-  // 1. ACADEMY HEADER
+  // 1. DYNAMIC STUDENT HEADER
   // ==========================================
 
-  Widget _buildAcademyHeader(
+  Widget _buildStudentHeader(
       EvaluationSummary summary, StudentEvaluationController controller) {
+    String studentName = controller.targetStudentName.value.trim();
+    if (studentName.isEmpty && summary.studentName.isNotEmpty) {
+      studentName = summary.studentName.trim();
+    }
+    if (studentName.isEmpty && controller.report.value?.studentName.isNotEmpty == true) {
+      studentName = controller.report.value!.studentName.trim();
+    }
+    if (studentName.isEmpty && Get.isRegistered<HomeController>()) {
+      final hName = Get.find<HomeController>().userName.value.trim();
+      if (hName.isNotEmpty &&
+          hName.toLowerCase() != 'player' &&
+          hName.toLowerCase() != 'coach') {
+        studentName = hName;
+      }
+    }
+    if (studentName.isEmpty) {
+      studentName = 'Academy Trainee';
+    }
+
+    final initial = studentName.isNotEmpty ? studentName[0].toUpperCase() : 'S';
+    final sportLabel = summary.sportName.isNotEmpty ? summary.sportName.toUpperCase() : 'BADMINTON';
+    final batchLabel = summary.batchName.isNotEmpty ? summary.batchName : 'Student Portal Report';
+
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Circular Academy Logo
+        // Golden Student Initial Crest / Avatar
         Container(
-          width: 44.h,
-          height: 44.h,
+          width: 48.w,
+          height: 48.w,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.white,
+            color: const Color(0xFFFFFDF5),
             border: Border.all(
               color: const Color(0xFFD4AF37),
-              width: 1.5,
+              width: 1.8,
             ),
             boxShadow: const [
               BoxShadow(
-                color: Color(0x18000000),
-                blurRadius: 6,
+                color: Color(0x18D4AF37),
+                blurRadius: 8,
                 offset: Offset(0, 2),
               ),
             ],
           ),
-          child: ClipOval(
-            child: Image.asset(
-              'assets/logo/logo.png',
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => const Icon(
-                Icons.sports_tennis_rounded,
-                color: Color(0xFFD4AF37),
+          child: Center(
+            child: Text(
+              initial,
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w900,
+                color: const Color(0xFF9E7B1A),
               ),
             ),
           ),
         ),
         SizedBox(width: 12.w),
 
-        // Academy Title
+        // Dynamic Student Name & Batch Tag
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'GIRISH',
+                studentName.toUpperCase(),
                 style: TextStyle(
                   fontFamily: 'Nunito',
-                  fontSize: 16.sp,
+                  fontSize: 16.5.sp,
                   fontWeight: FontWeight.w900,
                   color: const Color(0xFF0F172A),
-                  letterSpacing: 0.8,
-                  height: 1.1,
+                  letterSpacing: 0.6,
+                  height: 1.15,
                 ),
               ),
-              Text(
-                'BADMINTON ACADEMY',
-                style: TextStyle(
-                  fontFamily: 'Nunito',
-                  fontSize: 13.5.sp,
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFF0F172A),
-                  letterSpacing: 0.5,
-                  height: 1.2,
-                ),
-              ),
-              if (controller.targetStudentName.value.isNotEmpty) ...[
-                SizedBox(height: 2.h),
-                Text(
-                  'Student: ${controller.targetStudentName.value}',
-                  style: TextStyle(
-                    fontFamily: 'Nunito',
-                    fontSize: 11.5.sp,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF9E7B1A),
+              SizedBox(height: 3.h),
+              Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFFDF5),
+                      borderRadius: BorderRadius.circular(6.r),
+                      border: Border.all(color: const Color(0x60D4AF37), width: 0.9),
+                    ),
+                    child: Text(
+                      sportLabel,
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 9.5.sp,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF9E7B1A),
+                        letterSpacing: 0.4,
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Text(
+                      batchLabel,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF64748B),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
