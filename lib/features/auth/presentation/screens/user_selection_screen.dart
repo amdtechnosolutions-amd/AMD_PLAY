@@ -318,39 +318,46 @@ class UserSelectionScreen extends GetView<AuthController> {
         ),
         SizedBox(height: 14.h),
 
-        // 2. STUDENTS (ACADEMY PORTAL)
-        _buildRoleCard(
-          profile: MembershipProfile.parents,
-          roleName: 'Student',
-          title: 'Students',
-          badgeText: 'STUDENT PORTAL',
-          subtitle: 'Student training batches, attendance, fees & court booking',
-          icon: Icons.school_rounded,
-          isFeatured: false,
-          iconGradient: const LinearGradient(
-            colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+        // 2 & 3. STUDENTS & MEMBERS (IN A ROW)
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _buildCompactRoleCard(
+                  profile: MembershipProfile.parents,
+                  roleName: 'Student',
+                  title: 'Students',
+                  badgeText: 'STUDENT PORTAL',
+                  subtitle: 'Training batches, attendance, fees & booking',
+                  icon: Icons.school_rounded,
+                  iconGradient: const LinearGradient(
+                    colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  iconColor: goldAccent,
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _buildCompactRoleCard(
+                  profile: MembershipProfile.members,
+                  roleName: 'Member',
+                  title: 'Members',
+                  badgeText: '★ VIP ACCESS',
+                  subtitle: 'VIP Lounge, court reservations & lockers',
+                  icon: Icons.workspace_premium_rounded,
+                  iconGradient: const LinearGradient(
+                    colors: [Color(0xFF0F172A), Color(0xFF334155)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  iconColor: goldAccent,
+                ),
+              ),
+            ],
           ),
-          iconColor: goldAccent,
-        ),
-        SizedBox(height: 14.h),
-
-        // 3. MEMBERS (VIP ACCESS)
-        _buildRoleCard(
-          profile: MembershipProfile.members,
-          roleName: 'Member',
-          title: 'Members',
-          badgeText: '★ VIP ACCESS',
-          subtitle: 'VIP Lounge, court reservations & locker access',
-          icon: Icons.workspace_premium_rounded,
-          isFeatured: false,
-          iconGradient: const LinearGradient(
-            colors: [Color(0xFF0F172A), Color(0xFF334155)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          iconColor: goldAccent,
         ),
         SizedBox(height: 14.h),
 
@@ -371,6 +378,164 @@ class UserSelectionScreen extends GetView<AuthController> {
           iconColor: goldAccent,
         ),
       ],
+    );
+  }
+
+  Widget _buildCompactRoleCard({
+    required MembershipProfile profile,
+    required String roleName,
+    required String title,
+    required String badgeText,
+    required String subtitle,
+    required IconData icon,
+    required LinearGradient iconGradient,
+    required Color iconColor,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          controller.selectRole(roleName);
+          controller.selectProfile(profile);
+          Get.toNamed(AppRoutes.login);
+        },
+        borderRadius: BorderRadius.circular(18.r),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Colors.white, Color(0xFFFBFBFD)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(18.r),
+            border: Border.all(
+              color: const Color(0x40D4AF37),
+              width: 1.1,
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x28D4AF37),
+                blurRadius: 16,
+                spreadRadius: 0,
+                offset: Offset(0, 5),
+              ),
+              BoxShadow(
+                color: Color(0x0C000000),
+                blurRadius: 6,
+                spreadRadius: -1,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Top Bar inside Card: Icon + Arrow Action
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: 42.h,
+                    height: 42.h,
+                    decoration: BoxDecoration(
+                      gradient: iconGradient,
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(
+                        color: const Color(0x40D4AF37),
+                        width: 1,
+                      ),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x180F172A),
+                          blurRadius: 8,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Icon(icon, size: 22.sp, color: iconColor),
+                  ),
+                  Container(
+                    width: 28.h,
+                    height: 28.h,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8FAFC),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color(0x33D4AF37),
+                        width: 1,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 11.sp,
+                      color: darkText,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 12.h),
+
+              // Title and Badge
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w800,
+                      color: darkText,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 6.w,
+                      vertical: 2.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0x1FD4AF37),
+                      borderRadius: BorderRadius.circular(6.r),
+                      border: Border.all(
+                        color: const Color(0x80D4AF37),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Text(
+                      badgeText,
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 8.5.sp,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF9E7B1A),
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8.h),
+
+              // Subtitle Description
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontFamily: 'Nunito',
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w400,
+                  color: slateText,
+                  height: 1.3,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
