@@ -352,6 +352,24 @@ class UserSelectionScreen extends GetView<AuthController> {
           ),
           iconColor: goldAccent,
         ),
+        SizedBox(height: 14.h),
+
+        // 4. COACHES (STAFF PORTAL)
+        _buildRoleCard(
+          profile: MembershipProfile.coach,
+          roleName: 'Coach',
+          title: 'Coaches',
+          badgeText: 'COACH PORTAL',
+          subtitle: 'Manage training batches, player attendance & sessions',
+          icon: Icons.sports_rounded,
+          isFeatured: false,
+          iconGradient: const LinearGradient(
+            colors: [Color(0xFF0F172A), Color(0xFFD4AF37)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          iconColor: goldAccent,
+        ),
       ],
     );
   }

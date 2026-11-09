@@ -124,9 +124,18 @@ class HomeController extends GetxController {
     _storage.saveUserName(clean);
   }
 
-  /// Check whether current session is Pay & Play (customer/guest) or Academy Student
+  /// Check whether current session is a Coach / Trainer
+  bool get isCoach {
+    final r = userRole.value.toLowerCase().trim();
+    return r == 'coach' || r == 'trainer';
+  }
+
+  /// Check whether current session is Pay & Play (customer/guest) or Academy Student/Coach
   bool get isPayAndPlay {
     final r = userRole.value.toLowerCase().trim();
+    if (r == 'coach' || r == 'trainer') {
+      return false;
+    }
     if (r == 'customer' || r == 'guest' || r == 'pay_and_play' || r == 'booking') {
       return true;
     }
@@ -354,7 +363,10 @@ class HomeController extends GetxController {
 
     // 5. Default placeholder if still unassigned
     if (userName.value.isEmpty) {
-      if (isPayAndPlay) {
+      if (isCoach) {
+        userName.value = 'Coach';
+        greetingName.value = 'COACH';
+      } else if (isPayAndPlay) {
         userName.value = 'Player';
         greetingName.value = 'PLAYER';
       } else {

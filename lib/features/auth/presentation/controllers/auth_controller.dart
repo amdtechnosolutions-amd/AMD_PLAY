@@ -17,6 +17,7 @@ enum AuthMode {
 enum MembershipProfile {
   members,
   parents,
+  coach,
   booking,
 }
 
@@ -55,6 +56,8 @@ class AuthController extends GetxController {
       selectedProfile.value = MembershipProfile.members;
     } else if (role == 'Student') {
       selectedProfile.value = MembershipProfile.parents;
+    } else if (role == 'Coach') {
+      selectedProfile.value = MembershipProfile.coach;
     } else {
       selectedProfile.value = MembershipProfile.booking;
     }
@@ -112,11 +115,17 @@ class AuthController extends GetxController {
         : passwordController.text.trim();
 
     if (id.isEmpty) {
+      String hint = 'Please enter your account identifier or email.';
+      if (selectedRole.value == 'Student') {
+        hint = 'Please enter your Student Reg No, Mobile, or Email.';
+      } else if (selectedRole.value == 'Coach') {
+        hint = 'Please enter your Coach Email, Mobile, or Staff ID.';
+      } else if (selectedRole.value == 'Member') {
+        hint = 'Please enter your Member ID, Mobile, or Email.';
+      }
       Get.snackbar(
         'Missing Identifier',
-        selectedRole.value == 'Student'
-            ? 'Please enter your Student Reg No, Mobile, or Email.'
-            : 'Please enter your Member ID, Mobile, or Email.',
+        hint,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFFEE4E2),
         colorText: const Color(0xFF912018),
@@ -163,6 +172,31 @@ class AuthController extends GetxController {
             'password': pin,
           },
         );
+      } else if (roleLower == 'coach' || selectedProfile.value == MembershipProfile.coach) {
+        // Dedicated live Coach / Staff login endpoint
+        final isEmail = id.contains('@');
+        try {
+          response = await _apiClient.dio.post(
+            ApiEndpoints.login,
+            data: {
+              'email': id,
+              'password': pin,
+            },
+          );
+        } on DioException catch (_) {
+          // If identifier is not email or /auth/login fails, attempt member login route which handles any identifier
+          if (!isEmail) {
+            response = await _apiClient.dio.post(
+              ApiEndpoints.memberLogin,
+              data: {
+                'identifier': id,
+                'password': pin,
+              },
+            );
+          } else {
+            rethrow;
+          }
+        }
       } else {
         // Universal / Guest login endpoint
         response = await _apiClient.dio.post(
@@ -221,7 +255,8 @@ class AuthController extends GetxController {
     final firstName = user['firstName']?.toString() ?? '';
     final lastName = user['lastName']?.toString() ?? '';
     final fullName = (user['fullName']?.toString() ?? '$firstName $lastName').trim();
-    final displayName = fullName.isNotEmpty ? fullName : (user['regNo']?.toString() ?? 'Trainee');
+    final defaultTitle = role.toLowerCase() == 'coach' ? 'Coach' : 'Trainee';
+    final displayName = fullName.isNotEmpty ? fullName : (user['regNo']?.toString() ?? defaultTitle);
 
     await _storage.saveUserSession(
       accessToken: accessToken,

@@ -279,25 +279,35 @@ class LoginScreen extends GetView<AuthController> {
                   ),
                   SizedBox(height: 18.h),
 
-                  // Role Selector Tabs (Student vs Member)
+                  // Role Selector Tabs (Student vs Coach vs Member)
                   Obx(() {
                     final role = controller.selectedRole.value;
                     return Row(
                       children: [
                         Expanded(
                           child: _buildRoleTab(
-                            title: 'Student Portal',
-                            subtitle: 'Trainees & Batches',
+                            title: 'Student',
+                            subtitle: 'Trainees',
                             icon: Icons.school_rounded,
                             isSelected: role == 'Student',
                             onTap: () => controller.selectRole('Student'),
                           ),
                         ),
-                        SizedBox(width: 10.w),
+                        SizedBox(width: 8.w),
                         Expanded(
                           child: _buildRoleTab(
-                            title: 'Member Portal',
-                            subtitle: 'VIP & Passes',
+                            title: 'Coach',
+                            subtitle: 'Trainers',
+                            icon: Icons.sports_rounded,
+                            isSelected: role == 'Coach',
+                            onTap: () => controller.selectRole('Coach'),
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        Expanded(
+                          child: _buildRoleTab(
+                            title: 'Member',
+                            subtitle: 'VIP Passes',
                             icon: Icons.workspace_premium_rounded,
                             isSelected: role == 'Member',
                             onTap: () => controller.selectRole('Member'),
@@ -308,23 +318,47 @@ class LoginScreen extends GetView<AuthController> {
                   }),
                   SizedBox(height: 20.h),
 
-                  // User Id Field
-                  Text(
-                    'User ID / Reg. No.',
-                    style: TextStyle(
-                      fontFamily: 'Nunito',
-                      fontSize: 13.5.sp,
-                      fontWeight: FontWeight.w800,
-                      color: darkText,
-                    ),
-                  ),
-                  SizedBox(height: 6.h),
-                  _buildInputField(
-                    controller: controller.identifierController,
-                    hintText: 'Enter your ID, mobile or email',
-                    prefixIcon: Icons.person_outline_rounded,
-                    keyboardType: TextInputType.text,
-                  ),
+                  // Dynamic User Id / Email Field
+                  Obx(() {
+                    final role = controller.selectedRole.value;
+                    String label = 'User ID / Reg. No.';
+                    String hint = 'Enter your ID, mobile or email';
+                    IconData icon = Icons.person_outline_rounded;
+                    TextInputType kbType = TextInputType.text;
+
+                    if (role == 'Coach') {
+                      label = 'Coach Email / Staff ID';
+                      hint = 'Enter your coach email or staff ID';
+                      icon = Icons.sports_rounded;
+                      kbType = TextInputType.emailAddress;
+                    } else if (role == 'Member') {
+                      label = 'Member ID / Card No.';
+                      hint = 'Enter your member card ID or phone';
+                      icon = Icons.badge_outlined;
+                    }
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          label,
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 13.5.sp,
+                            fontWeight: FontWeight.w800,
+                            color: darkText,
+                          ),
+                        ),
+                        SizedBox(height: 6.h),
+                        _buildInputField(
+                          controller: controller.identifierController,
+                          hintText: hint,
+                          prefixIcon: icon,
+                          keyboardType: kbType,
+                        ),
+                      ],
+                    );
+                  }),
                   SizedBox(height: 14.h),
 
                   // Password Field
@@ -341,7 +375,7 @@ class LoginScreen extends GetView<AuthController> {
                   Obx(
                     () => _buildInputField(
                       controller: controller.pinController,
-                      hintText: 'Enter your password',
+                      hintText: 'Enter your account password',
                       prefixIcon: Icons.lock_outline_rounded,
                       obscureText: !controller.isPasswordVisible.value,
                       suffixWidget: GestureDetector(
@@ -437,7 +471,7 @@ class LoginScreen extends GetView<AuthController> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        'SIGN IN TO PORTAL',
+                                        'SIGN IN AS ${controller.selectedRole.value.toUpperCase()}',
                                         style: TextStyle(
                                           fontFamily: 'Nunito',
                                           fontSize: 14.sp,

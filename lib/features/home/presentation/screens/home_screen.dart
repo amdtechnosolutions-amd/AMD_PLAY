@@ -236,14 +236,19 @@ class HomeScreen extends StatelessWidget {
             child: Row(
               children: [
                 Icon(
-                  isPayAndPlay ? Icons.sports_tennis_rounded : Icons.calendar_today_outlined,
+                  controller.isCoach
+                      ? Icons.sports_rounded
+                      : (isPayAndPlay ? Icons.sports_tennis_rounded : Icons.calendar_today_outlined),
                   size: 13.sp,
                   color: const Color(0xFFD4AF37),
                 ),
                 SizedBox(width: 5.w),
                 Text(
-                  isPayAndPlay ? 'Booking' : 'Today',
-                  style: TextStyle(fontFamily: 'Nunito', 
+                  controller.isCoach
+                      ? 'Coach'
+                      : (isPayAndPlay ? 'Booking' : 'Today'),
+                  style: TextStyle(
+                    fontFamily: 'Nunito', 
                     fontSize: 12.5.sp,
                     fontWeight: FontWeight.w800,
                     color: const Color(0xFF9E7B1A),
