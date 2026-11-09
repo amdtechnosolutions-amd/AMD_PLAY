@@ -778,11 +778,7 @@ class ProfileScreen extends StatelessWidget {
               icon: Icons.receipt_long_outlined,
               title: 'Invoices & Payment Receipts',
               subtitle: 'Download receipts & settlement history',
-              onTap: () {
-                if (Get.isRegistered<MainNavController>()) {
-                  Get.find<MainNavController>().changeTab(homeCtrl.isPayAndPlay ? 2 : 3);
-                }
-              },
+              onTap: () => Get.toNamed(AppRoutes.invoices),
             ),
             Obx(() {
               if (homeCtrl.isCoach) {

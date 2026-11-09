@@ -26,6 +26,7 @@ import '../../features/coaching/presentation/screens/evaluate_student_screen.dar
 import '../../features/coaching/bindings/student_evaluation_binding.dart';
 import '../../features/coaching/bindings/coach_evaluation_binding.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/profile/presentation/screens/invoices_receipts_screen.dart';
 import 'app_routes.dart';
 
 /// Centralized GetX Page route map.
@@ -161,6 +162,11 @@ class AppPages {
     GetPage(
       name: AppRoutes.profile,
       page: () => const ProfileScreen(),
+      transition: Transition.rightToLeftWithFade,
+    ),
+    GetPage(
+      name: AppRoutes.invoices,
+      page: () => const InvoicesReceiptsScreen(),
       transition: Transition.rightToLeftWithFade,
     ),
   ];

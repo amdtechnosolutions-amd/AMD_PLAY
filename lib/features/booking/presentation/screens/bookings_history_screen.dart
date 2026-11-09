@@ -7,6 +7,7 @@ import '../../data/models/booking_pass_model.dart';
 import '../../data/services/booking_service.dart';
 import 'digital_pass_screen.dart';
 import 'court_booking_screen.dart';
+import '../../../home/presentation/widgets/payment_receipt_dialog.dart';
 
 class BookingsHistoryScreen extends StatefulWidget {
   const BookingsHistoryScreen({super.key});
@@ -206,11 +207,29 @@ class _BookingsHistoryScreenState extends State<BookingsHistoryScreen> with Sing
                       'Paid: ₹${pass.totalAmount.toInt()}',
                       style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                     ),
-                    TextButton.icon(
-                      icon: const Icon(Icons.qr_code_rounded, size: 16),
-                      label: const Text('VIEW ACCESS PASS'),
-                      style: TextButton.styleFrom(foregroundColor: AppColors.primary),
-                      onPressed: () => Get.to(() => DigitalPassScreen(pass: pass)),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextButton.icon(
+                          icon: const Icon(Icons.receipt_long_rounded, size: 15),
+                          label: const Text('RECEIPT'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: const Color(0xFFD4AF37),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          onPressed: () => PaymentReceiptDialog.showBooking(context, pass: pass),
+                        ),
+                        SizedBox(width: 4.w),
+                        TextButton.icon(
+                          icon: const Icon(Icons.qr_code_rounded, size: 15),
+                          label: const Text('PASS'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          onPressed: () => Get.to(() => DigitalPassScreen(pass: pass)),
+                        ),
+                      ],
                     ),
                   ],
                 ),

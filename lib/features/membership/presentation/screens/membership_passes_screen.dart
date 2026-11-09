@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../../home/presentation/controllers/home_controller.dart';
 import '../../../main_nav/presentation/controllers/main_nav_controller.dart';
+import '../../../booking/data/models/booking_pass_model.dart';
+import '../../../home/presentation/widgets/payment_receipt_dialog.dart';
 
 /// Screen displaying Academy Memberships & Season Passes.
 /// Strictly presents real data and empty states with zero mock/dummy plans.
@@ -62,7 +64,7 @@ class MembershipPassesScreen extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 10.h),
-                    _buildActiveBookingPassCard(activePass),
+                    _buildActiveBookingPassCard(context, activePass),
                     SizedBox(height: 24.h),
                   ],
                 );
@@ -80,7 +82,7 @@ class MembershipPassesScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActiveBookingPassCard(dynamic pass) {
+  Widget _buildActiveBookingPassCard(BuildContext context, dynamic pass) {
     final courtName = pass.courtName.isNotEmpty ? pass.courtName : 'Court Reservation';
     final sportName = pass.sportName.isNotEmpty ? pass.sportName : 'Academy Slot';
     final date = pass.dateText.isNotEmpty ? pass.dateText : 'Confirmed';
@@ -165,6 +167,34 @@ class MembershipPassesScreen extends StatelessWidget {
               fontWeight: FontWeight.w600,
               color: const Color(0xFF64748B),
             ),
+          ),
+          SizedBox(height: 12.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFFD4AF37), width: 1.1),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                ),
+                icon: const Icon(Icons.receipt_long_rounded, size: 14, color: Color(0xFF9E7B1A)),
+                label: Text(
+                  'VIEW INVOICE',
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF0F172A),
+                  ),
+                ),
+                onPressed: () {
+                  if (pass is BookingPassModel) {
+                    PaymentReceiptDialog.showBooking(context, pass: pass);
+                  }
+                },
+              ),
+            ],
           ),
         ],
       ),

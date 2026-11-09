@@ -4,9 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/app_button.dart';
 import '../../data/models/booking_pass_model.dart';
 import '../../../main_nav/presentation/controllers/main_nav_controller.dart';
+import '../../../home/presentation/widgets/payment_receipt_dialog.dart';
 
 class DigitalPassScreen extends StatelessWidget {
   final BookingPassModel pass;
@@ -330,15 +330,55 @@ class DigitalPassScreen extends StatelessWidget {
             ),
             SizedBox(height: 24.h),
 
-            // Return to Home
-            AppButton(
-              text: 'VIEW ALL MY BOOKINGS',
-              onPressed: () {
-                if (Get.isRegistered<MainNavController>()) {
-                  Get.find<MainNavController>().changeTab(1); // Bookings tab
-                }
-                Get.until((route) => route.isFirst);
-              },
+            // Return to Home & View Receipt Row
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                      side: const BorderSide(color: Color(0xFFD4AF37)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                    ),
+                    icon: Icon(Icons.receipt_long_rounded, color: const Color(0xFFD4AF37), size: 18.sp),
+                    label: Text(
+                      'RECEIPT',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 12.5.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    onPressed: () => PaymentReceiptDialog.showBooking(context, pass: pass),
+                  ),
+                ),
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                    ),
+                    onPressed: () {
+                      if (Get.isRegistered<MainNavController>()) {
+                        Get.find<MainNavController>().changeTab(1); // Bookings tab
+                      }
+                      Get.until((route) => route.isFirst);
+                    },
+                    child: Text(
+                      'MY BOOKINGS',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 12.5.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

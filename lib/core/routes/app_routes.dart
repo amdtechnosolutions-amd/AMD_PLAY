@@ -33,5 +33,6 @@ abstract class AppRoutes {
   static const String attendance = '/attendance';
   static const String membership = '/membership';
   static const String profile = '/profile';
+  static const String invoices = '/invoices';
   static const String notifications = '/notifications';
 }
