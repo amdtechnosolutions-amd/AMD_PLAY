@@ -243,7 +243,7 @@ class _PaymentReceiptDialogState extends State<PaymentReceiptDialog> {
       Get.snackbar(
         'Invoice Saved',
         path.isNotEmpty
-            ? 'PDF saved to storage and opened for sharing: ${widget.receiptNumber}'
+            ? 'PDF invoice ${widget.receiptNumber} saved to device storage.'
             : 'PDF invoice ${widget.receiptNumber} ready and saved.',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.white,
@@ -296,18 +296,8 @@ class _PaymentReceiptDialogState extends State<PaymentReceiptDialog> {
         notes: widget.notes,
       );
     } catch (e) {
-      Get.snackbar(
-        'Print Error',
-        'Could not launch print layout: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.white,
-        colorText: const Color(0xFFEF4444),
-        borderColor: const Color(0xFFEF4444),
-        borderWidth: 1.2,
-        margin: const EdgeInsets.all(16),
-        borderRadius: 14,
-        icon: const Icon(Icons.error_outline_rounded, color: Color(0xFFEF4444)),
-      );
+      // Fallback to saving PDF directly
+      await _handleDownload();
     } finally {
       if (mounted) {
         setState(() => _isPrinting = false);

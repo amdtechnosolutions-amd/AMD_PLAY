@@ -526,8 +526,8 @@ class _InvoicesReceiptsScreenState extends State<InvoicesReceiptsScreen> {
                       }
 
                       Get.snackbar(
-                        'Invoice Saved & Shared',
-                        'Tax invoice ${item.receiptNumber} generated successfully.',
+                        'Invoice Saved',
+                        'Tax invoice ${item.receiptNumber} saved to device storage.',
                         snackPosition: SnackPosition.BOTTOM,
                         backgroundColor: Colors.white,
                         colorText: darkText,

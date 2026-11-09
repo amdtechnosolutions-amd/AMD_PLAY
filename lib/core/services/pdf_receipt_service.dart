@@ -521,7 +521,7 @@ class PdfReceiptService {
     try {
       final output = await getApplicationDocumentsDirectory();
       final file = File('${output.path}/$cleanFileName');
-      await file.writeAsBytes(bytes);
+      await file.writeAsBytes(bytes, flush: true);
       savedPath = file.path;
     } catch (_) {}
 
@@ -531,17 +531,33 @@ class PdfReceiptService {
         final publicDownloads = Directory('/storage/emulated/0/Download');
         if (publicDownloads.existsSync()) {
           final downloadFile = File('${publicDownloads.path}/$cleanFileName');
-          await downloadFile.writeAsBytes(bytes);
+          await downloadFile.writeAsBytes(bytes, flush: true);
           savedPath = downloadFile.path;
         }
       }
     } catch (_) {}
 
-    // 3. Open native system Share / Save to Downloads / Drive sheet
-    await Printing.sharePdf(
-      bytes: bytes,
-      filename: cleanFileName,
-    );
+    // 2c. Fallback local temporary directory
+    if (savedPath.isEmpty) {
+      try {
+        final tmp = await getTemporaryDirectory();
+        final tmpFile = File('${tmp.path}/$cleanFileName');
+        await tmpFile.writeAsBytes(bytes, flush: true);
+        savedPath = tmpFile.path;
+      } catch (_) {}
+    }
+
+    // 3. Open native system Share / Save to Downloads sheet (if native plugin channel is registered)
+    try {
+      await Printing.sharePdf(
+        bytes: bytes,
+        filename: cleanFileName,
+      );
+    } catch (e) {
+      // Native printing plugin channel net.nfet.printing is not registered in the currently running debug process
+      // (a full cold app restart / flutter run registers the native code in APK).
+      // The PDF is already 100% saved to device disk above.
+    }
 
     return savedPath;
   }

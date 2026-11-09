@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+
 import '../../../../core/widgets/empty_state.dart';
 import '../../../home/presentation/controllers/home_controller.dart';
 import '../../data/models/student_evaluation_model.dart';
@@ -117,8 +118,7 @@ class _StudentCoachingReportScreenState
               padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 60.h),
               child: EmptyState(
                 title: 'No Performance Evaluations Yet',
-                message:
-                    'Your academy coaches have not published an evaluation scorecard for your profile yet. Once assessed, your skill radar, 24-parameter metrics, and historical trends will appear here.',
+                message: 'Your academy coaches have not published an evaluation scorecard for your profile yet. Once assessed, your skill radar, 24-parameter metrics, and historical trends will appear here.',
                 icon: Icons.sports_score_rounded,
                 buttonText: 'REFRESH',
                 onButtonPressed: controller.fetchEvaluations,
@@ -194,12 +194,15 @@ class _StudentCoachingReportScreenState
   // ==========================================
 
   Widget _buildStudentHeader(
-      EvaluationSummary summary, StudentEvaluationController controller) {
+    EvaluationSummary summary,
+    StudentEvaluationController controller,
+  ) {
     String studentName = controller.targetStudentName.value.trim();
     if (studentName.isEmpty && summary.studentName.isNotEmpty) {
       studentName = summary.studentName.trim();
     }
-    if (studentName.isEmpty && controller.report.value?.studentName.isNotEmpty == true) {
+    if (studentName.isEmpty &&
+        controller.report.value?.studentName.isNotEmpty == true) {
       studentName = controller.report.value!.studentName.trim();
     }
     if (studentName.isEmpty && Get.isRegistered<HomeController>()) {
@@ -215,8 +218,12 @@ class _StudentCoachingReportScreenState
     }
 
     final initial = studentName.isNotEmpty ? studentName[0].toUpperCase() : 'S';
-    final sportLabel = summary.sportName.isNotEmpty ? summary.sportName.toUpperCase() : 'BADMINTON';
-    final batchLabel = summary.batchName.isNotEmpty ? summary.batchName : 'Student Portal Report';
+    final sportLabel = summary.sportName.isNotEmpty
+        ? summary.sportName.toUpperCase()
+        : 'BADMINTON';
+    final batchLabel = summary.batchName.isNotEmpty
+        ? summary.batchName
+        : 'Student Portal Report';
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -228,10 +235,7 @@ class _StudentCoachingReportScreenState
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: const Color(0xFFFFFDF5),
-            border: Border.all(
-              color: const Color(0xFFD4AF37),
-              width: 1.8,
-            ),
+            border: Border.all(color: const Color(0xFFD4AF37), width: 1.8),
             boxShadow: const [
               BoxShadow(
                 color: Color(0x18D4AF37),
@@ -274,11 +278,17 @@ class _StudentCoachingReportScreenState
               Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 7.w,
+                      vertical: 2.h,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFFFFDF5),
                       borderRadius: BorderRadius.circular(6.r),
-                      border: Border.all(color: const Color(0x60D4AF37), width: 0.9),
+                      border: Border.all(
+                        color: const Color(0x60D4AF37),
+                        width: 0.9,
+                      ),
                     ),
                     child: Text(
                       sportLabel,
@@ -318,17 +328,16 @@ class _StudentCoachingReportScreenState
   // ==========================================
 
   Widget _buildScoreSummaryBar(
-      EvaluationSummary summary, StudentEvaluationReport report) {
+    EvaluationSummary summary,
+    StudentEvaluationReport report,
+  ) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: const Color(0xFFFFFDF5),
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(
-          color: const Color(0x60D4AF37),
-          width: 1.2,
-        ),
+        border: Border.all(color: const Color(0x60D4AF37), width: 1.2),
         boxShadow: const [
           BoxShadow(
             color: Color(0x10D4AF37),
@@ -423,7 +432,9 @@ class _StudentCoachingReportScreenState
   // ==========================================
 
   Widget _buildCategorySection(
-      String headerTitle, List<ParameterCardModel> items) {
+    String headerTitle,
+    List<ParameterCardModel> items,
+  ) {
     if (items.isEmpty) return const SizedBox.shrink();
 
     return Column(
