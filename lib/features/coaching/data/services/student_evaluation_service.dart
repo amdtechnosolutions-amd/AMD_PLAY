@@ -38,6 +38,12 @@ class StudentEvaluationService {
 
         if (rawData is Map<String, dynamic>) {
           return StudentEvaluationReport.fromJson(rawData);
+        } else if (rawData is List) {
+          if (rawData.isNotEmpty && rawData.first is Map) {
+            return StudentEvaluationReport.fromJson(Map<String, dynamic>.from(rawData.first as Map));
+          } else {
+            return StudentEvaluationReport.initialEmpty();
+          }
         }
       }
     } on DioException catch (dioErr) {
@@ -78,6 +84,12 @@ class StudentEvaluationService {
 
         if (rawData is Map<String, dynamic>) {
           return StudentEvaluationReport.fromJson(rawData);
+        } else if (rawData is List) {
+          if (rawData.isNotEmpty && rawData.first is Map) {
+            return StudentEvaluationReport.fromJson(Map<String, dynamic>.from(rawData.first as Map));
+          } else {
+            return StudentEvaluationReport.initialEmpty();
+          }
         }
       }
     } catch (e) {
@@ -102,6 +114,12 @@ class StudentEvaluationService {
         final rawData = body is Map && body['data'] != null ? body['data'] : body;
         if (rawData is Map<String, dynamic>) {
           return StudentEvaluationReport.fromJson(rawData);
+        } else if (rawData is List) {
+          if (rawData.isNotEmpty && rawData.first is Map) {
+            return StudentEvaluationReport.fromJson(Map<String, dynamic>.from(rawData.first as Map));
+          } else {
+            return StudentEvaluationReport.initialEmpty();
+          }
         }
       }
     } catch (e) {

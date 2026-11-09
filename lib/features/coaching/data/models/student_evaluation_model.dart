@@ -40,9 +40,9 @@ class EvaluationSummary {
       totalPossibleScore: maxScore,
       scoreText: json['scoreText']?.toString() ?? '${oScore.toInt()}/${maxScore.toInt()}',
       percentage: pct,
-      grade: json['grade']?.toString().toUpperCase() ?? (pct >= 85 ? 'A' : pct >= 70 ? 'B' : 'C'),
-      performanceLevel: json['performanceLevel']?.toString() ?? (pct >= 85 ? 'Excellent' : pct >= 70 ? 'Proficient' : 'Developing'),
-      coachRemarks: json['coachRemarks']?.toString() ?? json['remarks']?.toString() ?? 'Consistent effort and positive work ethic displayed in all sessions.',
+      grade: json['grade']?.toString().toUpperCase() ?? (oScore == 0 ? 'N/A' : (pct >= 85 ? 'A' : pct >= 70 ? 'B' : 'C')),
+      performanceLevel: json['performanceLevel']?.toString() ?? (oScore == 0 ? 'Unassessed' : (pct >= 85 ? 'Excellent' : pct >= 70 ? 'Proficient' : 'Developing')),
+      coachRemarks: json['coachRemarks']?.toString() ?? json['remarks']?.toString() ?? (oScore == 0 ? 'Evaluation pending from academy coaching staff.' : 'Consistent effort and positive work ethic displayed in all sessions.'),
       evaluationDate: json['date']?.toString() ?? json['evaluationDate']?.toString() ?? '',
       coachName: json['coachName']?.toString() ?? (json['coachId'] is Map ? json['coachId']['name']?.toString() : null) ?? 'Head Coach',
       batchName: json['batchName']?.toString() ?? (json['batchId'] is Map ? json['batchId']['name']?.toString() : null) ?? 'Academy Batch',
@@ -113,7 +113,7 @@ class BadmintonEvaluationParameter {
     required this.category,
     required this.header,
     required this.description,
-    this.defaultScore = 10.0,
+    this.defaultScore = 0.0,
     this.maxScore = 10.0,
   });
 
@@ -466,10 +466,39 @@ class StudentEvaluationReport {
       extractScoresFromMap(latest['categories'] as Map);
     }
 
+    // Extract category-level scores from root and latest object (e.g. physicalScore, mentalScore)
+    extractScoresFromMap(json);
+    if (latest.isNotEmpty) {
+      extractScoresFromMap(latest);
+    }
+
     final List<ParameterCardModel> cards = [];
     for (final std in BadmintonEvaluationParameter.standard24) {
       final normalizedKey = std.key.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
-      final resolvedScore = liveScores[normalizedKey] ?? std.defaultScore;
+
+      // 1. Direct specific parameter score (e.g. agility: 8.0)
+      double? score = liveScores[normalizedKey];
+
+      // 2. If specific parameter is missing, derive from category score if available
+      if (score == null) {
+        final catLower = std.category.toLowerCase();
+        double? catScore = liveScores['${catLower}score'] ?? liveScores[catLower];
+        if (catScore != null) {
+          if (catScore <= 10.0) {
+            score = catScore;
+          } else {
+            // Category counts: Physical(5), Mental(5), Skill(8), Attitude(6)
+            int count = catLower.contains('physical')
+                ? 5
+                : (catLower.contains('mental')
+                    ? 5
+                    : (catLower.contains('skill') ? 8 : 6));
+            score = (catScore / count).clamp(0.0, 10.0);
+          }
+        }
+      }
+
+      final resolvedScore = score ?? std.defaultScore;
 
       cards.add(ParameterCardModel(
         id: std.key,
@@ -479,8 +508,58 @@ class StudentEvaluationReport {
         score: resolvedScore,
         maxScore: std.maxScore,
         percentage: (resolvedScore / std.maxScore) * 100.0,
-        rating: resolvedScore >= 8.5 ? 'Advanced' : resolvedScore >= 7.0 ? 'Proficient' : 'Developing',
+        rating: resolvedScore >= 8.5
+            ? 'Advanced'
+            : (resolvedScore >= 7.0
+                ? 'Proficient'
+                : (resolvedScore > 0 ? 'Developing' : 'Unassessed')),
       ));
+    }
+
+    // Populate radar data from cards if not explicitly provided
+    if (radarList.isEmpty) {
+      final pCards = cards.where((c) => c.category.toLowerCase().contains('physical')).toList();
+      final mCards = cards.where((c) => c.category.toLowerCase().contains('mental')).toList();
+      final sCards = cards.where((c) => c.category.toLowerCase().contains('skill')).toList();
+      final aCards = cards.where((c) => c.category.toLowerCase().contains('attitude')).toList();
+
+      double sum(List<ParameterCardModel> list) => list.fold(0.0, (acc, item) => acc + item.score);
+
+      final pScore = sum(pCards);
+      final mScore = sum(mCards);
+      final sScore = sum(sCards);
+      final aScore = sum(aCards);
+
+      radarList.addAll([
+        RadarCategoryData(
+          category: 'PHYSICAL',
+          score: pScore,
+          maxScore: 50,
+          percentage: (pScore / 50.0) * 100.0,
+          color: const Color(0xFF10B981),
+        ),
+        RadarCategoryData(
+          category: 'MENTAL',
+          score: mScore,
+          maxScore: 50,
+          percentage: (mScore / 50.0) * 100.0,
+          color: const Color(0xFF3B82F6),
+        ),
+        RadarCategoryData(
+          category: 'SKILL',
+          score: sScore,
+          maxScore: 80,
+          percentage: (sScore / 80.0) * 100.0,
+          color: const Color(0xFFD4AF37),
+        ),
+        RadarCategoryData(
+          category: 'ATTITUDE',
+          score: aScore,
+          maxScore: 60,
+          percentage: (aScore / 60.0) * 100.0,
+          color: const Color(0xFF8B5CF6),
+        ),
+      ]);
     }
 
     // 4. Parse Trend
@@ -508,6 +587,47 @@ class StudentEvaluationReport {
       trend: trendItems,
       latestEvaluation: latest,
       studentName: resolvedStudentName,
+    );
+  }
+
+  /// Initial report with 0 scores when student has not been assessed yet
+  factory StudentEvaluationReport.initialEmpty({String studentName = ''}) {
+    return StudentEvaluationReport(
+      summary: EvaluationSummary(
+        overallScore: 0,
+        totalPossibleScore: 240,
+        scoreText: '0/240',
+        percentage: 0,
+        grade: 'N/A',
+        performanceLevel: 'Unassessed',
+        coachRemarks: 'Evaluation pending from academy coaching staff.',
+        evaluationDate: '',
+        coachName: 'Head Coach',
+        batchName: 'Academy Batch',
+        sportName: 'Badminton',
+        studentName: studentName,
+      ),
+      radarData: const [
+        RadarCategoryData(category: 'PHYSICAL', score: 0, maxScore: 50, percentage: 0, color: Color(0xFF10B981)),
+        RadarCategoryData(category: 'MENTAL', score: 0, maxScore: 50, percentage: 0, color: Color(0xFF3B82F6)),
+        RadarCategoryData(category: 'SKILL', score: 0, maxScore: 80, percentage: 0, color: Color(0xFFD4AF37)),
+        RadarCategoryData(category: 'ATTITUDE', score: 0, maxScore: 60, percentage: 0, color: Color(0xFF8B5CF6)),
+      ],
+      parameterCards: BadmintonEvaluationParameter.standard24.map((std) {
+        return ParameterCardModel(
+          id: std.key,
+          name: std.key,
+          category: std.category,
+          description: std.description,
+          score: 0,
+          maxScore: std.maxScore,
+          percentage: 0,
+          rating: 'Unassessed',
+        );
+      }).toList(),
+      trend: const [],
+      latestEvaluation: const {},
+      studentName: studentName,
     );
   }
 }
