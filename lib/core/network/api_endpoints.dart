@@ -84,6 +84,9 @@ class ApiEndpoints {
 
   // Coaching & Membership
   static const String coachingBatches = '/coaching/batches';
+  static const String coachEvaluations = '/coaching/evaluations';
+  static const String coachStudentEvaluations = '/coaching/evaluations/student';
+  static const String coachBatchEvaluations = '/coaching/evaluations/batch';
   static const String memberships = '/memberships/packages';
   static const String attendance = '/attendance';
   static const String userProfile = '/users/profile';

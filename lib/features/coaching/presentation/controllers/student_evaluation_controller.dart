@@ -13,10 +13,52 @@ class StudentEvaluationController extends GetxController {
   final Rxn<StudentEvaluationReport> report = Rxn<StudentEvaluationReport>();
   final RxString selectedCategoryFilter = 'ALL'.obs;
 
+  final RxString targetStudentId = ''.obs;
+  final RxString targetStudentName = ''.obs;
+
   @override
   void onInit() {
     super.onInit();
+    final args = Get.arguments;
+    if (args is Map) {
+      if (args['report'] is StudentEvaluationReport) {
+        report.value = args['report'] as StudentEvaluationReport;
+        if (args['studentName'] != null) {
+          targetStudentName.value = args['studentName'].toString();
+        }
+        return;
+      }
+      if (args['studentId'] != null) {
+        targetStudentId.value = args['studentId'].toString();
+        if (args['studentName'] != null) {
+          targetStudentName.value = args['studentName'].toString();
+        }
+        fetchStudentEvaluations(targetStudentId.value);
+        return;
+      }
+    }
     fetchEvaluations();
+  }
+
+  Future<void> fetchStudentEvaluations(String studentId) async {
+    isLoading.value = true;
+    hasError.value = false;
+    errorMessage.value = '';
+
+    try {
+      final res = await _service.getEvaluationForStudent(studentId);
+      if (res != null) {
+        report.value = res;
+      } else {
+        await fetchEvaluations();
+      }
+    } catch (e) {
+      debugPrint('[StudentEvaluationController] fetchStudentEvaluations error: $e');
+      hasError.value = true;
+      errorMessage.value = e.toString().replaceAll('Exception:', '').trim();
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<void> fetchEvaluations() async {

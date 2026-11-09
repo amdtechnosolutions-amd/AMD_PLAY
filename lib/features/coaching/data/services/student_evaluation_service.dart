@@ -85,5 +85,29 @@ class StudentEvaluationService {
     }
     return null;
   }
+
+  /// Fetch evaluation for a specific student (used by coaches)
+  Future<StudentEvaluationReport?> getEvaluationForStudent(String studentId) async {
+    try {
+      final token = await _storage.getAccessToken();
+      final response = await _apiClient.dio.get(
+        '${ApiEndpoints.coachStudentEvaluations}/$studentId',
+        options: Options(
+          headers: token != null ? {'Authorization': 'Bearer $token'} : null,
+        ),
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final body = response.data;
+        final rawData = body is Map && body['data'] != null ? body['data'] : body;
+        if (rawData is Map<String, dynamic>) {
+          return StudentEvaluationReport.fromJson(rawData);
+        }
+      }
+    } catch (e) {
+      debugPrint('[StudentEvaluationService] getEvaluationForStudent error: $e');
+    }
+    return null;
+  }
 }
 

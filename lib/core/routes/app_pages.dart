@@ -20,7 +20,10 @@ import '../../features/attendance/presentation/screens/attendance_screen.dart';
 import '../../features/membership/presentation/screens/membership_passes_screen.dart';
 import '../../features/coaching/presentation/screens/coaching_batches_screen.dart';
 import '../../features/coaching/presentation/screens/student_coaching_report_screen.dart';
+import '../../features/coaching/presentation/screens/coach_evaluations_screen.dart';
+import '../../features/coaching/presentation/screens/evaluate_student_screen.dart';
 import '../../features/coaching/bindings/student_evaluation_binding.dart';
+import '../../features/coaching/bindings/coach_evaluation_binding.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import 'app_routes.dart';
 
@@ -134,6 +137,18 @@ class AppPages {
       name: AppRoutes.coachingReport,
       page: () => const StudentCoachingReportScreen(),
       binding: StudentEvaluationBinding(),
+      transition: Transition.rightToLeftWithFade,
+    ),
+    GetPage(
+      name: AppRoutes.coachEvaluations,
+      page: () => const CoachEvaluationsScreen(),
+      binding: CoachEvaluationBinding(),
+      transition: Transition.rightToLeftWithFade,
+    ),
+    GetPage(
+      name: AppRoutes.evaluateStudent,
+      page: () => const EvaluateStudentScreen(),
+      binding: CoachEvaluationBinding(),
       transition: Transition.rightToLeftWithFade,
     ),
     GetPage(

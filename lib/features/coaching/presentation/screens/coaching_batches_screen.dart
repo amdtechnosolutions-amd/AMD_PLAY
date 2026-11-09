@@ -76,6 +76,11 @@ class _CoachingBatchesScreenState extends State<CoachingBatchesScreen> {
         centerTitle: true,
         actions: [
           IconButton(
+            icon: Icon(Icons.rate_review_outlined, size: 22.sp, color: const Color(0xFFD4AF37)),
+            onPressed: () => Get.toNamed(AppRoutes.coachEvaluations),
+            tooltip: 'Student Evaluations',
+          ),
+          IconButton(
             icon: Icon(Icons.assessment_outlined, size: 22.sp, color: const Color(0xFFD4AF37)),
             onPressed: () => Get.toNamed(AppRoutes.coachingReport),
             tooltip: 'Performance Report',
@@ -284,6 +289,69 @@ class _CoachingBatchesScreenState extends State<CoachingBatchesScreen> {
                     ),
                   ),
                 ],
+                SizedBox(height: 14.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF0F172A),
+                          side: const BorderSide(color: Color(0x60D4AF37), width: 1.1),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                          padding: EdgeInsets.symmetric(vertical: 8.h),
+                        ),
+                        onPressed: () => Get.toNamed(
+                          AppRoutes.coachEvaluations,
+                          arguments: {
+                            'batchId': b['_id'] ?? b['id'] ?? '',
+                            'batchName': title,
+                          },
+                        ),
+                        icon: Icon(Icons.assessment_outlined, size: 15.sp, color: const Color(0xFF9E7B1A)),
+                        label: Text(
+                          'Evaluations',
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 11.5.sp,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFD4AF37),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                          padding: EdgeInsets.symmetric(vertical: 8.h),
+                        ),
+                        onPressed: () => Get.toNamed(
+                          AppRoutes.evaluateStudent,
+                          arguments: {
+                            'batchId': b['_id'] ?? b['id'] ?? '',
+                            'batchName': title,
+                          },
+                        ),
+                        icon: Icon(Icons.add_rounded, size: 16.sp, color: Colors.white),
+                        label: Text(
+                          'Evaluate',
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 11.5.sp,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           );

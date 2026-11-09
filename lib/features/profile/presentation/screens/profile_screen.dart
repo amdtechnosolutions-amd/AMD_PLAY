@@ -783,6 +783,33 @@ class ProfileScreen extends StatelessWidget {
               },
             ),
             Obx(() {
+              if (homeCtrl.isCoach) {
+                return Column(
+                  children: [
+                    const Divider(color: Color(0x1AD4AF37), height: 1),
+                    _buildActionTile(
+                      icon: Icons.sports_rounded,
+                      title: 'My Coaching Batches',
+                      subtitle: 'Training schedules & squad assignments',
+                      onTap: () => Get.to(() => const CoachingBatchesScreen()),
+                    ),
+                    const Divider(color: Color(0x1AD4AF37), height: 1),
+                    _buildActionTile(
+                      icon: Icons.rate_review_outlined,
+                      title: 'Student Performance & Evaluations',
+                      subtitle: 'View live scorecards, radar charts & progress trends',
+                      onTap: () => Get.toNamed(AppRoutes.coachEvaluations),
+                    ),
+                    const Divider(color: Color(0x1AD4AF37), height: 1),
+                    _buildActionTile(
+                      icon: Icons.add_chart_rounded,
+                      title: 'Evaluate a Student',
+                      subtitle: 'Score across 24 parameters in Physical, Mental, Skill & Attitude',
+                      onTap: () => Get.toNamed(AppRoutes.evaluateStudent),
+                    ),
+                  ],
+                );
+              }
               if (homeCtrl.isPayAndPlay) return const SizedBox.shrink();
               return Column(
                 children: [

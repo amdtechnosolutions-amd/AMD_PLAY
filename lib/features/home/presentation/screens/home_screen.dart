@@ -102,7 +102,16 @@ class HomeScreen extends StatelessWidget {
                 _buildBookCourtHero(),
                 SizedBox(height: 24.h),
 
-                if (isPayAndPlay) ...[
+                if (controller.isCoach) ...[
+                  // ========================================================
+                  // COACH MODE: ASSIGNED BATCHES & STUDENT EVALUATIONS
+                  // ========================================================
+                  _buildCoachBatchesSection(controller, context),
+                  SizedBox(height: 24.h),
+
+                  _buildCoachEvaluationsSection(context),
+                  SizedBox(height: 16.h),
+                ] else if (isPayAndPlay) ...[
                   // ========================================================
                   // PAY & PLAY MODE: NO ATTENDANCE, NO MONTHLY FEES!
                   // ========================================================
@@ -1107,6 +1116,460 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  // ===========================================================================
+  // 4C. COACH MODULE SECTIONS: BATCHES & STUDENT EVALUATIONS
+  // ===========================================================================
+
+  Widget _buildCoachBatchesSection(HomeController controller, BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Text(
+                  'My Coaching Batches',
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF0F172A),
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFFDF5),
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(color: const Color(0xFFD4AF37), width: 0.9),
+                  ),
+                  child: Text(
+                    'COACH',
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 9.5.sp,
+                      fontWeight: FontWeight.w900,
+                      color: const Color(0xFF9E7B1A),
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            GestureDetector(
+              onTap: () => Get.toNamed(AppRoutes.coaching),
+              child: Row(
+                children: [
+                  Text(
+                    'View Batches',
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 12.5.sp,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF9E7B1A),
+                    ),
+                  ),
+                  SizedBox(width: 3.w),
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 11.sp,
+                    color: const Color(0xFF9E7B1A),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 12.h),
+
+        // Coaching Batches Hub Card
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(18.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(
+              color: const Color(0x60D4AF37),
+              width: 1.3,
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x20D4AF37),
+                blurRadius: 18,
+                offset: Offset(0, 6),
+              ),
+              BoxShadow(
+                color: Color(0x08000000),
+                blurRadius: 6,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 48.h,
+                    height: 48.h,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFFDF5),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color(0xFFD4AF37),
+                        width: 1.5,
+                      ),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x20D4AF37),
+                          blurRadius: 8,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.sports_rounded,
+                        size: 26.sp,
+                        color: const Color(0xFF9E7B1A),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 14.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Academy Training Batches',
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF0F172A),
+                          ),
+                        ),
+                        SizedBox(height: 3.h),
+                        Text(
+                          'Manage your sports squads, session timings & student capacity',
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 12.sp,
+                            color: const Color(0xFF64748B),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 14.h),
+
+              // Action button to View Batches
+              Container(
+                width: double.infinity,
+                height: 44.h,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFFDF5),
+                  borderRadius: BorderRadius.circular(14.r),
+                  border: Border.all(
+                    color: const Color(0xFFD4AF37),
+                    width: 1.2,
+                  ),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14.r),
+                    onTap: () => Get.toNamed(AppRoutes.coaching),
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.group_outlined,
+                            size: 18.sp,
+                            color: const Color(0xFF9E7B1A),
+                          ),
+                          SizedBox(width: 8.w),
+                          Text(
+                            'MANAGE MY BATCHES',
+                            style: TextStyle(
+                              fontFamily: 'Nunito',
+                              fontSize: 12.5.sp,
+                              fontWeight: FontWeight.w900,
+                              color: const Color(0xFF0F172A),
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          SizedBox(width: 6.w),
+                          Icon(
+                            Icons.arrow_forward_rounded,
+                            size: 15.sp,
+                            color: const Color(0xFFD4AF37),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCoachEvaluationsSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Student Performance & Evaluations',
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w800,
+                color: const Color(0xFF0F172A),
+              ),
+            ),
+            GestureDetector(
+              onTap: () => Get.toNamed(AppRoutes.coachEvaluations),
+              child: Row(
+                children: [
+                  Text(
+                    'All Reports',
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 12.5.sp,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF9E7B1A),
+                    ),
+                  ),
+                  SizedBox(width: 3.w),
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 11.sp,
+                    color: const Color(0xFF9E7B1A),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 12.h),
+
+        // Hero Evaluation & Scoring Card
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(18.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(
+              color: const Color(0x60D4AF37),
+              width: 1.3,
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x20D4AF37),
+                blurRadius: 18,
+                offset: Offset(0, 6),
+              ),
+              BoxShadow(
+                color: Color(0x08000000),
+                blurRadius: 6,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 48.h,
+                    height: 48.h,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFFDF5),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color(0xFFD4AF37),
+                        width: 1.5,
+                      ),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x20D4AF37),
+                          blurRadius: 8,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.rate_review_outlined,
+                        size: 26.sp,
+                        color: const Color(0xFF9E7B1A),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 14.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Student Performance Scorecards',
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF0F172A),
+                          ),
+                        ),
+                        SizedBox(height: 3.h),
+                        Text(
+                          'Assess 24 parameters across Physical, Mental, Skill & Attitude. Instant radar charts & grading.',
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 12.sp,
+                            color: const Color(0xFF64748B),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 14.h),
+
+              // Feature Tags
+              Wrap(
+                spacing: 6.w,
+                runSpacing: 6.h,
+                children: [
+                  _buildReportFeatureBadge(Icons.radar_rounded, 'Spider Radar'),
+                  _buildReportFeatureBadge(Icons.view_week_rounded, '24 Parameters'),
+                  _buildReportFeatureBadge(Icons.trending_up_rounded, 'Progress Trend'),
+                  _buildReportFeatureBadge(Icons.military_tech_outlined, 'Grade A - E'),
+                ],
+              ),
+              SizedBox(height: 16.h),
+
+              // Action Buttons Row: "+ Evaluate Student" & "View Scorecards"
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 44.h,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD4AF37),
+                        borderRadius: BorderRadius.circular(14.r),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x35D4AF37),
+                            blurRadius: 10,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(14.r),
+                          onTap: () => Get.toNamed(AppRoutes.evaluateStudent),
+                          child: Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.add_rounded,
+                                  size: 18.sp,
+                                  color: Colors.white,
+                                ),
+                                SizedBox(width: 4.w),
+                                Text(
+                                  'EVALUATE STUDENT',
+                                  style: TextStyle(
+                                    fontFamily: 'Nunito',
+                                    fontSize: 11.5.sp,
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.white,
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: Container(
+                      height: 44.h,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFFDF5),
+                        borderRadius: BorderRadius.circular(14.r),
+                        border: Border.all(
+                          color: const Color(0xFFD4AF37),
+                          width: 1.2,
+                        ),
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(14.r),
+                          onTap: () => Get.toNamed(AppRoutes.coachEvaluations),
+                          child: Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.assessment_outlined,
+                                  size: 17.sp,
+                                  color: const Color(0xFF9E7B1A),
+                                ),
+                                SizedBox(width: 6.w),
+                                Text(
+                                  'ALL SCORECARDS',
+                                  style: TextStyle(
+                                    fontFamily: 'Nunito',
+                                    fontSize: 11.5.sp,
+                                    fontWeight: FontWeight.w900,
+                                    color: const Color(0xFF0F172A),
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
