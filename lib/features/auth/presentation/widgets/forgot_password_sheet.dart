@@ -525,3 +525,4 @@ class _ForgotPasswordBottomSheetState extends State<ForgotPasswordBottomSheet> {
     );
   }
 }
+

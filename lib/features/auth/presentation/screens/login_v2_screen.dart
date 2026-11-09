@@ -393,14 +393,12 @@ class LoginV2Screen extends GetView<AuthController> {
               // Forgot Password Link
               GestureDetector(
                 onTap: () {
-                  Get.snackbar(
-                    'Password Recovery',
-                    'A password reset link has been sent to your registered contact.',
-                    snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: const Color(0xFF1E293B),
-                    colorText: const Color(0xFFFBBF24),
-                    margin: const EdgeInsets.all(16),
-                    borderRadius: 12,
+                  Get.toNamed(
+                    AppRoutes.forgotPassword,
+                    arguments: {
+                      'role': controller.selectedRole.value,
+                      'identifier': controller.identifierController.text.trim(),
+                    },
                   );
                 },
                 child: Text(

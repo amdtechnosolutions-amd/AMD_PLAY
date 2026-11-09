@@ -5,7 +5,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../controllers/auth_controller.dart';
-import '../widgets/forgot_password_sheet.dart';
 
 /// Clean, luxury Login Screen for INERTIA SPORTS ACADEMY
 /// Adopts the exact same design pattern, palette, and typography as UserSelectionScreen.
@@ -400,13 +399,11 @@ class LoginScreen extends GetView<AuthController> {
                     alignment: Alignment.centerRight,
                     child: GestureDetector(
                       onTap: () {
-                        ForgotPasswordBottomSheet.show(
-                          context: context,
-                          initialRole: controller.selectedRole.value,
-                          initialIdentifier: controller.identifierController.text.trim(),
-                          onSuccess: (identifier, newPassword) {
-                            controller.identifierController.text = identifier;
-                            controller.pinController.text = newPassword;
+                        Get.toNamed(
+                          AppRoutes.forgotPassword,
+                          arguments: {
+                            'role': controller.selectedRole.value,
+                            'identifier': controller.identifierController.text.trim(),
                           },
                         );
                       },

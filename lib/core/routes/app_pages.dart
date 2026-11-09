@@ -3,6 +3,7 @@ import '../../features/auth/bindings/auth_binding.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/login_v2_screen.dart';
 import '../../features/auth/presentation/screens/login_v3_screen.dart';
+import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/user_selection_screen.dart';
 import '../../features/home/bindings/home_binding.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
@@ -79,6 +80,12 @@ class AppPages {
     GetPage(
       name: AppRoutes.loginV3,
       page: () => const LoginV3Screen(),
+      binding: AuthBinding(),
+      transition: Transition.rightToLeftWithFade,
+    ),
+    GetPage(
+      name: AppRoutes.forgotPassword,
+      page: () => const ForgotPasswordScreen(),
       binding: AuthBinding(),
       transition: Transition.rightToLeftWithFade,
     ),

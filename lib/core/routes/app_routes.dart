@@ -11,6 +11,7 @@ abstract class AppRoutes {
   static const String loginV2 = '/login-v2';
   static const String loginV3 = '/login-v3';
   static const String loginForm = '/login-form';
+  static const String forgotPassword = '/forgot-password';
   static const String otp = '/otp';
   static const String mainNav = '/main';
   static const String home = '/home';

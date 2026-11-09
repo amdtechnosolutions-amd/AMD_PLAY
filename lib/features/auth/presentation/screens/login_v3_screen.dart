@@ -597,14 +597,12 @@ class LoginV3Screen extends GetView<AuthController> {
         if (!isSignUp)
           GestureDetector(
             onTap: () {
-              Get.snackbar(
-                'Password Recovery',
-                'Password reset instructions have been sent to your registered contact.',
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.white,
-                colorText: const Color(0xFFB45309),
-                margin: const EdgeInsets.all(16),
-                borderRadius: 12,
+              Get.toNamed(
+                AppRoutes.forgotPassword,
+                arguments: {
+                  'role': controller.selectedRole.value,
+                  'identifier': controller.identifierController.text.trim(),
+                },
               );
             },
             child: Text(
