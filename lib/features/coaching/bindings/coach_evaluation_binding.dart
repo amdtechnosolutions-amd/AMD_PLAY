@@ -9,3 +9,4 @@ class CoachEvaluationBinding extends Bindings {
     Get.lazyPut<StudentEvaluationController>(() => StudentEvaluationController());
   }
 }
+

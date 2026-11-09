@@ -93,6 +93,203 @@ class RadarCategoryData {
   }
 }
 
+/// Master catalog of the 24 standard Badminton Academy parameters
+class BadmintonEvaluationParameter {
+  final String key;
+  final String category;
+  final String header;
+  final String description;
+  final double defaultScore;
+  final double maxScore;
+
+  const BadmintonEvaluationParameter({
+    required this.key,
+    required this.category,
+    required this.header,
+    required this.description,
+    this.defaultScore = 10.0,
+    this.maxScore = 10.0,
+  });
+
+  static const List<BadmintonEvaluationParameter> standard24 = [
+    // 1. Physical (5)
+    BadmintonEvaluationParameter(
+      key: 'agility',
+      category: 'Physical',
+      header: 'Physical :',
+      description:
+          "Agility refers to a player's ability to move quickly and change direction efficiently while maintaining balance and control. It essential for fast-paced physical activities and sports.",
+    ),
+    BadmintonEvaluationParameter(
+      key: 'speed',
+      category: 'Physical',
+      header: 'Physical :',
+      description:
+          "Speed refers to how quickly a player can move across the court, react to opponent shots, and execute footwork mechanics during play.",
+    ),
+    BadmintonEvaluationParameter(
+      key: 'stamina',
+      category: 'Physical',
+      header: 'Physical :',
+      description:
+          "Stamina refers to a player's ability to sustain physical and mental performance over long periods, especially during extended rallies, intense training, or multi-game matches.",
+    ),
+    BadmintonEvaluationParameter(
+      key: 'strength',
+      category: 'Physical',
+      header: 'Physical :',
+      description:
+          "Strength refers to a player's ability to generate power and withstand physical force, particularly in explosive movements like smashing, jumping, and quickly recovered, as well as maintaining stamina throughout the game.",
+    ),
+    BadmintonEvaluationParameter(
+      key: 'flexibility',
+      category: 'Physical',
+      header: 'Physical :',
+      description:
+          "Flexibility refers to a player's ability to move joints and muscles through a wide range of motion, allowing for quick, efficient, and injury-free movements during play.",
+    ),
+
+    // 2. mental (5)
+    BadmintonEvaluationParameter(
+      key: 'focus',
+      category: 'mental',
+      header: 'mental :',
+      description:
+          "Focus in badminton refers to a player's mental sharpness and sustained attention during training and matches.",
+    ),
+    BadmintonEvaluationParameter(
+      key: 'confidence',
+      category: 'mental',
+      header: 'mental :',
+      description:
+          "Confidence is a player's belief in their skills, preparation, and decision-making during play.",
+    ),
+    BadmintonEvaluationParameter(
+      key: 'composure',
+      category: 'mental',
+      header: 'mental :',
+      description:
+          "Composure is the ability to stay calm, controlled, and focused under pressure, especially during high-pressure situations.",
+    ),
+    BadmintonEvaluationParameter(
+      key: 'resilience',
+      category: 'mental',
+      header: 'mental :',
+      description:
+          "Resilience is the mental toughness to bounce back from setbacks, mistakes, or lost points.",
+    ),
+    BadmintonEvaluationParameter(
+      key: 'sportsmanship',
+      category: 'mental',
+      header: 'mental :',
+      description:
+          "Sportsmanship is the spirit of fair play, respect, and integrity towards opponents, officials, and the game itself.",
+    ),
+
+    // 3. skill (8)
+    BadmintonEvaluationParameter(
+      key: 'forehandStrokes',
+      category: 'skill',
+      header: 'skill :',
+      description:
+          "Forehand strokes involve hitting the shuttle with the palm side of the hand facing the direction of the stroke, typically from the racket hand side of the body.",
+    ),
+    BadmintonEvaluationParameter(
+      key: 'backhandStrokes',
+      category: 'skill',
+      header: 'skill :',
+      description:
+          "Backhand strokes are played with the back of the hand facing the shuttle, usually on the non-dominant side of the body.",
+    ),
+    BadmintonEvaluationParameter(
+      key: 'serve',
+      category: 'skill',
+      header: 'skill :',
+      description:
+          "The serve starts the rally and must be hit below waist height, aimed to land in the opponent's service court.",
+    ),
+    BadmintonEvaluationParameter(
+      key: 'smash',
+      category: 'skill',
+      header: 'skill :',
+      description:
+          "The smash is a fast, downward, and powerful shot, primarily used to end a rally or create a weak return.",
+    ),
+    BadmintonEvaluationParameter(
+      key: 'dropShots',
+      category: 'skill',
+      header: 'skill :',
+      description:
+          "A drop shot is a soft hit that falls steep into the net and lands close to it in the opponent's front court.",
+    ),
+    BadmintonEvaluationParameter(
+      key: 'footwork',
+      category: 'skill',
+      header: 'skill :',
+      description:
+          "Footwork refers to a player's movement technique on court, including steps, lunges, and directional changes.",
+    ),
+    BadmintonEvaluationParameter(
+      key: 'netPlay',
+      category: 'skill',
+      header: 'skill :',
+      description:
+          "Net play involves soft and precise shots close to the net, such as tumbling net shots or net kills.",
+    ),
+    BadmintonEvaluationParameter(
+      key: 'defensiveSkills',
+      category: 'skill',
+      header: 'skill :',
+      description:
+          "Defensive skills refer to a player's ability to return smashes, drives, and other aggressive shots from the opponent.",
+    ),
+
+    // 4. attitude (6)
+    BadmintonEvaluationParameter(
+      key: 'punctuality',
+      category: 'attitude',
+      header: 'attitude :',
+      description:
+          "Being consistently on time for training, matches, and team events.",
+    ),
+    BadmintonEvaluationParameter(
+      key: 'effort',
+      category: 'attitude',
+      header: 'attitude :',
+      description:
+          "The physical and mental energy a player puts into training and match play.",
+    ),
+    BadmintonEvaluationParameter(
+      key: 'teamwork',
+      category: 'attitude',
+      header: 'attitude :',
+      description:
+          "Working effectively with others, especially in doubles or team settings.",
+    ),
+    BadmintonEvaluationParameter(
+      key: 'coachability',
+      category: 'attitude',
+      header: 'attitude :',
+      description:
+          "The willingness to listen, accept feedback, and implement suggestions for improvement.",
+    ),
+    BadmintonEvaluationParameter(
+      key: 'discipline',
+      category: 'attitude',
+      header: 'attitude :',
+      description:
+          "Maintaining self-control, following rules, and following training guidelines.",
+    ),
+    BadmintonEvaluationParameter(
+      key: 'positiveAttitude',
+      category: 'attitude',
+      header: 'attitude :',
+      description:
+          "Displaying optimism, enthusiasm, and a solution-focused mindset.",
+    ),
+  ];
+}
+
 /// Individual parameter evaluation card (e.g., Stamina, Footwork, Focus)
 class ParameterCardModel {
   final String id;
@@ -212,15 +409,70 @@ class StudentEvaluationReport {
       });
     }
 
-    // 3. Parse Parameter Cards (24 items or formatted parameters)
-    final List<ParameterCardModel> cards = [];
+    // 3. Parse Parameter Cards (Exact 24 Badminton Academy parameters from design)
+    final Map<String, double> liveScores = {};
+
+    void extractScoresFromMap(Map map) {
+      map.forEach((key, val) {
+        final k = key.toString().trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+        if (val is num) {
+          liveScores[k] = val.toDouble();
+        } else if (val is Map) {
+          extractScoresFromMap(val);
+        } else if (val is String) {
+          final parsed = double.tryParse(val);
+          if (parsed != null) liveScores[k] = parsed;
+        }
+      });
+    }
+
     final rawCards = json['parameterCards'] ?? json['parameters'];
     if (rawCards is List) {
       for (final c in rawCards) {
-        if (c is Map<String, dynamic>) {
-          cards.add(ParameterCardModel.fromJson(c));
+        if (c is Map) {
+          final name = (c['name'] ?? c['parameter'] ?? c['key'] ?? '')
+              .toString()
+              .trim()
+              .toLowerCase()
+              .replaceAll(RegExp(r'[^a-z0-9]'), '');
+          final score = (c['score'] ?? c['value'] as num?)?.toDouble();
+          if (name.isNotEmpty && score != null) {
+            liveScores[name] = score;
+          }
         }
       }
+    } else if (rawCards is Map) {
+      extractScoresFromMap(rawCards);
+    }
+
+    // 5. Latest Raw Evaluation
+    final latest = json['latestEvaluation'] is Map ? json['latestEvaluation'] as Map<String, dynamic> : <String, dynamic>{};
+
+    if (latest['parameters'] is Map) {
+      extractScoresFromMap(latest['parameters'] as Map);
+    }
+    if (latest['scores'] is Map) {
+      extractScoresFromMap(latest['scores'] as Map);
+    }
+    if (latest['categories'] is Map) {
+      extractScoresFromMap(latest['categories'] as Map);
+    }
+
+    final List<ParameterCardModel> cards = [];
+    for (final std in BadmintonEvaluationParameter.standard24) {
+      final normalizedKey = std.key.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+      final resolvedScore = liveScores[normalizedKey] ?? std.defaultScore;
+
+      cards.add(ParameterCardModel(
+        id: std.key,
+        name: std.key,
+        category: std.category,
+        description: std.description,
+        score: resolvedScore,
+        maxScore: std.maxScore,
+        percentage: (resolvedScore / std.maxScore) * 100.0,
+        rating: resolvedScore >= 8.5 ? 'Advanced' : resolvedScore >= 7.0 ? 'Proficient' : 'Developing',
+      ));
     }
 
     // 4. Parse Trend
@@ -233,9 +485,6 @@ class StudentEvaluationReport {
         }
       }
     }
-
-    // 5. Latest Raw Evaluation
-    final latest = json['latestEvaluation'] is Map ? json['latestEvaluation'] as Map<String, dynamic> : <String, dynamic>{};
 
     return StudentEvaluationReport(
       summary: summary,

@@ -2,21 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../../../core/widgets/empty_state.dart';
+import '../../data/models/student_evaluation_model.dart';
 import '../controllers/student_evaluation_controller.dart';
 import '../widgets/evaluation_radar_chart.dart';
 import '../widgets/evaluation_trend_chart.dart';
 import '../widgets/parameter_card_widget.dart';
 
-/// Screen displaying Logged-in Student Coaching Performance Report & Scorecard
-/// Backed by live endpoints:
-/// - GET /api/v1/students/my/evaluations
-/// - GET /api/v1/students/my/evaluations/latest
-class StudentCoachingReportScreen extends StatelessWidget {
+/// Screen displaying Student Coaching Performance Report & 24-Parameter Scorecard
+/// Formatted to match the official Academy Report UI:
+/// - Academy Title Header: GIRISH BADMINTON ACADEMY
+/// - Categorized parameter lists: Physical :, mental :, skill :, attitude :
+/// - Exact 24 parameters with custom illustrations, descriptions & bold score
+/// - Collapsible Radar Chart, historical progress trend & coach remarks
+class StudentCoachingReportScreen extends StatefulWidget {
   const StudentCoachingReportScreen({super.key});
 
+  @override
+  State<StudentCoachingReportScreen> createState() =>
+      _StudentCoachingReportScreenState();
+}
+
+class _StudentCoachingReportScreenState
+    extends State<StudentCoachingReportScreen> {
   static const Color goldAccent = Color(0xFFD4AF37);
   static const Color darkText = Color(0xFF0F172A);
   static const Color slateText = Color(0xFF64748B);
+
+  bool _showFullAnalytics = false;
 
   @override
   Widget build(BuildContext context) {
@@ -28,16 +40,17 @@ class StudentCoachingReportScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          'Coaching Report',
+          'Student Portal Report',
           style: TextStyle(
             fontFamily: 'Nunito',
-            fontSize: 18.sp,
+            fontSize: 17.5.sp,
             fontWeight: FontWeight.w800,
             color: darkText,
           ),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: darkText),
@@ -113,45 +126,60 @@ class StudentCoachingReportScreen extends StatelessWidget {
           }
 
           final summary = report.summary;
+          final physicalParams = report.parameterCards
+              .where((p) => p.category.toLowerCase().contains('physical'))
+              .toList();
+          final mentalParams = report.parameterCards
+              .where((p) => p.category.toLowerCase().contains('mental'))
+              .toList();
+          final skillParams = report.parameterCards
+              .where((p) => p.category.toLowerCase().contains('skill'))
+              .toList();
+          final attitudeParams = report.parameterCards
+              .where((p) => p.category.toLowerCase().contains('attitude'))
+              .toList();
 
           return SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 40.h),
+            padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 40.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. Overall Scorecard Summary Card
-                _buildSummaryHeroCard(summary),
-                SizedBox(height: 20.h),
+                // 1. Academy Header: GIRISH BADMINTON ACADEMY
+                _buildAcademyHeader(summary, controller),
+                SizedBox(height: 12.h),
 
-                // 2. Coach Remarks Card
-                if (summary.coachRemarks.isNotEmpty) ...[
-                  _buildCoachRemarksCard(summary),
-                  SizedBox(height: 20.h),
+                // 2. Quick Score Bar & Toggle for Spider Radar / Trend Charts
+                _buildScoreSummaryBar(summary, report),
+                SizedBox(height: 8.h),
+
+                // 3. Collapsible Analytics (Radar & Trend)
+                if (_showFullAnalytics) ...[
+                  if (summary.coachRemarks.isNotEmpty) ...[
+                    _buildCoachRemarksCard(summary),
+                    SizedBox(height: 16.h),
+                  ],
+                  if (report.radarData.isNotEmpty) ...[
+                    EvaluationRadarChart(categories: report.radarData),
+                    SizedBox(height: 16.h),
+                  ],
+                  if (report.trend.isNotEmpty) ...[
+                    EvaluationTrendChart(trend: report.trend),
+                    SizedBox(height: 16.h),
+                  ],
                 ],
 
-                // 3. Category Radar / Spider Chart (Physical, Mental, Skill, Attitude)
-                if (report.radarData.isNotEmpty) ...[
-                  EvaluationRadarChart(categories: report.radarData),
-                  SizedBox(height: 20.h),
-                ],
+                // 4. Physical Section
+                _buildCategorySection('Physical :', physicalParams),
 
-                // 4. Progress Trend Line Chart
-                if (report.trend.isNotEmpty) ...[
-                  EvaluationTrendChart(trend: report.trend),
-                  SizedBox(height: 20.h),
-                ],
+                // 5. Mental Section
+                _buildCategorySection('mental :', mentalParams),
 
-                // 5. Individual Parameter Cards (All 24 parameters formatted)
-                if (report.parameterCards.isNotEmpty) ...[
-                  _buildParametersHeader(controller),
-                  SizedBox(height: 12.h),
-                  _buildCategoryFilterBar(controller),
-                  SizedBox(height: 14.h),
-                  ...controller.filteredParameters.map(
-                    (param) => ParameterCardWidget(parameter: param),
-                  ),
-                ],
+                // 6. Skill Section
+                _buildCategorySection('skill :', skillParams),
+
+                // 7. Attitude Section
+                _buildCategorySection('attitude :', attitudeParams),
               ],
             ),
           );
@@ -161,238 +189,150 @@ class StudentCoachingReportScreen extends StatelessWidget {
   }
 
   // ==========================================
-  // HERO SCORECARD SUMMARY
+  // 1. ACADEMY HEADER
   // ==========================================
 
-  Widget _buildSummaryHeroCard(dynamic summary) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22.r),
-        border: Border.all(
-          color: const Color(0x60D4AF37),
-          width: 1.5,
+  Widget _buildAcademyHeader(
+      EvaluationSummary summary, StudentEvaluationController controller) {
+    return Row(
+      children: [
+        // Circular Academy Logo
+        Container(
+          width: 44.h,
+          height: 44.h,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white,
+            border: Border.all(
+              color: const Color(0xFFD4AF37),
+              width: 1.5,
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x18000000),
+                blurRadius: 6,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipOval(
+            child: Image.asset(
+              'assets/logo/logo.png',
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => const Icon(
+                Icons.sports_tennis_rounded,
+                color: Color(0xFFD4AF37),
+              ),
+            ),
+          ),
         ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x28D4AF37),
-            blurRadius: 20,
-            offset: Offset(0, 6),
-          ),
-          BoxShadow(
-            color: Color(0x0C000000),
-            blurRadius: 6,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        SizedBox(width: 12.w),
+
+        // Academy Title
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFFBEB),
-                  borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(color: const Color(0xFFF59E0B), width: 1),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.workspace_premium_rounded, size: 13.sp, color: const Color(0xFFB45309)),
-                    SizedBox(width: 4.w),
-                    Text(
-                      'LATEST SCORECARD',
-                      style: TextStyle(
-                        fontFamily: 'Nunito',
-                        fontSize: 10.5.sp,
-                        fontWeight: FontWeight.w800,
-                        color: const Color(0xFFB45309),
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
+              Text(
+                'GIRISH',
+                style: TextStyle(
+                  fontFamily: 'Nunito',
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w900,
+                  color: const Color(0xFF0F172A),
+                  letterSpacing: 0.8,
+                  height: 1.1,
                 ),
               ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFECFDF5),
-                  borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: const Color(0xFF10B981), width: 1),
+              Text(
+                'BADMINTON ACADEMY',
+                style: TextStyle(
+                  fontFamily: 'Nunito',
+                  fontSize: 13.5.sp,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF0F172A),
+                  letterSpacing: 0.5,
+                  height: 1.2,
                 ),
-                child: Text(
-                  summary.performanceLevel.toUpperCase(),
+              ),
+              if (controller.targetStudentName.value.isNotEmpty) ...[
+                SizedBox(height: 2.h),
+                Text(
+                  'Student: ${controller.targetStudentName.value}',
                   style: TextStyle(
                     fontFamily: 'Nunito',
-                    fontSize: 10.5.sp,
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF047857),
-                    letterSpacing: 0.4,
+                    fontSize: 11.5.sp,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF9E7B1A),
                   ),
                 ),
-              ),
+              ],
             ],
           ),
-          SizedBox(height: 16.h),
-
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Circular Grade Badge
-              Container(
-                width: 72.h,
-                height: 72.h,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFFFFFDF5),
-                  border: Border.all(color: goldAccent, width: 2.2),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x30D4AF37),
-                      blurRadius: 14,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        summary.grade,
-                        style: TextStyle(
-                          fontFamily: 'Nunito',
-                          fontSize: 26.sp,
-                          fontWeight: FontWeight.w900,
-                          color: const Color(0xFF9E7B1A),
-                          height: 1.0,
-                        ),
-                      ),
-                      Text(
-                        'GRADE',
-                        style: TextStyle(
-                          fontFamily: 'Nunito',
-                          fontSize: 8.5.sp,
-                          fontWeight: FontWeight.w800,
-                          color: slateText,
-                          letterSpacing: 0.6,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(width: 16.w),
-
-              // Overall Score & Percentage
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${summary.percentage.toStringAsFixed(1)}%',
-                      style: TextStyle(
-                        fontFamily: 'Nunito',
-                        fontSize: 28.sp,
-                        fontWeight: FontWeight.w900,
-                        color: darkText,
-                        height: 1.1,
-                      ),
-                    ),
-                    SizedBox(height: 3.h),
-                    Text(
-                      'Score: ${summary.scoreText} points',
-                      style: TextStyle(
-                        fontFamily: 'Nunito',
-                        fontSize: 13.5.sp,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF9E7B1A),
-                      ),
-                    ),
-                    if (summary.batchName.isNotEmpty) ...[
-                      SizedBox(height: 3.h),
-                      Text(
-                        '${summary.sportName} • ${summary.batchName}',
-                        style: TextStyle(
-                          fontFamily: 'Nunito',
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w500,
-                          color: slateText,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   // ==========================================
-  // COACH REMARKS CARD
+  // 2. SCORE SUMMARY BAR WITH ANALYTICS TOGGLE
   // ==========================================
 
-  Widget _buildCoachRemarksCard(dynamic summary) {
+  Widget _buildScoreSummaryBar(
+      EvaluationSummary summary, StudentEvaluationReport report) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(18.w),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: const Color(0x50D4AF37), width: 1.2),
+        color: const Color(0xFFFFFDF5),
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(
+          color: const Color(0x60D4AF37),
+          width: 1.2,
+        ),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x14D4AF37),
-            blurRadius: 14,
-            offset: Offset(0, 4),
+            color: Color(0x10D4AF37),
+            blurRadius: 8,
+            offset: Offset(0, 2),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
             children: [
-              Icon(Icons.format_quote_rounded, color: goldAccent, size: 22.sp),
-              SizedBox(width: 6.w),
-              Text(
-                'Coach Remarks & Recommendations',
-                style: TextStyle(
-                  fontFamily: 'Nunito',
-                  fontSize: 14.5.sp,
-                  fontWeight: FontWeight.w800,
-                  color: darkText,
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD4AF37),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Text(
+                  'GRADE ${summary.grade}',
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    letterSpacing: 0.5,
+                  ),
                 ),
               ),
-            ],
-          ),
-          SizedBox(height: 10.h),
-          Text(
-            summary.coachRemarks,
-            style: TextStyle(
-              fontFamily: 'Nunito',
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w500,
-              color: const Color(0xFF334155),
-              height: 1.45,
-            ),
-          ),
-          SizedBox(height: 10.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
+              SizedBox(width: 8.w),
               Text(
-                '- ${summary.coachName}',
+                'Total: ${summary.scoreText}',
+                style: TextStyle(
+                  fontFamily: 'Nunito',
+                  fontSize: 13.5.sp,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF0F172A),
+                ),
+              ),
+              SizedBox(width: 6.w),
+              Text(
+                '(${summary.percentage.toStringAsFixed(1)}%)',
                 style: TextStyle(
                   fontFamily: 'Nunito',
                   fontSize: 12.sp,
@@ -402,99 +342,136 @@ class StudentCoachingReportScreen extends StatelessWidget {
               ),
             ],
           ),
+          InkWell(
+            onTap: () {
+              setState(() {
+                _showFullAnalytics = !_showFullAnalytics;
+              });
+            },
+            borderRadius: BorderRadius.circular(8.r),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+              child: Row(
+                children: [
+                  Text(
+                    _showFullAnalytics ? 'Hide Charts' : 'Radar Chart',
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 11.5.sp,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF9E7B1A),
+                    ),
+                  ),
+                  SizedBox(width: 3.w),
+                  Icon(
+                    _showFullAnalytics
+                        ? Icons.keyboard_arrow_up_rounded
+                        : Icons.keyboard_arrow_down_rounded,
+                    size: 16.sp,
+                    color: const Color(0xFF9E7B1A),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
   // ==========================================
-  // PARAMETERS LIST & CATEGORY FILTER
+  // 3. CATEGORY SECTION WITH PARAMETER CARDS
   // ==========================================
 
-  Widget _buildParametersHeader(StudentEvaluationController controller) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildCategorySection(
+      String headerTitle, List<ParameterCardModel> items) {
+    if (items.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Icon(Icons.checklist_rtl_rounded, color: goldAccent, size: 22.sp),
-            SizedBox(width: 8.w),
-            Text(
-              'Detailed Parameters',
-              style: TextStyle(
-                fontFamily: 'Nunito',
-                fontSize: 16.5.sp,
-                fontWeight: FontWeight.w900,
-                color: darkText,
-              ),
-            ),
-          ],
-        ),
-        Obx(
-          () => Text(
-            '${controller.filteredParameters.length} Metrics',
+        Padding(
+          padding: EdgeInsets.only(top: 14.h, bottom: 8.h, left: 2.w),
+          child: Text(
+            headerTitle,
             style: TextStyle(
               fontFamily: 'Nunito',
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w700,
-              color: slateText,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF0F172A),
+              letterSpacing: -0.2,
             ),
           ),
         ),
+        ...items.map((param) => ParameterCardWidget(parameter: param)),
       ],
     );
   }
 
-  Widget _buildCategoryFilterBar(StudentEvaluationController controller) {
-    return Obx(() {
-      final categories = controller.availableCategories;
-      final selected = controller.selectedCategoryFilter.value;
+  // ==========================================
+  // 4. COACH REMARKS CARD
+  // ==========================================
 
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: categories.map((cat) {
-            final isSelected = selected == cat;
-            return Padding(
-              padding: EdgeInsets.only(right: 8.w),
-              child: GestureDetector(
-                onTap: () => controller.setCategoryFilter(cat),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                  decoration: BoxDecoration(
-                    color: isSelected ? const Color(0xFFFFFDF5) : Colors.white,
-                    borderRadius: BorderRadius.circular(16.r),
-                    border: Border.all(
-                      color: isSelected ? goldAccent : const Color(0xFFE2E8F0),
-                      width: isSelected ? 1.5 : 1.0,
-                    ),
-                    boxShadow: isSelected
-                        ? const [
-                            BoxShadow(
-                              color: Color(0x20D4AF37),
-                              blurRadius: 8,
-                              offset: Offset(0, 2),
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: Text(
-                    cat,
-                    style: TextStyle(
-                      fontFamily: 'Nunito',
-                      fontSize: 11.5.sp,
-                      fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                      color: isSelected ? const Color(0xFF9E7B1A) : slateText,
-                    ),
-                  ),
+  Widget _buildCoachRemarksCard(EvaluationSummary summary) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: const Color(0x50D4AF37), width: 1.2),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x14D4AF37),
+            blurRadius: 10,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.format_quote_rounded, color: goldAccent, size: 20.sp),
+              SizedBox(width: 6.w),
+              Text(
+                'Coach Remarks & Recommendations',
+                style: TextStyle(
+                  fontFamily: 'Nunito',
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w800,
+                  color: darkText,
                 ),
               ),
-            );
-          }).toList(),
-        ),
-      );
-    });
+            ],
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            summary.coachRemarks,
+            style: TextStyle(
+              fontFamily: 'Nunito',
+              fontSize: 12.5.sp,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF334155),
+              height: 1.4,
+            ),
+          ),
+          SizedBox(height: 6.h),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              '- ${summary.coachName}',
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                fontSize: 11.5.sp,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF9E7B1A),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
-
