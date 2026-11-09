@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_endpoints.dart';
+import '../../../../core/routes/app_routes.dart';
 import '../../../../core/widgets/empty_state.dart';
 
 /// Live Coaching Batches Screen powered by GET /api/v1/coaching/batches.
@@ -74,6 +75,11 @@ class _CoachingBatchesScreenState extends State<CoachingBatchesScreen> {
         elevation: 0,
         centerTitle: true,
         actions: [
+          IconButton(
+            icon: Icon(Icons.assessment_outlined, size: 22.sp, color: const Color(0xFFD4AF37)),
+            onPressed: () => Get.toNamed(AppRoutes.coachingReport),
+            tooltip: 'Performance Report',
+          ),
           IconButton(
             icon: Icon(Icons.refresh_rounded, size: 22.sp, color: const Color(0xFF0F172A)),
             onPressed: _fetchLiveBatches,

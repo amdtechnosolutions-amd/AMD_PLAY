@@ -19,6 +19,8 @@ import '../../features/attendance/bindings/attendance_binding.dart';
 import '../../features/attendance/presentation/screens/attendance_screen.dart';
 import '../../features/membership/presentation/screens/membership_passes_screen.dart';
 import '../../features/coaching/presentation/screens/coaching_batches_screen.dart';
+import '../../features/coaching/presentation/screens/student_coaching_report_screen.dart';
+import '../../features/coaching/bindings/student_evaluation_binding.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import 'app_routes.dart';
 
@@ -126,6 +128,12 @@ class AppPages {
     GetPage(
       name: AppRoutes.coaching,
       page: () => const CoachingBatchesScreen(),
+      transition: Transition.rightToLeftWithFade,
+    ),
+    GetPage(
+      name: AppRoutes.coachingReport,
+      page: () => const StudentCoachingReportScreen(),
+      binding: StudentEvaluationBinding(),
       transition: Transition.rightToLeftWithFade,
     ),
     GetPage(

@@ -795,6 +795,13 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   const Divider(color: Color(0x1AD4AF37), height: 1),
                   _buildActionTile(
+                    icon: Icons.assessment_outlined,
+                    title: 'Coaching Performance Report',
+                    subtitle: 'Skill radar, 24-parameter metrics & scorecards',
+                    onTap: () => Get.toNamed(AppRoutes.coachingReport),
+                  ),
+                  const Divider(color: Color(0x1AD4AF37), height: 1),
+                  _buildActionTile(
                     icon: Icons.calendar_month_outlined,
                     title: 'Attendance Records',
                     subtitle: 'Daily check-in stats & history',

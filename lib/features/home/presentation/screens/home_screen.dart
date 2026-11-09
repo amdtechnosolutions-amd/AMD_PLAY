@@ -124,6 +124,10 @@ class HomeScreen extends StatelessWidget {
                   _buildTodayAttendanceSection(controller),
                   SizedBox(height: 24.h),
 
+                  // Coaching Performance Report & Evaluation Scorecard
+                  _buildCoachingReportSection(context),
+                  SizedBox(height: 24.h),
+
                   _buildMonthlyFeesSection(controller, context),
                   SizedBox(height: 16.h),
                 ],
@@ -845,6 +849,264 @@ class HomeScreen extends StatelessWidget {
           );
         }),
       ],
+    );
+  }
+
+  // ===========================================================================
+  // 4B. COACHING PERFORMANCE REPORT SECTION
+  // ===========================================================================
+
+  Widget _buildCoachingReportSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Coaching Performance',
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w800,
+                color: const Color(0xFF0F172A),
+              ),
+            ),
+            GestureDetector(
+              onTap: () => Get.toNamed(AppRoutes.coachingReport),
+              child: Row(
+                children: [
+                  Text(
+                    'Full Report',
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 12.5.sp,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF9E7B1A),
+                    ),
+                  ),
+                  SizedBox(width: 3.w),
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 11.sp,
+                    color: const Color(0xFF9E7B1A),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 12.h),
+
+        // Interactive Scorecard & Radar Banner Card
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(18.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(
+              color: const Color(0x60D4AF37),
+              width: 1.3,
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x20D4AF37),
+                blurRadius: 18,
+                offset: Offset(0, 6),
+              ),
+              BoxShadow(
+                color: Color(0x08000000),
+                blurRadius: 6,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 48.h,
+                    height: 48.h,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFFDF5),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color(0xFFD4AF37),
+                        width: 1.5,
+                      ),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x20D4AF37),
+                          blurRadius: 8,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.radar_rounded,
+                        size: 24.sp,
+                        color: const Color(0xFFD4AF37),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 14.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Evaluation Scorecard',
+                              style: TextStyle(
+                                fontFamily: 'Nunito',
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w800,
+                                color: const Color(0xFF0F172A),
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFECFDF5),
+                                borderRadius: BorderRadius.circular(10.r),
+                                border: Border.all(color: const Color(0xFF10B981), width: 0.8),
+                              ),
+                              child: Text(
+                                'LIVE REPORT',
+                                style: TextStyle(
+                                  fontFamily: 'Nunito',
+                                  fontSize: 9.5.sp,
+                                  fontWeight: FontWeight.w800,
+                                  color: const Color(0xFF047857),
+                                  letterSpacing: 0.4,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 3.h),
+                        Text(
+                          'Radar chart, 24 individual parameters & trends',
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF64748B),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 14.h),
+
+              // Feature Badges
+              Wrap(
+                spacing: 8.w,
+                runSpacing: 6.h,
+                children: [
+                  _buildReportFeatureBadge(Icons.radar_rounded, 'Spider Chart'),
+                  _buildReportFeatureBadge(Icons.checklist_rtl_rounded, '24 Parameters'),
+                  _buildReportFeatureBadge(Icons.trending_up_rounded, 'Progress Trend'),
+                  _buildReportFeatureBadge(Icons.format_quote_rounded, 'Coach Feedback'),
+                ],
+              ),
+              SizedBox(height: 16.h),
+
+              // Action CTA Button
+              Container(
+                width: double.infinity,
+                height: 46.h,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14.r),
+                  border: Border.all(
+                    color: const Color(0xFFD4AF37),
+                    width: 1.5,
+                  ),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x20D4AF37),
+                      blurRadius: 10,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14.r),
+                    onTap: () => Get.toNamed(AppRoutes.coachingReport),
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.assessment_outlined,
+                            size: 18.sp,
+                            color: const Color(0xFF9E7B1A),
+                          ),
+                          SizedBox(width: 8.w),
+                          Text(
+                            'VIEW FULL SCORECARD & RADAR',
+                            style: TextStyle(
+                              fontFamily: 'Nunito',
+                              fontSize: 12.5.sp,
+                              fontWeight: FontWeight.w900,
+                              color: const Color(0xFF0F172A),
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          SizedBox(width: 6.w),
+                          Icon(
+                            Icons.arrow_forward_rounded,
+                            size: 15.sp,
+                            color: const Color(0xFFD4AF37),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReportFeatureBadge(IconData icon, String label) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFDF5),
+        borderRadius: BorderRadius.circular(8.r),
+        border: Border.all(color: const Color(0x60D4AF37), width: 0.8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12.sp, color: const Color(0xFF9E7B1A)),
+          SizedBox(width: 4.w),
+          Text(
+            label,
+            style: TextStyle(
+              fontFamily: 'Nunito',
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF0F172A),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
