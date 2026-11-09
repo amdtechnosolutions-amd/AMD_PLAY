@@ -421,97 +421,67 @@ class LoginScreen extends GetView<AuthController> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 32.h),
 
-                  // Single Action Button: Sports Equipment Doodle Line Collage with Circular Arrow CTA
+                  // Single Round Action Button
                   Center(
-                    child: SizedBox(
-                      width: 260.w,
-                      height: 220.h,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          // Gold Line Art Sports Doodle Collage
-                          Positioned.fill(
-                            child: CustomPaint(
-                              painter: _SportsEquipmentGoldDoodlePainter(),
-                            ),
-                          ),
-
-                          // Outer ambient gold circular ring
-                          Container(
-                            width: 96.h,
-                            height: 96.h,
+                    child: Obx(
+                      () => Material(
+                        color: Colors.transparent,
+                        shape: const CircleBorder(),
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: controller.isLoading.value
+                              ? null
+                              : controller.submit,
+                          child: Container(
+                            width: 68.h,
+                            height: 68.h,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
+                              color: Colors.white,
                               border: Border.all(
-                                color: const Color(0x55D4AF37),
-                                width: 1.5,
+                                color: goldAccent,
+                                width: 2.4,
                               ),
-                            ),
-                          ),
-
-                          // Single Center Circular Floating CTA Button
-                          Obx(
-                            () => Material(
-                              color: Colors.transparent,
-                              shape: const CircleBorder(),
-                              child: InkWell(
-                                customBorder: const CircleBorder(),
-                                onTap: controller.isLoading.value
-                                    ? null
-                                    : controller.submit,
-                                child: Container(
-                                  width: 66.h,
-                                  height: 66.h,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.white,
-                                    border: Border.all(
-                                      color: goldAccent,
-                                      width: 2.2,
-                                    ),
-                                    boxShadow: const [
-                                      BoxShadow(
-                                        color: Color(0x35D4AF37),
-                                        blurRadius: 18,
-                                        offset: Offset(0, 6),
-                                      ),
-                                      BoxShadow(
-                                        color: Color(0x10000000),
-                                        blurRadius: 6,
-                                        offset: Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Center(
-                                    child: controller.isLoading.value
-                                        ? SizedBox(
-                                            width: 22.w,
-                                            height: 22.w,
-                                            child: const CircularProgressIndicator(
-                                              strokeWidth: 2.8,
-                                              valueColor:
-                                                  AlwaysStoppedAnimation<Color>(
-                                                goldAccent,
-                                              ),
-                                            ),
-                                          )
-                                        : Icon(
-                                            Icons.arrow_forward_rounded,
-                                            color: const Color(0xFF9E7B1A),
-                                            size: 28.sp,
-                                          ),
-                                  ),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0x35D4AF37),
+                                  blurRadius: 20,
+                                  offset: Offset(0, 6),
                                 ),
-                              ),
+                                BoxShadow(
+                                  color: Color(0x10000000),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: controller.isLoading.value
+                                  ? SizedBox(
+                                      width: 24.w,
+                                      height: 24.w,
+                                      child: const CircularProgressIndicator(
+                                        strokeWidth: 2.8,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                          goldAccent,
+                                        ),
+                                      ),
+                                    )
+                                  : Icon(
+                                      Icons.arrow_forward_rounded,
+                                      color: const Color(0xFF9E7B1A),
+                                      size: 30.sp,
+                                    ),
                             ),
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 36.h),
 
                   // Bottom Home Bar Indicator
                   Center(
@@ -754,160 +724,6 @@ class _InertiaGridPainter extends CustomPainter {
     for (double y = 0; y < size.height; y += step) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
     }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-/// Custom painter rendering the sports equipment line art doodle wheel in luxury gold lines
-class _SportsEquipmentGoldDoodlePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final strokePaint = Paint()
-      ..color = const Color(0x40D4AF37)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.3
-      ..strokeCap = StrokeCap.round;
-
-    final subtleFillPaint = Paint()
-      ..color = const Color(0x14D4AF37)
-      ..style = PaintingStyle.fill;
-
-    final center = Offset(size.width / 2, size.height / 2);
-
-    // 1. Concentric ambient sports rings
-    canvas.drawCircle(center, 100, strokePaint);
-    canvas.drawCircle(center, 72, strokePaint);
-
-    // 2. Football / Soccer ball (Top Center)
-    final soccerCenter = Offset(center.dx, center.dy - 68);
-    canvas.drawCircle(soccerCenter, 20, strokePaint);
-    canvas.drawCircle(soccerCenter, 20, subtleFillPaint);
-    final pentagon = Path()
-      ..moveTo(soccerCenter.dx, soccerCenter.dy - 7)
-      ..lineTo(soccerCenter.dx + 7, soccerCenter.dy - 2)
-      ..lineTo(soccerCenter.dx + 4, soccerCenter.dy + 6)
-      ..lineTo(soccerCenter.dx - 4, soccerCenter.dy + 6)
-      ..lineTo(soccerCenter.dx - 7, soccerCenter.dy - 2)
-      ..close();
-    canvas.drawPath(pentagon, strokePaint);
-
-    // 3. Cricket Stumps & Bat (Top Left)
-    canvas.drawLine(
-      Offset(center.dx - 80, center.dy - 35),
-      Offset(center.dx - 80, center.dy + 12),
-      strokePaint,
-    );
-    canvas.drawLine(
-      Offset(center.dx - 73, center.dy - 35),
-      Offset(center.dx - 73, center.dy + 12),
-      strokePaint,
-    );
-    canvas.drawLine(
-      Offset(center.dx - 66, center.dy - 35),
-      Offset(center.dx - 66, center.dy + 12),
-      strokePaint,
-    );
-    // Bails on top
-    canvas.drawLine(
-      Offset(center.dx - 84, center.dy - 35),
-      Offset(center.dx - 62, center.dy - 35),
-      strokePaint,
-    );
-    // Bat leaning
-    canvas.drawLine(
-      Offset(center.dx - 58, center.dy - 50),
-      Offset(center.dx - 58, center.dy + 8),
-      strokePaint,
-    );
-
-    // 4. Tennis Racket (Top Right)
-    final racketHead = Offset(center.dx + 68, center.dy - 48);
-    canvas.drawOval(
-      Rect.fromCenter(center: racketHead, width: 30, height: 38),
-      strokePaint,
-    );
-    canvas.drawLine(
-      Offset(racketHead.dx, racketHead.dy + 19),
-      Offset(racketHead.dx + 12, racketHead.dy + 55),
-      strokePaint,
-    );
-
-    // 5. Basketball (Right Center)
-    final bbCenter = Offset(center.dx + 84, center.dy + 12);
-    canvas.drawCircle(bbCenter, 18, strokePaint);
-    canvas.drawLine(
-      Offset(bbCenter.dx - 18, bbCenter.dy),
-      Offset(bbCenter.dx + 18, bbCenter.dy),
-      strokePaint,
-    );
-    canvas.drawLine(
-      Offset(bbCenter.dx, bbCenter.dy - 18),
-      Offset(bbCenter.dx, bbCenter.dy + 18),
-      strokePaint,
-    );
-
-    // 6. Skateboard (Bottom Left)
-    final deckRect = RRect.fromRectAndRadius(
-      Rect.fromCenter(
-        center: Offset(center.dx - 52, center.dy + 62),
-        width: 48,
-        height: 10,
-      ),
-      const Radius.circular(5),
-    );
-    canvas.drawRRect(deckRect, strokePaint);
-    canvas.drawCircle(Offset(center.dx - 65, center.dy + 72), 4, strokePaint);
-    canvas.drawCircle(Offset(center.dx - 39, center.dy + 72), 4, strokePaint);
-
-    // 7. Badminton Shuttlecock (Bottom Center)
-    final shuttlecock = Path()
-      ..moveTo(center.dx - 10, center.dy + 75)
-      ..lineTo(center.dx + 10, center.dy + 75)
-      ..lineTo(center.dx + 3, center.dy + 92)
-      ..lineTo(center.dx - 3, center.dy + 92)
-      ..close();
-    canvas.drawPath(shuttlecock, strokePaint);
-    canvas.drawCircle(Offset(center.dx, center.dy + 95), 4, strokePaint);
-
-    // 8. Archery Bow & Arrow (Left Center)
-    final bowPath = Path()
-      ..moveTo(center.dx - 84, center.dy + 8)
-      ..quadraticBezierTo(
-        center.dx - 105,
-        center.dy + 34,
-        center.dx - 84,
-        center.dy + 60,
-      );
-    canvas.drawPath(bowPath, strokePaint);
-    canvas.drawLine(
-      Offset(center.dx - 84, center.dy + 8),
-      Offset(center.dx - 84, center.dy + 60),
-      strokePaint,
-    );
-    canvas.drawLine(
-      Offset(center.dx - 96, center.dy + 34),
-      Offset(center.dx - 58, center.dy + 34),
-      strokePaint,
-    );
-
-    // 9. Ambient Star Accents
-    canvas.drawCircle(
-      Offset(center.dx - 30, center.dy - 60),
-      2.5,
-      subtleFillPaint,
-    );
-    canvas.drawCircle(
-      Offset(center.dx + 30, center.dy - 60),
-      2.5,
-      subtleFillPaint,
-    );
-    canvas.drawCircle(
-      Offset(center.dx + 60, center.dy + 65),
-      3,
-      subtleFillPaint,
-    );
   }
 
   @override
