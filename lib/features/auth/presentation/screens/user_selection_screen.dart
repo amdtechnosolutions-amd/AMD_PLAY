@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../controllers/auth_controller.dart';
@@ -318,7 +319,7 @@ class UserSelectionScreen extends GetView<AuthController> {
         ),
         SizedBox(height: 14.h),
 
-        // 2 & 3. STUDENTS & MEMBERS (IN A ROW)
+        // 2 & 3. STUDENTS & MEMBERS (IN A ROW WITH OFFICIAL SVG ICONS)
         Row(
           children: [
             Expanded(
@@ -328,13 +329,7 @@ class UserSelectionScreen extends GetView<AuthController> {
                 title: 'Students',
                 badgeText: 'STUDENT PORTAL',
                 subtitle: 'Batches, attendance & coaching',
-                icon: Icons.school_rounded,
-                iconGradient: const LinearGradient(
-                  colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                iconColor: goldAccent,
+                svgAsset: 'assets/images/students.svg',
               ),
             ),
             SizedBox(width: 12.w),
@@ -345,34 +340,22 @@ class UserSelectionScreen extends GetView<AuthController> {
                 title: 'Members',
                 badgeText: '★ VIP ACCESS',
                 subtitle: 'VIP Lounge, court & lockers',
-                icon: Icons.workspace_premium_rounded,
-                iconGradient: const LinearGradient(
-                  colors: [Color(0xFF0F172A), Color(0xFF334155)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                iconColor: goldAccent,
+                svgAsset: 'assets/images/members.svg',
               ),
             ),
           ],
         ),
         SizedBox(height: 14.h),
 
-        // 4. COACHES (STAFF PORTAL)
+        // 4. COACHES (STAFF PORTAL WITH OFFICIAL SVG ICON)
         _buildRoleCard(
           profile: MembershipProfile.coach,
           roleName: 'Coach',
           title: 'Coaches',
           badgeText: 'COACH PORTAL',
           subtitle: 'Manage training batches, player attendance & sessions',
-          icon: Icons.sports_rounded,
+          svgAsset: 'assets/images/coaching.svg',
           isFeatured: false,
-          iconGradient: const LinearGradient(
-            colors: [Color(0xFF0F172A), Color(0xFFD4AF37)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          iconColor: goldAccent,
         ),
       ],
     );
@@ -384,9 +367,10 @@ class UserSelectionScreen extends GetView<AuthController> {
     required String title,
     required String badgeText,
     required String subtitle,
-    required IconData icon,
-    required LinearGradient iconGradient,
-    required Color iconColor,
+    String? svgAsset,
+    IconData? icon,
+    LinearGradient? iconGradient,
+    Color iconColor = goldAccent,
   }) {
     return Material(
       color: Colors.transparent,
@@ -429,29 +413,36 @@ class UserSelectionScreen extends GetView<AuthController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top Bar inside Card: Icon + Arrow Action
+              // Top Bar inside Card: Icon / SVG + Arrow Action
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    width: 38.h,
-                    height: 38.h,
+                    width: 40.h,
+                    height: 40.h,
                     decoration: BoxDecoration(
-                      gradient: iconGradient,
-                      borderRadius: BorderRadius.circular(11.r),
+                      color: Colors.white,
+                      gradient: svgAsset == null ? iconGradient : null,
+                      borderRadius: BorderRadius.circular(12.r),
                       border: Border.all(
-                        color: const Color(0x40D4AF37),
-                        width: 1,
+                        color: const Color(0x60D4AF37),
+                        width: 1.2,
                       ),
                       boxShadow: const [
                         BoxShadow(
-                          color: Color(0x180F172A),
+                          color: Color(0x18D4AF37),
                           blurRadius: 6,
                           offset: Offset(0, 2),
                         ),
                       ],
                     ),
-                    child: Icon(icon, size: 20.sp, color: iconColor),
+                    padding: EdgeInsets.all(svgAsset != null ? 5.h : 0),
+                    child: svgAsset != null
+                        ? SvgPicture.asset(
+                            svgAsset,
+                            fit: BoxFit.contain,
+                          )
+                        : Icon(icon, size: 20.sp, color: iconColor),
                   ),
                   Container(
                     width: 26.h,
@@ -539,16 +530,18 @@ class UserSelectionScreen extends GetView<AuthController> {
     );
   }
 
+
   Widget _buildRoleCard({
     required MembershipProfile profile,
     required String roleName,
     required String title,
     required String badgeText,
     required String subtitle,
-    required IconData icon,
+    String? svgAsset,
+    IconData? icon,
     required bool isFeatured,
-    required LinearGradient iconGradient,
-    required Color iconColor,
+    LinearGradient? iconGradient,
+    Color iconColor = goldAccent,
     String? featuredTag,
   }) {
     return Material(
@@ -603,25 +596,32 @@ class UserSelectionScreen extends GetView<AuthController> {
               ),
               child: Row(
                 children: [
-                  // Vibrant Left Icon Container
+                  // Left Icon Container (SVG or Icon)
                   Container(
                     width: 48.h,
                     height: 48.h,
                     decoration: BoxDecoration(
-                      gradient: iconGradient,
+                      color: svgAsset != null ? Colors.white : null,
+                      gradient: svgAsset == null ? iconGradient : null,
                       borderRadius: BorderRadius.circular(14.r),
                       border: isFeatured
                           ? Border.all(color: Colors.white, width: 1.5)
-                          : Border.all(color: const Color(0x40D4AF37), width: 1),
+                          : Border.all(color: const Color(0x60D4AF37), width: 1.2),
                       boxShadow: [
                         BoxShadow(
-                          color: isFeatured ? const Color(0x40D4AF37) : const Color(0x180F172A),
+                          color: isFeatured ? const Color(0x40D4AF37) : const Color(0x18D4AF37),
                           blurRadius: 8,
                           offset: const Offset(0, 3),
                         ),
                       ],
                     ),
-                    child: Icon(icon, size: 24.sp, color: iconColor),
+                    padding: svgAsset != null ? EdgeInsets.all(6.h) : EdgeInsets.zero,
+                    child: svgAsset != null
+                        ? SvgPicture.asset(
+                            svgAsset,
+                            fit: BoxFit.contain,
+                          )
+                        : Icon(icon, size: 24.sp, color: iconColor),
                   ),
                   SizedBox(width: 14.w),
 

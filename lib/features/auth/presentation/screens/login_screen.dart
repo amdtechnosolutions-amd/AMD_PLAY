@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../controllers/auth_controller.dart';
@@ -288,7 +289,7 @@ class LoginScreen extends GetView<AuthController> {
                           child: _buildRoleTab(
                             title: 'Student',
                             subtitle: 'Trainees',
-                            icon: Icons.school_rounded,
+                            svgAsset: 'assets/images/students.svg',
                             isSelected: role == 'Student',
                             onTap: () => controller.selectRole('Student'),
                           ),
@@ -298,7 +299,7 @@ class LoginScreen extends GetView<AuthController> {
                           child: _buildRoleTab(
                             title: 'Coach',
                             subtitle: 'Trainers',
-                            icon: Icons.sports_rounded,
+                            svgAsset: 'assets/images/coaching.svg',
                             isSelected: role == 'Coach',
                             onTap: () => controller.selectRole('Coach'),
                           ),
@@ -308,7 +309,7 @@ class LoginScreen extends GetView<AuthController> {
                           child: _buildRoleTab(
                             title: 'Member',
                             subtitle: 'VIP Passes',
-                            icon: Icons.workspace_premium_rounded,
+                            svgAsset: 'assets/images/members.svg',
                             isSelected: role == 'Member',
                             onTap: () => controller.selectRole('Member'),
                           ),
@@ -543,7 +544,8 @@ class LoginScreen extends GetView<AuthController> {
   Widget _buildRoleTab({
     required String title,
     required String subtitle,
-    required IconData icon,
+    String? svgAsset,
+    IconData? icon,
     required bool isSelected,
     required VoidCallback onTap,
   }) {
@@ -575,18 +577,29 @@ class LoginScreen extends GetView<AuthController> {
           child: Row(
             children: [
               Container(
-                padding: EdgeInsets.all(6.w),
+                width: 28.h,
+                height: 28.h,
+                padding: EdgeInsets.all(svgAsset != null ? 3.h : 6.w),
                 decoration: BoxDecoration(
                   color: isSelected
                       ? const Color(0x20D4AF37)
                       : const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(8.r),
+                  border: Border.all(
+                    color: isSelected ? const Color(0x80D4AF37) : Colors.transparent,
+                    width: 0.8,
+                  ),
                 ),
-                child: Icon(
-                  icon,
-                  size: 16.sp,
-                  color: isSelected ? const Color(0xFF9E7B1A) : slateText,
-                ),
+                child: svgAsset != null
+                    ? SvgPicture.asset(
+                        svgAsset,
+                        fit: BoxFit.contain,
+                      )
+                    : Icon(
+                        icon,
+                        size: 16.sp,
+                        color: isSelected ? const Color(0xFF9E7B1A) : slateText,
+                      ),
               ),
               SizedBox(width: 8.w),
               Expanded(
