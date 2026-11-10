@@ -684,11 +684,11 @@ class CourtBookingScreen extends StatelessWidget {
             Color badgeColor = const Color(0xFF059669);
 
             if (isSelected) {
-              bgColor = AppColors.primary;
-              borderColor = const Color(0xFF0F172A);
+              bgColor = const Color(0xFFFFFDE7);
+              borderColor = AppColors.primary;
               textColor = const Color(0xFF0F172A);
-              badgeBg = const Color(0xFF0F172A);
-              badgeColor = Colors.white;
+              badgeBg = AppColors.primary;
+              badgeColor = const Color(0xFF0F172A);
             } else if (slot.isHold) {
               bgColor = const Color(0xFFFFFBEB);
               borderColor = const Color(0xFFFDE68A);
@@ -731,9 +731,9 @@ class CourtBookingScreen extends StatelessWidget {
                   boxShadow: [
                     if (isSelected)
                       BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
+                        color: AppColors.primary.withValues(alpha: 0.15),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
                       ),
                   ],
                 ),
@@ -757,7 +757,7 @@ class CourtBookingScreen extends StatelessWidget {
                           ),
                         ),
                         if (isSelected)
-                          const Icon(Icons.check_circle_rounded, size: 16, color: Color(0xFF0F172A)),
+                          const Icon(Icons.check_circle_rounded, size: 16, color: AppColors.primary),
                       ],
                     ),
                     SizedBox(height: 4.h),

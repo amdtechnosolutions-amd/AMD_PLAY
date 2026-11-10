@@ -36,10 +36,10 @@ class SlotCard extends StatelessWidget {
 
     switch (state) {
       case SlotState.selected:
-        bg = AppColors.primary;
-        fg = AppColors.textInverse;
-        border = BorderSide.none;
-        stateIcon = const Icon(Icons.check_circle_rounded, color: AppColors.accent, size: 14);
+        bg = const Color(0xFFFFFDE7);
+        fg = AppColors.textPrimary;
+        border = const BorderSide(color: AppColors.primary, width: 2.0);
+        stateIcon = const Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 14);
         statusLabel = 'Selected';
         break;
       case SlotState.booked:
@@ -79,9 +79,9 @@ class SlotCard extends StatelessWidget {
           boxShadow: state == SlotState.selected
               ? [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.28),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+                    color: AppColors.primary.withValues(alpha: 0.15),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
                   ),
                 ]
               : [],
