@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+
 import '../controllers/splash_controller.dart';
 
 /// Premium animated splash screen for INERTIA SPORTS ACADEMY
@@ -12,7 +13,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _animController;
   late final Animation<double> _scaleAnimation;
   late final Animation<double> _fadeAnimation;
@@ -24,16 +26,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 5000),
     );
 
     _scaleAnimation = Tween<double>(begin: 0.82, end: 1.0).animate(
       CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic),
     );
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animController, curve: Curves.easeIn),
-    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeIn));
 
     _animController.forward();
   }
@@ -76,29 +79,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             ),
           ),
 
-          // Subtle Golden Ambient Glow at the Center
-          Positioned.fill(
-            child: Center(
-              child: Container(
-                width: 240.h,
-                height: 240.h,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: const Color(0x1AF59E0B),
-                    width: 40,
-                  ),
-                ),
-              ),
-            ),
-          ),
-
           // Subtle Athletic Grid Overlay
-          Positioned.fill(
-            child: CustomPaint(
-              painter: _SplashGridPainter(),
-            ),
-          ),
+          Positioned.fill(child: CustomPaint(painter: _SplashGridPainter())),
 
           // Center Logo and INERTIA SPORTS ACADEMY Title
           Center(
@@ -145,7 +127,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
                     // Tagline in CAPS
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 14.w,
+                        vertical: 4.h,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0x0DFFFFFF),
                         borderRadius: BorderRadius.circular(20.r),
@@ -185,7 +170,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     height: 20.w,
                     child: const CircularProgressIndicator(
                       strokeWidth: 2.0,
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFD4AF37)),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFFD4AF37),
+                      ),
                     ),
                   ),
                   SizedBox(height: 14.h),
@@ -215,10 +202,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       decoration: BoxDecoration(
         color: Colors.black,
         shape: BoxShape.circle,
-        border: Border.all(
-          color: const Color(0xFFD4AF37),
-          width: 2.5,
-        ),
+        border: Border.all(color: const Color(0xFFD4AF37), width: 2.5),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
