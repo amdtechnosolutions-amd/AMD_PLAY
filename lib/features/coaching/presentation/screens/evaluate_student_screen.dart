@@ -18,6 +18,7 @@ class _EvaluateStudentScreenState extends State<EvaluateStudentScreen> {
   static const Color slateText = Color(0xFF64748B);
 
   final _formKey = GlobalKey<FormState>();
+  final ScrollController _scrollController = ScrollController();
   final TextEditingController _studentIdController = TextEditingController();
   final TextEditingController _studentNameController = TextEditingController();
   final TextEditingController _remarksController = TextEditingController();
@@ -75,10 +76,34 @@ class _EvaluateStudentScreenState extends State<EvaluateStudentScreen> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _studentIdController.dispose();
     _studentNameController.dispose();
     _remarksController.dispose();
     super.dispose();
+  }
+
+  /// Reset evaluation form fields and scroll smoothly back to top for the next student
+  void _resetForm() {
+    setState(() {
+      _selectedStudentId = null;
+      _studentNameController.clear();
+      _studentIdController.clear();
+      _remarksController.clear();
+      _physicalScore = 48.0;
+      _mentalScore = 52.0;
+      _skillScore = 54.0;
+      _attitudeScore = 56.0;
+    });
+    _formKey.currentState?.reset();
+
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOutCubic,
+      );
+    }
   }
 
   double get _totalScore => _physicalScore + _mentalScore + _skillScore + _attitudeScore;
@@ -153,17 +178,27 @@ class _EvaluateStudentScreenState extends State<EvaluateStudentScreen> {
 
       if (success) {
         debugPrint('[EvaluateStudentScreen] Success response confirmed!');
+
+        // Refresh batch student roster and controller data
+        if (_selectedBatchId != null && _selectedBatchId!.isNotEmpty) {
+          controller.loadStudentsForBatch(_selectedBatchId!);
+        }
+        await controller.fetchCoachData();
+
+        // Reset form fields & scores back to baseline for the next evaluation
+        _resetForm();
+
         Get.snackbar(
-          'Evaluation Published',
-          'Student performance report has been successfully recorded on the server.',
+          'Evaluation Published!',
+          'Student report has been saved. Form has been reset for the next student.',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.white,
           colorText: darkText,
           borderColor: goldAccent,
           borderWidth: 1.2,
+          duration: const Duration(seconds: 4),
           margin: const EdgeInsets.all(16),
         );
-        Get.back();
       }
     } catch (e) {
       debugPrint('[EvaluateStudentScreen] Submission error: $e');
@@ -209,8 +244,17 @@ class _EvaluateStudentScreenState extends State<EvaluateStudentScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: darkText),
           onPressed: () => Get.back(),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded, color: goldAccent),
+            tooltip: 'Reset Form',
+            onPressed: _resetForm,
+          ),
+          SizedBox(width: 8.w),
+        ],
       ),
       body: SingleChildScrollView(
+        controller: _scrollController,
         padding: EdgeInsets.fromLTRB(18.w, 12.h, 18.w, 40.h),
         child: Form(
           key: _formKey,
