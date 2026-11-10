@@ -138,6 +138,7 @@ class _EvaluateStudentScreenState extends State<EvaluateStudentScreen> {
     setState(() => _isSubmitting = true);
 
     try {
+      debugPrint('[EvaluateStudentScreen] Publishing evaluation for student ${_studentIdController.text} in batch $_selectedBatchId');
       final success = await controller.submitEvaluation(
         studentId: _studentIdController.text.trim(),
         batchId: _selectedBatchId,
@@ -151,9 +152,10 @@ class _EvaluateStudentScreenState extends State<EvaluateStudentScreen> {
       );
 
       if (success) {
+        debugPrint('[EvaluateStudentScreen] Success response confirmed!');
         Get.snackbar(
           'Evaluation Published',
-          'Student performance report has been successfully recorded.',
+          'Student performance report has been successfully recorded on the server.',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.white,
           colorText: darkText,
@@ -164,14 +166,16 @@ class _EvaluateStudentScreenState extends State<EvaluateStudentScreen> {
         Get.back();
       }
     } catch (e) {
+      debugPrint('[EvaluateStudentScreen] Submission error: $e');
       Get.snackbar(
-        'Submission Failed',
+        'Submission Response',
         e.toString().replaceAll('Exception:', '').trim(),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.white,
         colorText: const Color(0xFFEF4444),
         borderColor: const Color(0xFFEF4444),
         borderWidth: 1.2,
+        duration: const Duration(seconds: 6),
         margin: const EdgeInsets.all(16),
       );
     } finally {

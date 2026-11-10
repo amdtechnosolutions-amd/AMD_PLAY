@@ -141,6 +141,7 @@ class CoachEvaluationController extends GetxController {
     required String remarks,
   }) async {
     try {
+      debugPrint('[CoachEvaluationController] submitEvaluation initiated: studentId=$studentId, batchId=$batchId');
       final success = await _service.createEvaluation(
         studentId: studentId,
         batchId: batchId,
@@ -151,11 +152,12 @@ class CoachEvaluationController extends GetxController {
         remarks: remarks,
       );
       if (success) {
+        debugPrint('[CoachEvaluationController] Evaluation created successfully, refreshing coach data...');
         await fetchCoachData();
         return true;
       }
     } catch (e) {
-      debugPrint('[CoachEvaluationController] submitEvaluation error: $e');
+      debugPrint('[CoachEvaluationController] submitEvaluation caught error: $e');
       rethrow;
     }
     return false;

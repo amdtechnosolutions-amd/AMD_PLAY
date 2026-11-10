@@ -261,6 +261,12 @@ class CoachEvaluationService {
         'evaluationDate': DateTime.now().toIso8601String(),
       };
 
+      debugPrint('====================================================');
+      debugPrint('[CoachEvaluationService] SUBMITTING EVALUATION:');
+      debugPrint('URL: ${ApiEndpoints.coachEvaluations}');
+      debugPrint('Payload: $payload');
+      debugPrint('====================================================');
+
       final response = await _apiClient.dio.post(
         ApiEndpoints.coachEvaluations,
         data: payload,
@@ -269,9 +275,35 @@ class CoachEvaluationService {
         ),
       );
 
-      return response.statusCode == 200 || response.statusCode == 201;
+      debugPrint('====================================================');
+      debugPrint('[CoachEvaluationService] EVALUATION RESPONSE:');
+      debugPrint('Status Code: ${response.statusCode}');
+      debugPrint('Response Body: ${response.data}');
+      debugPrint('====================================================');
+
+      final isSuccess = response.statusCode == 200 || response.statusCode == 201;
+      if (!isSuccess) {
+        debugPrint('[CoachEvaluationService] Non-success response: ${response.data}');
+      }
+      return isSuccess;
     } catch (e) {
-      debugPrint('[CoachEvaluationService] createEvaluation error: $e');
+      debugPrint('====================================================');
+      debugPrint('[CoachEvaluationService] EVALUATION ERROR:');
+      if (e is DioException) {
+        debugPrint('DioException Status: ${e.response?.statusCode}');
+        debugPrint('DioException Response Data: ${e.response?.data}');
+        debugPrint('DioException Message: ${e.message}');
+        debugPrint('====================================================');
+        final serverMsg = e.response?.data is Map
+            ? (e.response?.data['message'] ?? e.response?.data['error'])?.toString()
+            : null;
+        if (serverMsg != null && serverMsg.isNotEmpty) {
+          throw Exception(serverMsg);
+        }
+      } else {
+        debugPrint('Error: $e');
+        debugPrint('====================================================');
+      }
       rethrow;
     }
   }
