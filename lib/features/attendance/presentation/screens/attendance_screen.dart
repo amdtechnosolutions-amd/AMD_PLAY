@@ -11,6 +11,15 @@ import '../controllers/attendance_controller.dart';
 class AttendanceScreen extends StatelessWidget {
   const AttendanceScreen({super.key});
 
+  static const Color goldAccent = Color(0xFFD4AF37);
+  static const Color presentColor = Color(0xFF10B981);
+  static const Color presentLight = Color(0xFFECFDF5);
+  static const Color absentColor = Color(0xFFF87171);
+  static const Color absentLight = Color(0xFFFEE2E2);
+  static const Color excusedColor = Color(0xFFF59E0B);
+  static const Color excusedLight = Color(0xFFFEF3C7);
+  static const Color darkSlate = Color(0xFF0F172A);
+
   @override
   Widget build(BuildContext context) {
     final controller = Get.isRegistered<AttendanceController>()
@@ -55,7 +64,7 @@ class AttendanceScreen extends StatelessWidget {
                 textConfirm: 'Logout',
                 textCancel: 'Cancel',
                 confirmTextColor: Colors.white,
-                buttonColor: const Color(0xFF00D2C2),
+                buttonColor: goldAccent,
                 onConfirm: () async {
                   if (Get.isRegistered<StorageService>()) {
                     await Get.find<StorageService>().clearAll();
@@ -71,12 +80,12 @@ class AttendanceScreen extends StatelessWidget {
       body: Obx(() {
         if (controller.isLoading.value && controller.allSessions.isEmpty) {
           return const Center(
-            child: CircularProgressIndicator(color: Color(0xFF00D2C2)),
+            child: CircularProgressIndicator(color: goldAccent),
           );
         }
 
         return RefreshIndicator(
-          color: const Color(0xFF00D2C2),
+          color: goldAccent,
           onRefresh: () => controller.refreshAttendance(),
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -120,9 +129,9 @@ class AttendanceScreen extends StatelessWidget {
         Expanded(
           child: _buildMetricCard(
             icon: Icons.donut_large_rounded,
-            iconColor: const Color(0xFF00D2C2),
+            iconColor: goldAccent,
             value: '${controller.overallPercentage.value}%',
-            valueColor: const Color(0xFF00D2C2),
+            valueColor: goldAccent,
             label: 'Overall',
           ),
         ),
@@ -132,9 +141,9 @@ class AttendanceScreen extends StatelessWidget {
         Expanded(
           child: _buildMetricCard(
             icon: Icons.check_circle_rounded,
-            iconColor: const Color(0xFF00D2C2),
+            iconColor: presentColor,
             value: '${controller.presentCount.value}',
-            valueColor: const Color(0xFF00D2C2),
+            valueColor: presentColor,
             label: 'Present',
           ),
         ),
@@ -144,9 +153,9 @@ class AttendanceScreen extends StatelessWidget {
         Expanded(
           child: _buildMetricCard(
             icon: Icons.cancel_rounded,
-            iconColor: const Color(0xFFF87171),
+            iconColor: absentColor,
             value: '${controller.absentCount.value}',
-            valueColor: const Color(0xFFF87171),
+            valueColor: absentColor,
             label: 'Absent',
           ),
         ),
@@ -215,38 +224,49 @@ class AttendanceScreen extends StatelessWidget {
           style: TextStyle(fontFamily: 'Nunito', 
             fontSize: 16.sp,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF0F172A),
+            color: darkSlate,
           ),
         ),
         GestureDetector(
           onTap: () => _showMonthPicker(context, controller),
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
             decoration: BoxDecoration(
-              color: const Color(0xFF00D2C2).withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(12.r),
+              color: const Color(0xFFFFFDF5),
+              borderRadius: BorderRadius.circular(14.r),
+              border: Border.all(
+                color: const Color(0x60D4AF37),
+                width: 1.2,
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x10D4AF37),
+                  blurRadius: 6,
+                  offset: Offset(0, 2),
+                ),
+              ],
             ),
             child: Row(
               children: [
                 Icon(
                   Icons.calendar_today_outlined,
                   size: 15.sp,
-                  color: const Color(0xFF00D2C2),
+                  color: goldAccent,
                 ),
                 SizedBox(width: 6.w),
                 Text(
                   controller.formattedMonthHeader,
                   style: TextStyle(fontFamily: 'Nunito', 
                     fontSize: 13.5.sp,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF00D2C2),
+                    fontWeight: FontWeight.w700,
+                    color: darkSlate,
                   ),
                 ),
                 SizedBox(width: 4.w),
                 Icon(
                   Icons.keyboard_arrow_down_rounded,
                   size: 16.sp,
-                  color: const Color(0xFF00D2C2),
+                  color: goldAccent,
                 ),
               ],
             ),
@@ -273,12 +293,21 @@ class AttendanceScreen extends StatelessWidget {
               duration: const Duration(milliseconds: 200),
               height: 44.h,
               decoration: BoxDecoration(
-                color: isCal ? const Color(0xFF00D2C2) : Colors.white,
+                color: isCal ? goldAccent : Colors.white,
                 borderRadius: BorderRadius.circular(22.r),
                 border: Border.all(
-                  color: isCal ? const Color(0xFF00D2C2) : const Color(0xFFE2E8F0),
+                  color: isCal ? goldAccent : const Color(0xFFE2E8F0),
                   width: 1.2,
                 ),
+                boxShadow: isCal
+                    ? const [
+                        BoxShadow(
+                          color: Color(0x25D4AF37),
+                          blurRadius: 8,
+                          offset: Offset(0, 3),
+                        ),
+                      ]
+                    : null,
               ),
               child: Center(
                 child: Row(
@@ -314,12 +343,21 @@ class AttendanceScreen extends StatelessWidget {
               duration: const Duration(milliseconds: 200),
               height: 44.h,
               decoration: BoxDecoration(
-                color: !isCal ? const Color(0xFF00D2C2) : Colors.white,
+                color: !isCal ? goldAccent : Colors.white,
                 borderRadius: BorderRadius.circular(22.r),
                 border: Border.all(
-                  color: !isCal ? const Color(0xFF00D2C2) : const Color(0xFFE2E8F0),
+                  color: !isCal ? goldAccent : const Color(0xFFE2E8F0),
                   width: 1.2,
                 ),
+                boxShadow: !isCal
+                    ? const [
+                        BoxShadow(
+                          color: Color(0x25D4AF37),
+                          blurRadius: 8,
+                          offset: Offset(0, 3),
+                        ),
+                      ]
+                    : null,
               ),
               child: Center(
                 child: Row(
@@ -437,11 +475,11 @@ class AttendanceScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildLegendItem(const Color(0xFF00D2C2), 'Present'),
+              _buildLegendItem(presentColor, 'Present'),
               SizedBox(width: 18.w),
-              _buildLegendItem(const Color(0xFFF87171), 'Absent'),
+              _buildLegendItem(absentColor, 'Absent'),
               SizedBox(width: 18.w),
-              _buildLegendItem(const Color(0xFFF59E0B), 'Excused'),
+              _buildLegendItem(excusedColor, 'Excused'),
             ],
           ),
         ],
@@ -544,16 +582,16 @@ class AttendanceScreen extends StatelessWidget {
 
         if (isCurrentMonth) {
           if (isPresent) {
-            bgColor = const Color(0xFF00D2C2);
+            bgColor = presentColor;
             textColor = Colors.white;
           } else if (isAbsent) {
-            bgColor = const Color(0xFFF87171);
+            bgColor = absentColor;
             textColor = Colors.white;
           } else if (isExcused) {
-            bgColor = const Color(0xFFF59E0B);
+            bgColor = excusedColor;
             textColor = Colors.white;
           } else {
-            textColor = const Color(0xFF0F172A);
+            textColor = darkSlate;
           }
         }
 
@@ -656,11 +694,11 @@ class AttendanceScreen extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                   decoration: BoxDecoration(
                     color: status == 'Present'
-                        ? const Color(0xFFE0FAF6)
+                        ? presentLight
                         : (status == 'Absent'
-                            ? const Color(0xFFFEE2E2)
+                            ? absentLight
                             : (status == 'Excused'
-                                ? const Color(0xFFFEF3C7)
+                                ? excusedLight
                                 : const Color(0xFFF1F5F9))),
                     borderRadius: BorderRadius.circular(20.r),
                   ),
@@ -670,7 +708,7 @@ class AttendanceScreen extends StatelessWidget {
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w700,
                       color: status == 'Present'
-                          ? const Color(0xFF00D2C2)
+                          ? presentColor
                           : (status == 'Absent'
                               ? const Color(0xFFEF4444)
                               : (status == 'Excused'
@@ -724,7 +762,7 @@ class AttendanceScreen extends StatelessWidget {
               height: 44.h,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF00D2C2),
+                  backgroundColor: goldAccent,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.r),
                   ),
@@ -752,7 +790,7 @@ class AttendanceScreen extends StatelessWidget {
   Widget _buildDetailRow(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, size: 16.sp, color: const Color(0xFF00D2C2)),
+        Icon(icon, size: 16.sp, color: goldAccent),
         SizedBox(width: 8.w),
         Text(
           '$label: ',
@@ -822,13 +860,13 @@ class AttendanceScreen extends StatelessWidget {
             SizedBox(height: 16.h),
             TextButton.icon(
               onPressed: () => controller.refreshAttendance(),
-              icon: Icon(Icons.refresh_rounded, size: 16.sp, color: const Color(0xFF00D2C2)),
+              icon: Icon(Icons.refresh_rounded, size: 16.sp, color: goldAccent),
               label: Text(
                 'Refresh',
                 style: TextStyle(fontFamily: 'Nunito', 
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF00D2C2),
+                  color: goldAccent,
                 ),
               ),
             ),
@@ -868,10 +906,10 @@ class AttendanceScreen extends StatelessWidget {
                       height: 42.h,
                       decoration: BoxDecoration(
                         color: isAbsent
-                            ? const Color(0xFFFEE2E2)
+                            ? absentLight
                             : (isPresent
-                                ? const Color(0xFFE0FAF6)
-                                : const Color(0xFFFEF3C7)),
+                                ? presentLight
+                                : excusedLight),
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       child: Icon(
@@ -883,7 +921,7 @@ class AttendanceScreen extends StatelessWidget {
                         color: isAbsent
                             ? const Color(0xFFEF4444)
                             : (isPresent
-                                ? const Color(0xFF00D2C2)
+                                ? presentColor
                                 : const Color(0xFFD97706)),
                         size: 22.sp,
                       ),
@@ -933,10 +971,10 @@ class AttendanceScreen extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                 decoration: BoxDecoration(
                   color: isAbsent
-                      ? const Color(0xFFFEE2E2)
+                      ? absentLight
                       : (isPresent
-                          ? const Color(0xFFE0FAF6)
-                          : const Color(0xFFFEF3C7)),
+                          ? presentLight
+                          : excusedLight),
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
@@ -947,7 +985,7 @@ class AttendanceScreen extends StatelessWidget {
                     color: isAbsent
                         ? const Color(0xFFEF4444)
                         : (isPresent
-                            ? const Color(0xFF00D2C2)
+                            ? presentColor
                             : const Color(0xFFD97706)),
                   ),
                 ),
@@ -1004,12 +1042,12 @@ class AttendanceScreen extends StatelessWidget {
                       padding: EdgeInsets.symmetric(vertical: 10.h),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? const Color(0xFF00D2C2)
+                            ? goldAccent
                             : const Color(0xFFF8FAFC),
                         borderRadius: BorderRadius.circular(10.r),
                         border: Border.all(
                           color: isSelected
-                              ? const Color(0xFF00D2C2)
+                              ? goldAccent
                               : const Color(0xFFE2E8F0),
                         ),
                       ),
@@ -1042,7 +1080,7 @@ class AttendanceScreen extends StatelessWidget {
                       style: TextStyle(fontFamily: 'Nunito', 
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF00D2C2),
+                        color: goldAccent,
                       ),
                     ),
                   ),
