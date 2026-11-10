@@ -35,7 +35,8 @@ class AttendanceScreen extends StatelessWidget {
         automaticallyImplyLeading: false,
         title: Text(
           'Attendance History',
-          style: TextStyle(fontFamily: 'Nunito', 
+          style: TextStyle(
+            fontFamily: 'Nunito',
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
             color: const Color(0xFF0F172A),
@@ -191,7 +192,8 @@ class AttendanceScreen extends StatelessWidget {
           SizedBox(height: 10.h),
           Text(
             value,
-            style: TextStyle(fontFamily: 'Nunito', 
+            style: TextStyle(
+              fontFamily: 'Nunito',
               fontSize: 20.sp,
               fontWeight: FontWeight.w800,
               color: valueColor,
@@ -200,7 +202,8 @@ class AttendanceScreen extends StatelessWidget {
           SizedBox(height: 2.h),
           Text(
             label,
-            style: TextStyle(fontFamily: 'Nunito', 
+            style: TextStyle(
+              fontFamily: 'Nunito',
               fontSize: 12.sp,
               fontWeight: FontWeight.w500,
               color: const Color(0xFF64748B),
@@ -215,13 +218,17 @@ class AttendanceScreen extends StatelessWidget {
   // FILTER BY MONTH HEADER
   // ===========================================================================
 
-  Widget _buildFilterByMonthHeader(BuildContext context, AttendanceController controller) {
+  Widget _buildFilterByMonthHeader(
+    BuildContext context,
+    AttendanceController controller,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           'Filter by Month',
-          style: TextStyle(fontFamily: 'Nunito', 
+          style: TextStyle(
+            fontFamily: 'Nunito',
             fontSize: 16.sp,
             fontWeight: FontWeight.w700,
             color: darkSlate,
@@ -234,10 +241,7 @@ class AttendanceScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: const Color(0xFFFFFDF5),
               borderRadius: BorderRadius.circular(14.r),
-              border: Border.all(
-                color: const Color(0x60D4AF37),
-                width: 1.2,
-              ),
+              border: Border.all(color: const Color(0x60D4AF37), width: 1.2),
               boxShadow: const [
                 BoxShadow(
                   color: Color(0x10D4AF37),
@@ -256,7 +260,8 @@ class AttendanceScreen extends StatelessWidget {
                 SizedBox(width: 6.w),
                 Text(
                   controller.formattedMonthHeader,
-                  style: TextStyle(fontFamily: 'Nunito', 
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
                     fontSize: 13.5.sp,
                     fontWeight: FontWeight.w700,
                     color: darkSlate,
@@ -321,7 +326,8 @@ class AttendanceScreen extends StatelessWidget {
                     SizedBox(width: 6.w),
                     Text(
                       'Calendar View',
-                      style: TextStyle(fontFamily: 'Nunito', 
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
                         fontSize: 13.5.sp,
                         fontWeight: FontWeight.w700,
                         color: isCal ? Colors.white : const Color(0xFF64748B),
@@ -371,7 +377,8 @@ class AttendanceScreen extends StatelessWidget {
                     SizedBox(width: 6.w),
                     Text(
                       'List View',
-                      style: TextStyle(fontFamily: 'Nunito', 
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
                         fontSize: 13.5.sp,
                         fontWeight: FontWeight.w700,
                         color: !isCal ? Colors.white : const Color(0xFF64748B),
@@ -391,7 +398,10 @@ class AttendanceScreen extends StatelessWidget {
   // DYNAMIC CALENDAR CARD WITH ACCURATE MONTH LAYOUT & LIVE ATTENDANCE BADGES
   // ===========================================================================
 
-  Widget _buildCalendarCard(BuildContext context, AttendanceController controller) {
+  Widget _buildCalendarCard(
+    BuildContext context,
+    AttendanceController controller,
+  ) {
     final weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
     return Container(
@@ -425,7 +435,8 @@ class AttendanceScreen extends StatelessWidget {
               ),
               Text(
                 controller.formattedMonthHeader,
-                style: TextStyle(fontFamily: 'Nunito', 
+                style: TextStyle(
+                  fontFamily: 'Nunito',
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w800,
                   color: const Color(0xFF0F172A),
@@ -452,7 +463,8 @@ class AttendanceScreen extends StatelessWidget {
                 child: Center(
                   child: Text(
                     day,
-                    style: TextStyle(fontFamily: 'Nunito', 
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF64748B),
@@ -494,15 +506,13 @@ class AttendanceScreen extends StatelessWidget {
         Container(
           width: 10.w,
           height: 10.w,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         SizedBox(width: 6.w),
         Text(
           label,
-          style: TextStyle(fontFamily: 'Nunito', 
+          style: TextStyle(
+            fontFamily: 'Nunito',
             fontSize: 11.5.sp,
             fontWeight: FontWeight.w500,
             color: const Color(0xFF64748B),
@@ -512,7 +522,10 @@ class AttendanceScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDynamicCalendarDaysGrid(BuildContext context, AttendanceController controller) {
+  Widget _buildDynamicCalendarDaysGrid(
+    BuildContext context,
+    AttendanceController controller,
+  ) {
     final cur = controller.currentMonth.value;
     final year = cur.year;
     final month = cur.month;
@@ -527,18 +540,12 @@ class AttendanceScreen extends StatelessWidget {
 
     // 1. Previous month trailing days
     for (int i = firstDayWeekday - 1; i >= 0; i--) {
-      gridCells.add({
-        'day': daysInPrevMonth - i,
-        'isCurrentMonth': false,
-      });
+      gridCells.add({'day': daysInPrevMonth - i, 'isCurrentMonth': false});
     }
 
     // 2. Current month days
     for (int d = 1; d <= daysInMonth; d++) {
-      gridCells.add({
-        'day': d,
-        'isCurrentMonth': true,
-      });
+      gridCells.add({'day': d, 'isCurrentMonth': true});
     }
 
     // 3. Next month leading days to complete full rows (multiple of 7)
@@ -546,10 +553,7 @@ class AttendanceScreen extends StatelessWidget {
     if (remainder != 0) {
       final daysToAdd = 7 - remainder;
       for (int i = 1; i <= daysToAdd; i++) {
-        gridCells.add({
-          'day': i,
-          'isCurrentMonth': false,
-        });
+        gridCells.add({'day': i, 'isCurrentMonth': false});
       }
     }
 
@@ -611,14 +615,12 @@ class AttendanceScreen extends StatelessWidget {
             child: Container(
               width: 36.h,
               height: 36.h,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: bgColor,
-              ),
+              decoration: BoxDecoration(shape: BoxShape.circle, color: bgColor),
               child: Center(
                 child: Text(
                   '$dayNum',
-                  style: TextStyle(fontFamily: 'Nunito', 
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
                     fontSize: 14.sp,
                     fontWeight: (isPresent || isAbsent || isExcused)
                         ? FontWeight.w700
@@ -642,7 +644,8 @@ class AttendanceScreen extends StatelessWidget {
     AttendanceSession? session,
   ) {
     final cur = controller.currentMonth.value;
-    final dateStr = DateFormat('MMMM dd, yyyy').format(DateTime(cur.year, cur.month, day));
+    final dateStr = DateFormat('MMMM dd, yyyy')
+        .format(DateTime(cur.year, cur.month, day));
 
     Get.bottomSheet(
       Container(
@@ -674,7 +677,8 @@ class AttendanceScreen extends StatelessWidget {
                   children: [
                     Text(
                       dateStr,
-                      style: TextStyle(fontFamily: 'Nunito', 
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
                         color: const Color(0xFF0F172A),
@@ -683,7 +687,8 @@ class AttendanceScreen extends StatelessWidget {
                     SizedBox(height: 2.h),
                     Text(
                       session?.batchName ?? 'Academy Coaching Session',
-                      style: TextStyle(fontFamily: 'Nunito', 
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
                         fontSize: 12.5.sp,
                         color: const Color(0xFF64748B),
                       ),
@@ -691,29 +696,33 @@ class AttendanceScreen extends StatelessWidget {
                   ],
                 ),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 6.h,
+                  ),
                   decoration: BoxDecoration(
                     color: status == 'Present'
                         ? presentLight
                         : (status == 'Absent'
-                            ? absentLight
-                            : (status == 'Excused'
-                                ? excusedLight
-                                : const Color(0xFFF1F5F9))),
+                              ? absentLight
+                              : (status == 'Excused'
+                                    ? excusedLight
+                                    : const Color(0xFFF1F5F9))),
                     borderRadius: BorderRadius.circular(20.r),
                   ),
                   child: Text(
                     status ?? 'No Session',
-                    style: TextStyle(fontFamily: 'Nunito', 
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w700,
                       color: status == 'Present'
                           ? presentColor
                           : (status == 'Absent'
-                              ? const Color(0xFFEF4444)
-                              : (status == 'Excused'
-                                  ? const Color(0xFFD97706)
-                                  : const Color(0xFF64748B))),
+                                ? const Color(0xFFEF4444)
+                                : (status == 'Excused'
+                                      ? const Color(0xFFD97706)
+                                      : const Color(0xFF64748B))),
                     ),
                   ),
                 ),
@@ -723,9 +732,17 @@ class AttendanceScreen extends StatelessWidget {
             const Divider(color: Color(0xFFF1F5F9)),
             SizedBox(height: 12.h),
             if (session != null) ...[
-              _buildDetailRow(Icons.sports_tennis_rounded, 'Sport', session.sport),
+              _buildDetailRow(
+                Icons.sports_tennis_rounded,
+                'Sport',
+                session.sport,
+              ),
               SizedBox(height: 10.h),
-              _buildDetailRow(Icons.schedule_rounded, 'Batch Timing', session.time),
+              _buildDetailRow(
+                Icons.schedule_rounded,
+                'Batch Timing',
+                session.time,
+              ),
               SizedBox(height: 10.h),
               _buildDetailRow(
                 Icons.verified_user_rounded,
@@ -742,14 +759,19 @@ class AttendanceScreen extends StatelessWidget {
               ],
               if (session.remarks.isNotEmpty) ...[
                 SizedBox(height: 10.h),
-                _buildDetailRow(Icons.notes_rounded, 'Remarks', session.remarks),
+                _buildDetailRow(
+                  Icons.notes_rounded,
+                  'Remarks',
+                  session.remarks,
+                ),
               ],
             ] else ...[
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 8.h),
                 child: Text(
                   'No training session or scheduled attendance punch recorded for this day.',
-                  style: TextStyle(fontFamily: 'Nunito', 
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
                     fontSize: 13.sp,
                     color: const Color(0xFF64748B),
                   ),
@@ -771,7 +793,8 @@ class AttendanceScreen extends StatelessWidget {
                 onPressed: () => Get.back(),
                 child: Text(
                   'Close',
-                  style: TextStyle(fontFamily: 'Nunito', 
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
@@ -794,7 +817,8 @@ class AttendanceScreen extends StatelessWidget {
         SizedBox(width: 8.w),
         Text(
           '$label: ',
-          style: TextStyle(fontFamily: 'Nunito', 
+          style: TextStyle(
+            fontFamily: 'Nunito',
             fontSize: 13.sp,
             fontWeight: FontWeight.w600,
             color: const Color(0xFF0F172A),
@@ -803,7 +827,8 @@ class AttendanceScreen extends StatelessWidget {
         Expanded(
           child: Text(
             value,
-            style: TextStyle(fontFamily: 'Nunito', 
+            style: TextStyle(
+              fontFamily: 'Nunito',
               fontSize: 13.sp,
               color: const Color(0xFF64748B),
             ),
@@ -842,7 +867,8 @@ class AttendanceScreen extends StatelessWidget {
             SizedBox(height: 12.h),
             Text(
               'No Attendance Records Found',
-              style: TextStyle(fontFamily: 'Nunito', 
+              style: TextStyle(
+                fontFamily: 'Nunito',
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFF0F172A),
@@ -852,7 +878,8 @@ class AttendanceScreen extends StatelessWidget {
             Text(
               'No session logs recorded for ${controller.formattedMonthHeader}.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontFamily: 'Nunito', 
+              style: TextStyle(
+                fontFamily: 'Nunito',
                 fontSize: 12.5.sp,
                 color: const Color(0xFF64748B),
               ),
@@ -863,7 +890,8 @@ class AttendanceScreen extends StatelessWidget {
               icon: Icon(Icons.refresh_rounded, size: 16.sp, color: goldAccent),
               label: Text(
                 'Refresh',
-                style: TextStyle(fontFamily: 'Nunito', 
+                style: TextStyle(
+                  fontFamily: 'Nunito',
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
                   color: goldAccent,
@@ -907,22 +935,20 @@ class AttendanceScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: isAbsent
                             ? absentLight
-                            : (isPresent
-                                ? presentLight
-                                : excusedLight),
+                            : (isPresent ? presentLight : excusedLight),
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       child: Icon(
                         isAbsent
                             ? Icons.cancel_outlined
                             : (isPresent
-                                ? Icons.sports_tennis_rounded
-                                : Icons.info_outline_rounded),
+                                  ? Icons.sports_tennis_rounded
+                                  : Icons.info_outline_rounded),
                         color: isAbsent
                             ? const Color(0xFFEF4444)
                             : (isPresent
-                                ? presentColor
-                                : const Color(0xFFD97706)),
+                                  ? presentColor
+                                  : const Color(0xFFD97706)),
                         size: 22.sp,
                       ),
                     ),
@@ -933,7 +959,8 @@ class AttendanceScreen extends StatelessWidget {
                         children: [
                           Text(
                             record.formattedDate,
-                            style: TextStyle(fontFamily: 'Nunito', 
+                            style: TextStyle(
+                              fontFamily: 'Nunito',
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w700,
                               color: const Color(0xFF0F172A),
@@ -942,7 +969,8 @@ class AttendanceScreen extends StatelessWidget {
                           SizedBox(height: 3.h),
                           Text(
                             '${record.sport} • ${record.time}',
-                            style: TextStyle(fontFamily: 'Nunito', 
+                            style: TextStyle(
+                              fontFamily: 'Nunito',
                               fontSize: 11.5.sp,
                               color: const Color(0xFF64748B),
                             ),
@@ -952,7 +980,8 @@ class AttendanceScreen extends StatelessWidget {
                             SizedBox(height: 2.h),
                             Text(
                               record.remarks,
-                              style: TextStyle(fontFamily: 'Nunito', 
+                              style: TextStyle(
+                                fontFamily: 'Nunito',
                                 fontSize: 10.5.sp,
                                 fontStyle: FontStyle.italic,
                                 color: const Color(0xFF94A3B8),
@@ -972,21 +1001,18 @@ class AttendanceScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isAbsent
                       ? absentLight
-                      : (isPresent
-                          ? presentLight
-                          : excusedLight),
+                      : (isPresent ? presentLight : excusedLight),
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
                   record.status,
-                  style: TextStyle(fontFamily: 'Nunito', 
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w700,
                     color: isAbsent
                         ? const Color(0xFFEF4444)
-                        : (isPresent
-                            ? presentColor
-                            : const Color(0xFFD97706)),
+                        : (isPresent ? presentColor : const Color(0xFFD97706)),
                   ),
                 ),
               ),
@@ -1004,13 +1030,25 @@ class AttendanceScreen extends StatelessWidget {
   void _showMonthPicker(BuildContext context, AttendanceController controller) {
     final current = controller.currentMonth.value;
     final months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
 
     Get.dialog(
       Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.r),
+        ),
         child: Padding(
           padding: EdgeInsets.all(20.w),
           child: Column(
@@ -1018,7 +1056,8 @@ class AttendanceScreen extends StatelessWidget {
             children: [
               Text(
                 'Select Month (${current.year})',
-                style: TextStyle(fontFamily: 'Nunito', 
+                style: TextStyle(
+                  fontFamily: 'Nunito',
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF0F172A),
@@ -1054,10 +1093,15 @@ class AttendanceScreen extends StatelessWidget {
                       child: Center(
                         child: Text(
                           months[index].substring(0, 3),
-                          style: TextStyle(fontFamily: 'Nunito', 
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
                             fontSize: 13.sp,
-                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                            color: isSelected ? Colors.white : const Color(0xFF0F172A),
+                            fontWeight: isSelected
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                            color: isSelected
+                                ? Colors.white
+                                : const Color(0xFF0F172A),
                           ),
                         ),
                       ),
@@ -1077,7 +1121,8 @@ class AttendanceScreen extends StatelessWidget {
                     },
                     child: Text(
                       'Current Month',
-                      style: TextStyle(fontFamily: 'Nunito', 
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
                         color: goldAccent,
@@ -1088,7 +1133,8 @@ class AttendanceScreen extends StatelessWidget {
                     onPressed: () => Get.back(),
                     child: Text(
                       'Close',
-                      style: TextStyle(fontFamily: 'Nunito', 
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF64748B),

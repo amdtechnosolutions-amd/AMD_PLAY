@@ -559,19 +559,20 @@ class CourtBookingScreen extends StatelessWidget {
               width: 58.w,
               padding: EdgeInsets.symmetric(vertical: 8.h),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : Colors.white,
+                color: isSelected ? const Color(0xFFFFFDE7) : Colors.white,
                 borderRadius: BorderRadius.circular(16.r),
                 border: Border.all(
                   color: isSelected ? AppColors.primary : const Color(0xFFE2E8F0),
-                  width: isSelected ? 1.8 : 1.0,
+                  width: isSelected ? 2.0 : 1.2,
                 ),
                 boxShadow: [
-                  if (isSelected)
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.35),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    ),
+                  BoxShadow(
+                    color: isSelected
+                        ? AppColors.primary.withValues(alpha: 0.15)
+                        : Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
                 ],
               ),
               child: Column(
