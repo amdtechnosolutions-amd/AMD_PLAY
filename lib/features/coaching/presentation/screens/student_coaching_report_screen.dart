@@ -171,16 +171,16 @@ class _StudentCoachingReportScreenState
                 ],
 
                 // 4. Physical Section
-                _buildCategorySection('Physical :', physicalParams),
+                _buildCategorySection('PHYSICAL :', physicalParams),
 
                 // 5. Mental Section
-                _buildCategorySection('mental :', mentalParams),
+                _buildCategorySection('MENTAL :', mentalParams),
 
                 // 6. Skill Section
-                _buildCategorySection('skill :', skillParams),
+                _buildCategorySection('SKILL :', skillParams),
 
                 // 7. Attitude Section
-                _buildCategorySection('attitude :', attitudeParams),
+                _buildCategorySection('ATTITUDE :', attitudeParams),
               ],
             ),
           );
@@ -443,13 +443,13 @@ class _StudentCoachingReportScreenState
         Padding(
           padding: EdgeInsets.only(top: 14.h, bottom: 8.h, left: 2.w),
           child: Text(
-            headerTitle,
+            headerTitle.toUpperCase(),
             style: TextStyle(
               fontFamily: 'Nunito',
               fontSize: 16.sp,
               fontWeight: FontWeight.w900,
               color: const Color(0xFF0F172A),
-              letterSpacing: -0.2,
+              letterSpacing: 0.2,
             ),
           ),
         ),

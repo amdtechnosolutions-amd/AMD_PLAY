@@ -122,35 +122,35 @@ class BadmintonEvaluationParameter {
     BadmintonEvaluationParameter(
       key: 'agility',
       category: 'Physical',
-      header: 'Physical :',
+      header: 'PHYSICAL :',
       description:
           "Agility refers to a player's ability to move quickly and change direction efficiently while maintaining balance and control. It essential for fast-paced physical activities and sports.",
     ),
     BadmintonEvaluationParameter(
       key: 'speed',
       category: 'Physical',
-      header: 'Physical :',
+      header: 'PHYSICAL :',
       description:
           "Speed refers to how quickly a player can move across the court, react to opponent shots, and execute footwork mechanics during play.",
     ),
     BadmintonEvaluationParameter(
       key: 'stamina',
       category: 'Physical',
-      header: 'Physical :',
+      header: 'PHYSICAL :',
       description:
           "Stamina refers to a player's ability to sustain physical and mental performance over long periods, especially during extended rallies, intense training, or multi-game matches.",
     ),
     BadmintonEvaluationParameter(
       key: 'strength',
       category: 'Physical',
-      header: 'Physical :',
+      header: 'PHYSICAL :',
       description:
           "Strength refers to a player's ability to generate power and withstand physical force, particularly in explosive movements like smashing, jumping, and quickly recovered, as well as maintaining stamina throughout the game.",
     ),
     BadmintonEvaluationParameter(
       key: 'flexibility',
       category: 'Physical',
-      header: 'Physical :',
+      header: 'PHYSICAL :',
       description:
           "Flexibility refers to a player's ability to move joints and muscles through a wide range of motion, allowing for quick, efficient, and injury-free movements during play.",
     ),
@@ -159,35 +159,35 @@ class BadmintonEvaluationParameter {
     BadmintonEvaluationParameter(
       key: 'focus',
       category: 'mental',
-      header: 'mental :',
+      header: 'MENTAL :',
       description:
           "Focus in badminton refers to a player's mental sharpness and sustained attention during training and matches.",
     ),
     BadmintonEvaluationParameter(
       key: 'confidence',
       category: 'mental',
-      header: 'mental :',
+      header: 'MENTAL :',
       description:
           "Confidence is a player's belief in their skills, preparation, and decision-making during play.",
     ),
     BadmintonEvaluationParameter(
       key: 'composure',
       category: 'mental',
-      header: 'mental :',
+      header: 'MENTAL :',
       description:
           "Composure is the ability to stay calm, controlled, and focused under pressure, especially during high-pressure situations.",
     ),
     BadmintonEvaluationParameter(
       key: 'resilience',
       category: 'mental',
-      header: 'mental :',
+      header: 'MENTAL :',
       description:
           "Resilience is the mental toughness to bounce back from setbacks, mistakes, or lost points.",
     ),
     BadmintonEvaluationParameter(
       key: 'sportsmanship',
       category: 'mental',
-      header: 'mental :',
+      header: 'MENTAL :',
       description:
           "Sportsmanship is the spirit of fair play, respect, and integrity towards opponents, officials, and the game itself.",
     ),
@@ -196,56 +196,56 @@ class BadmintonEvaluationParameter {
     BadmintonEvaluationParameter(
       key: 'forehandStrokes',
       category: 'skill',
-      header: 'skill :',
+      header: 'SKILL :',
       description:
           "Forehand strokes involve hitting the shuttle with the palm side of the hand facing the direction of the stroke, typically from the racket hand side of the body.",
     ),
     BadmintonEvaluationParameter(
       key: 'backhandStrokes',
       category: 'skill',
-      header: 'skill :',
+      header: 'SKILL :',
       description:
           "Backhand strokes are played with the back of the hand facing the shuttle, usually on the non-dominant side of the body.",
     ),
     BadmintonEvaluationParameter(
       key: 'serve',
       category: 'skill',
-      header: 'skill :',
+      header: 'SKILL :',
       description:
           "The serve starts the rally and must be hit below waist height, aimed to land in the opponent's service court.",
     ),
     BadmintonEvaluationParameter(
       key: 'smash',
       category: 'skill',
-      header: 'skill :',
+      header: 'SKILL :',
       description:
           "The smash is a fast, downward, and powerful shot, primarily used to end a rally or create a weak return.",
     ),
     BadmintonEvaluationParameter(
       key: 'dropShots',
       category: 'skill',
-      header: 'skill :',
+      header: 'SKILL :',
       description:
           "A drop shot is a soft hit that falls steep into the net and lands close to it in the opponent's front court.",
     ),
     BadmintonEvaluationParameter(
       key: 'footwork',
       category: 'skill',
-      header: 'skill :',
+      header: 'SKILL :',
       description:
           "Footwork refers to a player's movement technique on court, including steps, lunges, and directional changes.",
     ),
     BadmintonEvaluationParameter(
       key: 'netPlay',
       category: 'skill',
-      header: 'skill :',
+      header: 'SKILL :',
       description:
           "Net play involves soft and precise shots close to the net, such as tumbling net shots or net kills.",
     ),
     BadmintonEvaluationParameter(
       key: 'defensiveSkills',
       category: 'skill',
-      header: 'skill :',
+      header: 'SKILL :',
       description:
           "Defensive skills refer to a player's ability to return smashes, drives, and other aggressive shots from the opponent.",
     ),
@@ -254,42 +254,42 @@ class BadmintonEvaluationParameter {
     BadmintonEvaluationParameter(
       key: 'punctuality',
       category: 'attitude',
-      header: 'attitude :',
+      header: 'ATTITUDE :',
       description:
           "Being consistently on time for training, matches, and team events.",
     ),
     BadmintonEvaluationParameter(
       key: 'effort',
       category: 'attitude',
-      header: 'attitude :',
+      header: 'ATTITUDE :',
       description:
           "The physical and mental energy a player puts into training and match play.",
     ),
     BadmintonEvaluationParameter(
       key: 'teamwork',
       category: 'attitude',
-      header: 'attitude :',
+      header: 'ATTITUDE :',
       description:
           "Working effectively with others, especially in doubles or team settings.",
     ),
     BadmintonEvaluationParameter(
       key: 'coachability',
       category: 'attitude',
-      header: 'attitude :',
+      header: 'ATTITUDE :',
       description:
           "The willingness to listen, accept feedback, and implement suggestions for improvement.",
     ),
     BadmintonEvaluationParameter(
       key: 'discipline',
       category: 'attitude',
-      header: 'attitude :',
+      header: 'ATTITUDE :',
       description:
           "Maintaining self-control, following rules, and following training guidelines.",
     ),
     BadmintonEvaluationParameter(
       key: 'positiveAttitude',
       category: 'attitude',
-      header: 'attitude :',
+      header: 'ATTITUDE :',
       description:
           "Displaying optimism, enthusiasm, and a solution-focused mindset.",
     ),
