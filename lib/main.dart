@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -12,6 +13,27 @@ import 'features/splash/presentation/screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Guard against known Flutter Web engine resize assertion during viewport/keyboard changes
+  PlatformDispatcher.instance.onError = (error, stack) {
+    final errorString = error.toString();
+    if (errorString.contains('ViewInsets cannot be negative') ||
+        errorString.contains('_viewInsets.isNonNegative')) {
+      debugPrint('Suppressed Flutter Web resize assertion: $errorString');
+      return true;
+    }
+    return false;
+  };
+
+  FlutterError.onError = (FlutterErrorDetails details) {
+    final errorString = details.exceptionAsString();
+    if (errorString.contains('ViewInsets cannot be negative') ||
+        errorString.contains('_viewInsets.isNonNegative')) {
+      debugPrint('Suppressed Flutter Web resize assertion: $errorString');
+      return;
+    }
+    FlutterError.presentError(details);
+  };
 
   // Set preferred orientation to portrait
   await SystemChrome.setPreferredOrientations([

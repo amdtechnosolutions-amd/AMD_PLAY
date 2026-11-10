@@ -44,6 +44,25 @@
   <title>mobile_app</title>
   <link rel="manifest" href="manifest.json">
 </head>
+<body>
+  <script>
+    // Suppress harmless Flutter Web engine viewport resize assertions
+    window.addEventListener('unhandledrejection', function(event) {
+      var reasonStr = (event && event.reason) ? String(event.reason) : '';
+      if (reasonStr.indexOf('ViewInsets cannot be negative') !== -1 || reasonStr.indexOf('_viewInsets.isNonNegative') !== -1) {
+        event.preventDefault();
+        console.warn('Suppressed Flutter Web engine viewport assertion:', reasonStr);
+      }
+    });
+    window.addEventListener('error', function(event) {
+      var msgStr = (event && event.message) ? String(event.message) : '';
+      if (msgStr.indexOf('ViewInsets cannot be negative') !== -1 || msgStr.indexOf('_viewInsets.isNonNegative') !== -1) {
+        event.preventDefault();
+        console.warn('Suppressed Flutter Web engine viewport assertion:', msgStr);
+      }
+    });
+  </script>
+
   <!-- Razorpay Web Checkout SDK & JS Bridge -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script>
