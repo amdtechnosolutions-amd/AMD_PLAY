@@ -171,11 +171,21 @@ class AttendanceController extends GetxController {
     }
   }
 
+  @visibleForTesting
+  void parseAttendanceDataForTest(Map data) => _parseAttendanceData(data);
+
   void _parseAttendanceData(Map data) {
     totalSessions.value = (data['totalSessions'] as num?)?.toInt() ?? 0;
     presentCount.value = (data['presentCount'] as num?)?.toInt() ?? 0;
     absentCount.value = (data['absentCount'] as num?)?.toInt() ?? 0;
-    overallPercentage.value = (data['attendancePercentage'] as num?)?.toInt() ?? 0;
+
+    final rawPercentage = (data['attendancePercentage'] as num?)?.toInt() ?? 0;
+    // Guard against backend bug returning 100% when there are 0 total sessions
+    if (totalSessions.value == 0 || (presentCount.value == 0 && absentCount.value == 0)) {
+      overallPercentage.value = 0;
+    } else {
+      overallPercentage.value = rawPercentage;
+    }
 
     final sessionHistory = data['sessionHistory'] as List? ?? [];
     final punchLogs = data['punchLogs'] as List? ?? [];
@@ -267,7 +277,12 @@ class AttendanceController extends GetxController {
     sessionMap.assignAll(sMap);
 
     // Calculate overall percentage if not provided or 0 with active sessions
-    if (totalSessions.value == 0 && list.isNotEmpty) {
+    if (list.isEmpty) {
+      totalSessions.value = 0;
+      presentCount.value = 0;
+      absentCount.value = 0;
+      overallPercentage.value = 0;
+    } else if (totalSessions.value == 0) {
       totalSessions.value = list.length;
       presentCount.value = pDates.length;
       absentCount.value = aDates.length;
