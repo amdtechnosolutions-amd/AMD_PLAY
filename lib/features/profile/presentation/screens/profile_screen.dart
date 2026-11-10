@@ -769,7 +769,7 @@ class ProfileScreen extends StatelessWidget {
               subtitle: 'View active reservations & entry PINs',
               onTap: () {
                 if (Get.isRegistered<MainNavController>()) {
-                  Get.find<MainNavController>().changeTab(1); // Bookings
+                  Get.find<MainNavController>().changeTab(homeCtrl.isCoach ? 3 : 1); // Bookings
                 }
               },
             ),
@@ -789,14 +789,26 @@ class ProfileScreen extends StatelessWidget {
                       icon: Icons.sports_rounded,
                       title: 'My Coaching Batches',
                       subtitle: 'Training schedules & squad assignments',
-                      onTap: () => Get.to(() => const CoachingBatchesScreen()),
+                      onTap: () {
+                        if (Get.isRegistered<MainNavController>()) {
+                          Get.find<MainNavController>().changeTab(1);
+                        } else {
+                          Get.to(() => const CoachingBatchesScreen());
+                        }
+                      },
                     ),
                     const Divider(color: Color(0x1AD4AF37), height: 1),
                     _buildActionTile(
                       icon: Icons.rate_review_outlined,
                       title: 'Student Performance & Evaluations',
                       subtitle: 'View live scorecards, radar charts & progress trends',
-                      onTap: () => Get.toNamed(AppRoutes.coachEvaluations),
+                      onTap: () {
+                        if (Get.isRegistered<MainNavController>()) {
+                          Get.find<MainNavController>().changeTab(2);
+                        } else {
+                          Get.toNamed(AppRoutes.coachEvaluations);
+                        }
+                      },
                     ),
                     const Divider(color: Color(0x1AD4AF37), height: 1),
                     _buildActionTile(

@@ -52,3 +52,4 @@ void main() {
     expect(controller.overallPercentage.value, 80);
   });
 }
+

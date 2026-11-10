@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -22,7 +23,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
   <style>
-    html, body {
+    html,
+    body {
       height: 100%;
       width: 100%;
       margin: 0;
@@ -39,22 +41,23 @@
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" href="favicon.png" />
 
   <title>mobile_app</title>
   <link rel="manifest" href="manifest.json">
 </head>
+
 <body>
   <script>
     // Suppress harmless Flutter Web engine viewport resize assertions
-    window.addEventListener('unhandledrejection', function(event) {
+    window.addEventListener('unhandledrejection', function (event) {
       var reasonStr = (event && event.reason) ? String(event.reason) : '';
       if (reasonStr.indexOf('ViewInsets cannot be negative') !== -1 || reasonStr.indexOf('_viewInsets.isNonNegative') !== -1) {
         event.preventDefault();
         console.warn('Suppressed Flutter Web engine viewport assertion:', reasonStr);
       }
     });
-    window.addEventListener('error', function(event) {
+    window.addEventListener('error', function (event) {
       var msgStr = (event && event.message) ? String(event.message) : '';
       if (msgStr.indexOf('ViewInsets cannot be negative') !== -1 || msgStr.indexOf('_viewInsets.isNonNegative') !== -1) {
         event.preventDefault();
@@ -66,21 +69,21 @@
   <!-- Razorpay Web Checkout SDK & JS Bridge -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script>
-    window.openRazorpayWebCheckout = function(optionsJson, successCallback, failureCallback) {
+    window.openRazorpayWebCheckout = function (optionsJson, successCallback, failureCallback) {
       try {
         var options = typeof optionsJson === 'string' ? JSON.parse(optionsJson) : optionsJson;
-        options.handler = function(response) {
+        options.handler = function (response) {
           if (successCallback) {
             successCallback(response.razorpay_payment_id || '', response.razorpay_order_id || '', response.razorpay_signature || '');
           }
         };
         options.modal = {
-          ondismiss: function() {
+          ondismiss: function () {
             if (failureCallback) failureCallback('Checkout popup closed by user');
           }
         };
         var rzp = new Razorpay(options);
-        rzp.on('payment.failed', function(response) {
+        rzp.on('payment.failed', function (response) {
           var msg = (response && response.error && response.error.description) ? response.error.description : 'Payment failed';
           if (failureCallback) failureCallback(msg);
         });
@@ -101,4 +104,5 @@
   -->
   <script src="flutter_bootstrap.js" async></script>
 </body>
+
 </html>

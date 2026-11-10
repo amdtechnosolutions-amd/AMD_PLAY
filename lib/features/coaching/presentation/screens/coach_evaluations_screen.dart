@@ -37,10 +37,12 @@ class CoachEvaluationsScreen extends StatelessWidget {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: darkText),
-          onPressed: () => Get.back(),
-        ),
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: darkText),
+                onPressed: () => Get.back(),
+              )
+            : null,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded, color: goldAccent),

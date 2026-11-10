@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 import '../theme/app_colors.dart';
 import '../theme/app_radius.dart';
 import '../theme/app_typography.dart';
 
-enum SlotState {
-  available,
-  selected,
-  booked,
-  maintenance,
-}
+enum SlotState { available, selected, booked, maintenance }
 
 /// SlotCard presenting a court booking slot with distinct visual states and pricing.
 class SlotCard extends StatelessWidget {
@@ -39,33 +35,50 @@ class SlotCard extends StatelessWidget {
         bg = const Color(0xFFFFFDE7);
         fg = AppColors.textPrimary;
         border = const BorderSide(color: AppColors.primary, width: 2.0);
-        stateIcon = const Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 14);
+        stateIcon = const Icon(
+          Icons.check_circle_rounded,
+          color: AppColors.primary,
+          size: 14,
+        );
         statusLabel = 'Selected';
         break;
       case SlotState.booked:
         bg = AppColors.surfaceSubtle;
         fg = AppColors.textMuted;
         border = const BorderSide(color: AppColors.borderSubtle);
-        stateIcon = const Icon(Icons.lock_rounded, color: AppColors.textMuted, size: 14);
+        stateIcon = const Icon(
+          Icons.lock_rounded,
+          color: AppColors.textMuted,
+          size: 14,
+        );
         statusLabel = 'Booked';
         break;
       case SlotState.maintenance:
         bg = AppColors.warningLight;
         fg = AppColors.warning;
         border = const BorderSide(color: AppColors.warning);
-        stateIcon = const Icon(Icons.build_rounded, color: AppColors.warning, size: 14);
+        stateIcon = const Icon(
+          Icons.build_rounded,
+          color: AppColors.warning,
+          size: 14,
+        );
         statusLabel = 'Maintenance';
         break;
       case SlotState.available:
         bg = AppColors.surface;
         fg = AppColors.textPrimary;
         border = const BorderSide(color: AppColors.border);
-        stateIcon = const Icon(Icons.circle_outlined, color: AppColors.success, size: 12);
+        stateIcon = const Icon(
+          Icons.circle_outlined,
+          color: AppColors.success,
+          size: 12,
+        );
         statusLabel = 'Available';
         break;
     }
 
-    final isClickable = state == SlotState.available || state == SlotState.selected;
+    final isClickable =
+        state == SlotState.available || state == SlotState.selected;
 
     return GestureDetector(
       onTap: isClickable ? onTap : null,
@@ -100,11 +113,15 @@ class SlotCard extends StatelessWidget {
               ),
             ),
             SizedBox(height: 4.h),
-            if (priceText != null && state != SlotState.booked && state != SlotState.maintenance) ...[
+            if (priceText != null &&
+                state != SlotState.booked &&
+                state != SlotState.maintenance) ...[
               Text(
                 priceText!,
                 style: AppTypography.caption.copyWith(
-                  color: state == SlotState.selected ? AppColors.accent : AppColors.primary,
+                  color: state == SlotState.selected
+                      ? AppColors.accent
+                      : AppColors.primary,
                   fontWeight: FontWeight.w700,
                   fontSize: 12.sp,
                 ),

@@ -26,7 +26,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 5000),
+      duration: const Duration(milliseconds: 8000),
     );
 
     _scaleAnimation = Tween<double>(begin: 0.82, end: 1.0).animate(

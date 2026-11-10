@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/storage/storage_service.dart';
 
@@ -14,7 +15,7 @@ class SplashController extends GetxController {
 
   Future<void> _initializeApp() async {
     // 1000ms delay for clean, subtle animation
-    await Future.delayed(const Duration(milliseconds: 1100));
+    await Future.delayed(const Duration(milliseconds: 3100));
 
     final hasSeenOnboarding = await _storageService.hasSeenOnboarding();
     final accessToken = await _storageService.getAccessToken();

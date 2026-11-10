@@ -283,7 +283,8 @@ class HomeScreen extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         if (Get.isRegistered<MainNavController>()) {
-          Get.find<MainNavController>().changeTab(1);
+          final isCoach = Get.isRegistered<HomeController>() && Get.find<HomeController>().isCoach;
+          Get.find<MainNavController>().changeTab(isCoach ? 3 : 1);
         } else {
           Get.toNamed(AppRoutes.slotBooking);
         }
@@ -1136,40 +1137,53 @@ class HomeScreen extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                Text(
-                  'My Coaching Batches',
-                  style: TextStyle(
-                    fontFamily: 'Nunito',
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF0F172A),
-                  ),
-                ),
-                SizedBox(width: 8.w),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFFDF5),
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: const Color(0xFFD4AF37), width: 0.9),
-                  ),
-                  child: Text(
-                    'COACH',
-                    style: TextStyle(
-                      fontFamily: 'Nunito',
-                      fontSize: 9.5.sp,
-                      fontWeight: FontWeight.w900,
-                      color: const Color(0xFF9E7B1A),
-                      letterSpacing: 0.8,
+            Expanded(
+              child: Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      'My Coaching Batches',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 17.sp,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF0F172A),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                  SizedBox(width: 8.w),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFFDF5),
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(color: const Color(0xFFD4AF37), width: 0.9),
+                    ),
+                    child: Text(
+                      'COACH',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 9.5.sp,
+                        fontWeight: FontWeight.w900,
+                        color: const Color(0xFF9E7B1A),
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
+            SizedBox(width: 8.w),
             GestureDetector(
-              onTap: () => Get.toNamed(AppRoutes.coaching),
+              onTap: () {
+                if (Get.isRegistered<MainNavController>() && controller.isCoach) {
+                  Get.find<MainNavController>().changeTab(1);
+                } else {
+                  Get.toNamed(AppRoutes.coaching);
+                }
+              },
               child: Row(
                 children: [
                   Text(
@@ -1296,7 +1310,13 @@ class HomeScreen extends StatelessWidget {
                   color: Colors.transparent,
                   child: InkWell(
                     borderRadius: BorderRadius.circular(14.r),
-                    onTap: () => Get.toNamed(AppRoutes.coaching),
+                    onTap: () {
+                      if (Get.isRegistered<MainNavController>() && controller.isCoach) {
+                        Get.find<MainNavController>().changeTab(1);
+                      } else {
+                        Get.toNamed(AppRoutes.coaching);
+                      }
+                    },
                     child: Center(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -1343,17 +1363,28 @@ class HomeScreen extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Student Performance & Evaluations',
-              style: TextStyle(
-                fontFamily: 'Nunito',
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w800,
-                color: const Color(0xFF0F172A),
+            Expanded(
+              child: Text(
+                'Student Performance & Evaluations',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontFamily: 'Nunito',
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF0F172A),
+                ),
               ),
             ),
+            SizedBox(width: 8.w),
             GestureDetector(
-              onTap: () => Get.toNamed(AppRoutes.coachEvaluations),
+              onTap: () {
+                if (Get.isRegistered<MainNavController>()) {
+                  Get.find<MainNavController>().changeTab(2);
+                } else {
+                  Get.toNamed(AppRoutes.coachEvaluations);
+                }
+              },
               child: Row(
                 children: [
                   Text(
@@ -1542,7 +1573,13 @@ class HomeScreen extends StatelessWidget {
                         color: Colors.transparent,
                         child: InkWell(
                           borderRadius: BorderRadius.circular(14.r),
-                          onTap: () => Get.toNamed(AppRoutes.coachEvaluations),
+                          onTap: () {
+                            if (Get.isRegistered<MainNavController>()) {
+                              Get.find<MainNavController>().changeTab(2);
+                            } else {
+                              Get.toNamed(AppRoutes.coachEvaluations);
+                            }
+                          },
                           child: Center(
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
