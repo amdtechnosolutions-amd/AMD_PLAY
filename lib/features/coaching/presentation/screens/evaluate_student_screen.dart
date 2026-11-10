@@ -439,7 +439,7 @@ class _EvaluateStudentScreenState extends State<EvaluateStudentScreen> {
                 }
 
                 final isStudentInList = students.any(
-                  (s) => ((s['_id'] ?? s['studentId'])?.toString() == _selectedStudentId),
+                  (s) => ((s['id'] ?? s['value'] ?? s['_id'] ?? s['studentId'])?.toString() == _selectedStudentId),
                 );
                 final effectiveStudentId = isStudentInList ? _selectedStudentId : null;
 
@@ -470,9 +470,14 @@ class _EvaluateStudentScreenState extends State<EvaluateStudentScreen> {
                       ),
                       icon: Icon(Icons.keyboard_arrow_down_rounded, color: darkText, size: 22.sp),
                       items: students.map((s) {
-                        final id = (s['_id'] ?? s['studentId'])?.toString() ?? '';
+                        final id = (s['id'] ?? s['value'] ?? s['_id'] ?? s['studentId'])?.toString() ?? '';
+                        final label = s['label']?.toString() ?? '';
                         final name = (s['name'] ?? s['fullName'] ?? 'Trainee').toString();
                         final regNo = (s['regNo'] ?? s['employeeNo'] ?? s['phone'] ?? '').toString();
+                        final displayText = label.isNotEmpty
+                            ? label
+                            : (regNo.isNotEmpty ? '$name ($regNo)' : name);
+
                         return DropdownMenuItem<String>(
                           value: id,
                           child: Row(
@@ -481,7 +486,7 @@ class _EvaluateStudentScreenState extends State<EvaluateStudentScreen> {
                               SizedBox(width: 8.w),
                               Expanded(
                                 child: Text(
-                                  regNo.isNotEmpty ? '$name (ID: $regNo)' : name,
+                                  displayText,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
@@ -498,13 +503,13 @@ class _EvaluateStudentScreenState extends State<EvaluateStudentScreen> {
                       }).toList(),
                       onChanged: (val) {
                         final s = students.firstWhereOrNull(
-                          (st) => (st['_id'] ?? st['studentId'])?.toString() == val,
+                          (st) => (st['id'] ?? st['value'] ?? st['_id'] ?? st['studentId'])?.toString() == val,
                         );
                         setState(() {
                           _selectedStudentId = val;
                           if (s != null) {
-                            final name = (s['name'] ?? s['fullName'] ?? 'Trainee').toString();
-                            final idVal = (s['_id'] ?? s['studentId'] ?? val)?.toString() ?? '';
+                            final name = (s['name'] ?? s['fullName'] ?? s['label'] ?? 'Trainee').toString();
+                            final idVal = (s['id'] ?? s['value'] ?? s['_id'] ?? s['studentId'] ?? val)?.toString() ?? '';
                             _studentNameController.text = name;
                             _studentIdController.text = idVal;
                           }
@@ -518,84 +523,98 @@ class _EvaluateStudentScreenState extends State<EvaluateStudentScreen> {
               // 3. Selected Student Confirmation Card
               if (_selectedStudentId != null && _studentNameController.text.isNotEmpty) ...[
                 SizedBox(height: 12.h),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 11.h),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFFDF5),
-                    borderRadius: BorderRadius.circular(14.r),
-                    border: Border.all(color: const Color(0xFFD4AF37), width: 1.2),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x12D4AF37),
-                        blurRadius: 8,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 40.h,
-                        height: 40.h,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFFFF8E1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.sports_tennis_rounded,
-                            size: 22.sp,
-                            color: const Color(0xFF9E7B1A),
+                Builder(
+                  builder: (context) {
+                    final selectedStudentData = controller.batchStudents.firstWhereOrNull(
+                      (st) => (st['id'] ?? st['value'] ?? st['_id'] ?? st['studentId'])?.toString() == _selectedStudentId,
+                    );
+                    final reg = selectedStudentData != null
+                        ? (selectedStudentData['employeeNo'] ?? selectedStudentData['regNo'] ?? selectedStudentData['phone'] ?? _studentIdController.text)
+                        : _studentIdController.text;
+                    final skill = selectedStudentData?['skillLevel']?.toString();
+
+                    return Container(
+                      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 11.h),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFFDF5),
+                        borderRadius: BorderRadius.circular(14.r),
+                        border: Border.all(color: const Color(0xFFD4AF37), width: 1.2),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x12D4AF37),
+                            blurRadius: 8,
+                            offset: Offset(0, 2),
                           ),
-                        ),
+                        ],
                       ),
-                      SizedBox(width: 12.w),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _studentNameController.text,
-                              style: TextStyle(
-                                fontFamily: 'Nunito',
-                                fontSize: 14.5.sp,
-                                fontWeight: FontWeight.w800,
-                                color: darkText,
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 40.h,
+                            height: 40.h,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFFFF8E1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: Icon(
+                                Icons.sports_tennis_rounded,
+                                size: 22.sp,
+                                color: const Color(0xFF9E7B1A),
                               ),
                             ),
-                            SizedBox(height: 2.h),
-                            Text(
-                              'Student Reg / ID: ${_studentIdController.text}',
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _studentNameController.text,
+                                  style: TextStyle(
+                                    fontFamily: 'Nunito',
+                                    fontSize: 14.5.sp,
+                                    fontWeight: FontWeight.w800,
+                                    color: darkText,
+                                  ),
+                                ),
+                                SizedBox(height: 2.h),
+                                Text(
+                                  skill != null && skill.isNotEmpty
+                                      ? 'Reg: $reg • $skill'
+                                      : 'Reg: $reg',
+                                  style: TextStyle(
+                                    fontFamily: 'Nunito',
+                                    fontSize: 11.5.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: slateText,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE8F5E9),
+                              borderRadius: BorderRadius.circular(8.r),
+                              border: Border.all(color: const Color(0xFF81C784), width: 0.8),
+                            ),
+                            child: Text(
+                              'READY',
                               style: TextStyle(
                                 fontFamily: 'Nunito',
-                                fontSize: 11.5.sp,
-                                fontWeight: FontWeight.w600,
-                                color: slateText,
+                                fontSize: 10.5.sp,
+                                fontWeight: FontWeight.w900,
+                                color: const Color(0xFF2E7D32),
+                                letterSpacing: 0.5,
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE8F5E9),
-                          borderRadius: BorderRadius.circular(8.r),
-                          border: Border.all(color: const Color(0xFF81C784), width: 0.8),
-                        ),
-                        child: Text(
-                          'READY',
-                          style: TextStyle(
-                            fontFamily: 'Nunito',
-                            fontSize: 10.5.sp,
-                            fontWeight: FontWeight.w900,
-                            color: const Color(0xFF2E7D32),
-                            letterSpacing: 0.5,
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
               ],
               SizedBox(height: 24.h),

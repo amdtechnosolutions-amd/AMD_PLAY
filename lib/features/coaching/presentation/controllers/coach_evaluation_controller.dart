@@ -49,7 +49,7 @@ class CoachEvaluationController extends GetxController {
   }
 
   /// Load students belonging specifically to the requested batch
-  Future<void> loadStudentsForBatch(String batchId) async {
+  Future<void> loadStudentsForBatch(String batchId, {String? search}) async {
     if (batchId.isEmpty) {
       batchStudents.clear();
       return;
@@ -57,20 +57,26 @@ class CoachEvaluationController extends GetxController {
 
     isLoadingStudents.value = true;
     try {
-      // 1. First check if cached batch in controller has students list
-      final cachedBatch = batches.firstWhereOrNull((b) => (b['_id'] ?? b['id'])?.toString() == batchId);
-      if (cachedBatch != null && cachedBatch['students'] is List && (cachedBatch['students'] as List).isNotEmpty) {
-        final list = (cachedBatch['students'] as List)
-            .map((e) => Map<String, dynamic>.from(e as Map))
-            .toList();
+      // 1. Primary: Fetch via Option 1 (/coaching/batches/:batchId/students/dropdown)
+      final list = await _service.getBatchStudents(batchId, search: search);
+      if (list.isNotEmpty) {
         batchStudents.value = list;
         isLoadingStudents.value = false;
         return;
       }
 
-      // 2. Fetch live batch students via service
-      final list = await _service.getBatchStudents(batchId);
-      batchStudents.value = list;
+      // 2. Fallback: Check if cached batch in controller has students list
+      final cachedBatch = batches.firstWhereOrNull((b) => (b['_id'] ?? b['id'])?.toString() == batchId);
+      if (cachedBatch != null && cachedBatch['students'] is List && (cachedBatch['students'] as List).isNotEmpty) {
+        final cachedList = (cachedBatch['students'] as List)
+            .map((e) => Map<String, dynamic>.from(e as Map))
+            .toList();
+        batchStudents.value = cachedList;
+        isLoadingStudents.value = false;
+        return;
+      }
+
+      batchStudents.clear();
     } catch (e) {
       debugPrint('[CoachEvaluationController] loadStudentsForBatch error: $e');
       batchStudents.clear();

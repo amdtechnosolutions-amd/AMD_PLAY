@@ -48,17 +48,22 @@ class CoachEvaluationService {
   }
 
   /// Fetch students enrolled specifically in a batch
-  Future<List<Map<String, dynamic>>> getBatchStudents(String batchId) async {
+  /// Option 1: GET /api/v1/coaching/batches/:batchId/students/dropdown
+  Future<List<Map<String, dynamic>>> getBatchStudents(String batchId, {String? search}) async {
     if (batchId.isEmpty) return [];
     try {
       final token = await _getToken();
       final headers = token != null ? {'Authorization': 'Bearer $token'} : null;
+      final queryParams = <String, dynamic>{
+        'status': 'active',
+        if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+      };
 
-      // 1. Query /students?batchId=:batchId
+      // 1. Primary endpoint: /coaching/batches/:batchId/students/dropdown
       try {
         final res = await _apiClient.dio.get(
-          '/students',
-          queryParameters: {'batchId': batchId, 'limit': 100},
+          ApiEndpoints.batchStudentsDropdown(batchId),
+          queryParameters: queryParams,
           options: Options(headers: headers),
         );
         if (res.statusCode == 200 && res.data != null) {
@@ -67,28 +72,54 @@ class CoachEvaluationService {
               ? body['data'] as List
               : (body is List ? body : []);
           if (list.isNotEmpty) {
-            return list.map((e) {
-              final m = Map<String, dynamic>.from(e as Map);
-              final firstName = m['firstName']?.toString() ?? '';
-              final lastName = m['lastName']?.toString() ?? '';
-              final name = (m['name'] ?? m['fullName'] ?? '$firstName $lastName').toString().trim();
-              final regNo = (m['employeeNo'] ?? m['regNo'] ?? m['phone'] ?? m['_id'])?.toString() ?? '';
-              return {
-                '_id': m['_id']?.toString() ?? '',
-                'studentId': m['_id']?.toString() ?? '',
-                'name': name.isNotEmpty ? name : 'Trainee',
-                'regNo': regNo,
-                'email': m['email']?.toString() ?? '',
-                'phone': m['phone']?.toString() ?? '',
-              };
-            }).toList();
+            return list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
           }
         }
       } catch (e) {
-        debugPrint('[CoachEvaluationService] /students query notice: $e');
+        debugPrint('[CoachEvaluationService] /batches/:id/students/dropdown notice: $e');
       }
 
-      // 2. Fallback: Query /coaching/batches/:id
+      // 2. Alias: /coaching/batches/:batchId/students
+      try {
+        final res = await _apiClient.dio.get(
+          '${ApiEndpoints.coachingBatches}/$batchId/students',
+          queryParameters: queryParams,
+          options: Options(headers: headers),
+        );
+        if (res.statusCode == 200 && res.data != null) {
+          final body = res.data;
+          final list = body is Map && body['data'] is List
+              ? body['data'] as List
+              : (body is List ? body : []);
+          if (list.isNotEmpty) {
+            return list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+          }
+        }
+      } catch (e) {
+        debugPrint('[CoachEvaluationService] /batches/:id/students notice: $e');
+      }
+
+      // 3. Option 3: /students/dropdown?batchId=:batchId
+      try {
+        final res = await _apiClient.dio.get(
+          ApiEndpoints.studentsDropdown,
+          queryParameters: {'batchId': batchId, ...queryParams},
+          options: Options(headers: headers),
+        );
+        if (res.statusCode == 200 && res.data != null) {
+          final body = res.data;
+          final list = body is Map && body['data'] is List
+              ? body['data'] as List
+              : (body is List ? body : []);
+          if (list.isNotEmpty) {
+            return list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+          }
+        }
+      } catch (e) {
+        debugPrint('[CoachEvaluationService] /students/dropdown notice: $e');
+      }
+
+      // 4. Fallback: Query /coaching/batches/:id
       final batchRes = await _apiClient.dio.get(
         '${ApiEndpoints.coachingBatches}/$batchId',
         options: Options(headers: headers),
@@ -99,19 +130,52 @@ class CoachEvaluationService {
         if (data is Map && data['students'] is List) {
           return (data['students'] as List).map((e) {
             final m = Map<String, dynamic>.from(e as Map);
+            final name = (m['name'] ?? m['fullName'] ?? 'Trainee').toString();
+            final regNo = (m['regNo'] ?? m['employeeNo'] ?? m['phone'] ?? m['_id'])?.toString() ?? '';
             return {
-              '_id': (m['_id'] ?? m['studentId'])?.toString() ?? '',
-              'studentId': (m['_id'] ?? m['studentId'])?.toString() ?? '',
-              'name': (m['name'] ?? m['fullName'] ?? 'Trainee').toString(),
-              'regNo': (m['regNo'] ?? m['employeeNo'] ?? m['phone'] ?? m['_id'])?.toString() ?? '',
+              'id': (m['_id'] ?? m['studentId'] ?? m['id'])?.toString() ?? '',
+              'value': (m['_id'] ?? m['studentId'] ?? m['id'])?.toString() ?? '',
+              'label': regNo.isNotEmpty ? '$name ($regNo)' : name,
+              'name': name,
+              'employeeNo': regNo,
+              'regNo': regNo,
               'email': m['email']?.toString() ?? '',
               'phone': m['phone']?.toString() ?? '',
+              'status': m['status']?.toString() ?? 'active',
             };
           }).toList();
         }
       }
     } catch (e) {
       debugPrint('[CoachEvaluationService] getBatchStudents error: $e');
+    }
+    return [];
+  }
+
+  /// Option 2: Fetch all batches and enrolled students in one single request
+  Future<List<Map<String, dynamic>>> getBatchWiseStudents({String? search, String? sportId}) async {
+    try {
+      final token = await _getToken();
+      final headers = token != null ? {'Authorization': 'Bearer $token'} : null;
+      final queryParams = <String, dynamic>{
+        if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+        if (sportId != null && sportId.isNotEmpty) 'sportId': sportId,
+      };
+
+      final res = await _apiClient.dio.get(
+        ApiEndpoints.batchWiseStudents,
+        queryParameters: queryParams,
+        options: Options(headers: headers),
+      );
+      if (res.statusCode == 200 && res.data != null) {
+        final body = res.data;
+        final list = body is Map && body['data'] is List
+            ? body['data'] as List
+            : (body is List ? body : []);
+        return list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+      }
+    } catch (e) {
+      debugPrint('[CoachEvaluationService] getBatchWiseStudents error: $e');
     }
     return [];
   }

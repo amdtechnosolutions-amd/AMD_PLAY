@@ -91,6 +91,9 @@ class ApiEndpoints {
 
   // Coaching & Membership
   static const String coachingBatches = '/coaching/batches';
+  static String batchStudentsDropdown(String batchId) => '/coaching/batches/$batchId/students/dropdown';
+  static const String batchWiseStudents = '/coaching/batch-wise-students';
+  static const String studentsDropdown = '/students/dropdown';
   static const String coachEvaluations = '/coaching/evaluations';
   static const String coachStudentEvaluations = '/coaching/evaluations/student';
   static const String coachBatchEvaluations = '/coaching/evaluations/batch';
