@@ -42,7 +42,7 @@ class _StudentCoachingReportScreenState
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          'Student Portal Report',
+          'Student Performance Report',
           style: TextStyle(
             fontFamily: 'Nunito',
             fontSize: 17.5.sp,
@@ -223,7 +223,7 @@ class _StudentCoachingReportScreenState
         : 'BADMINTON';
     final batchLabel = summary.batchName.isNotEmpty
         ? summary.batchName
-        : 'Student Portal Report';
+        : 'Student Performance Report';
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,

@@ -46,3 +46,4 @@ void main() {
     expect(unratedCard.score, 0.0);
   });
 }
+
