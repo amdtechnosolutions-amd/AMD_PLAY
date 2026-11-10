@@ -39,6 +39,8 @@ class CoachEvaluationController extends GetxController {
 
       evaluations.value = results[0];
       batches.value = results[1];
+      debugPrint('[CoachEvaluationController] Live evaluations loaded: ${evaluations.length} records');
+      debugPrint('[CoachEvaluationController] Live batches loaded: ${batches.length} batches');
     } catch (e) {
       debugPrint('[CoachEvaluationController] fetchCoachData error: $e');
       hasError.value = true;
@@ -99,24 +101,34 @@ class CoachEvaluationController extends GetxController {
       // 1. Batch filter
       if (selectedBatchId.value != 'ALL') {
         final evBatchId = ev['batchId'] is Map
-            ? ev['batchId']['_id']?.toString()
+            ? (ev['batchId']['_id'] ?? ev['batchId']['id'])?.toString()
             : ev['batchId']?.toString();
         if (evBatchId != selectedBatchId.value) return false;
       }
 
       // 2. Search query filter
       if (searchQuery.value.isNotEmpty) {
-        final student = ev['studentId'] is Map ? ev['studentId'] : ev['student'];
-        final name = (student is Map
-                ? (student['name'] ?? student['fullName'] ?? student['studentName'])
-                : ev['studentName'])
+        final student = ev['studentId'] is Map ? ev['studentId'] as Map : (ev['student'] is Map ? ev['student'] as Map : null);
+        final fName = student != null ? (student['firstName'] ?? '').toString() : '';
+        final lName = student != null ? (student['lastName'] ?? '').toString() : '';
+        final fullName = '$fName $lName'.trim();
+
+        final name = (fullName.isNotEmpty
+                ? fullName
+                : (student != null
+                    ? (student['name'] ?? student['fullName'] ?? student['studentName'])
+                    : ev['studentName']))
             ?.toString()
             .toLowerCase() ??
             '';
-        final regNo = (student is Map ? (student['regNo'] ?? student['rollNo']) : ev['regNo'])
+
+        final regNo = (student != null
+                ? (student['employeeNo'] ?? student['regNo'] ?? student['cardNo'] ?? student['rollNo'])
+                : ev['regNo'])
             ?.toString()
             .toLowerCase() ??
             '';
+
         final q = searchQuery.value;
         if (!name.contains(q) && !regNo.contains(q)) return false;
       }

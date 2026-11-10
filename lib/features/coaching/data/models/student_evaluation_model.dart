@@ -47,10 +47,21 @@ class EvaluationSummary {
       coachName: json['coachName']?.toString() ?? (json['coachId'] is Map ? json['coachId']['name']?.toString() : null) ?? 'Head Coach',
       batchName: json['batchName']?.toString() ?? (json['batchId'] is Map ? json['batchId']['name']?.toString() : null) ?? 'Academy Batch',
       sportName: json['sportName']?.toString() ?? (json['sportId'] is Map ? json['sportId']['name']?.toString() : null) ?? 'Badminton',
-      studentName: json['studentName']?.toString() ??
-          (json['student'] is Map ? (json['student']['name'] ?? json['student']['fullName'])?.toString() : null) ??
-          (json['studentId'] is Map ? (json['studentId']['name'] ?? json['studentId']['fullName'])?.toString() : null) ??
-          '',
+      studentName: (json['studentName'] != null && json['studentName'].toString().trim().isNotEmpty)
+          ? json['studentName'].toString().trim()
+          : (json['student'] is Map
+              ? (json['student']['name'] ??
+                 json['student']['fullName'] ??
+                 ('${json['student']['firstName'] ?? ''} ${json['student']['lastName'] ?? ''}'.trim().isNotEmpty
+                     ? '${json['student']['firstName'] ?? ''} ${json['student']['lastName'] ?? ''}'.trim()
+                     : null))?.toString()
+              : (json['studentId'] is Map
+                  ? (json['studentId']['name'] ??
+                     json['studentId']['fullName'] ??
+                     ('${json['studentId']['firstName'] ?? ''} ${json['studentId']['lastName'] ?? ''}'.trim().isNotEmpty
+                         ? '${json['studentId']['firstName'] ?? ''} ${json['studentId']['lastName'] ?? ''}'.trim()
+                         : null))?.toString()
+                  : '')) ?? '',
     );
   }
 }
@@ -573,12 +584,27 @@ class StudentEvaluationReport {
       }
     }
 
-    final resolvedStudentName = json['studentName']?.toString() ??
-        (json['student'] is Map ? (json['student']['name'] ?? json['student']['fullName'])?.toString() : null) ??
-        (json['studentId'] is Map ? (json['studentId']['name'] ?? json['studentId']['fullName'])?.toString() : null) ??
-        (latest['student'] is Map ? (latest['student']['name'] ?? latest['student']['fullName'])?.toString() : null) ??
-        (latest['studentName']?.toString()) ??
-        summary.studentName;
+    String resolveName(dynamic source) {
+      if (source == null) return '';
+      if (source is String && source.trim().isNotEmpty) return source.trim();
+      if (source is Map) {
+        final f = (source['firstName'] ?? '').toString().trim();
+        final l = (source['lastName'] ?? '').toString().trim();
+        final full = '$f $l'.trim();
+        if (full.isNotEmpty) return full;
+        final n = (source['name'] ?? source['fullName'] ?? source['studentName'] ?? '').toString().trim();
+        if (n.isNotEmpty) return n;
+      }
+      return '';
+    }
+
+    String resolvedStudentName = resolveName(json['studentName']);
+    if (resolvedStudentName.isEmpty) resolvedStudentName = resolveName(json['student']);
+    if (resolvedStudentName.isEmpty) resolvedStudentName = resolveName(json['studentId']);
+    if (resolvedStudentName.isEmpty) resolvedStudentName = resolveName(latest['student']);
+    if (resolvedStudentName.isEmpty) resolvedStudentName = resolveName(latest['studentId']);
+    if (resolvedStudentName.isEmpty) resolvedStudentName = resolveName(latest['studentName']);
+    if (resolvedStudentName.isEmpty) resolvedStudentName = summary.studentName;
 
     return StudentEvaluationReport(
       summary: summary,

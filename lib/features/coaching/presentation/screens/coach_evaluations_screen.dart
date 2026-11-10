@@ -294,35 +294,103 @@ class CoachEvaluationsScreen extends StatelessWidget {
     Map<String, dynamic> item,
     CoachEvaluationController controller,
   ) {
-    final student = item['studentId'] is Map ? item['studentId'] : item['student'];
-    final studentName = (student is Map
-            ? (student['name'] ?? student['fullName'] ?? student['studentName'])
-            : item['studentName'])
-        ?.toString() ??
-        'Academy Student';
-    final regNo = (student is Map ? (student['regNo'] ?? student['rollNo']) : item['regNo'])
-        ?.toString() ??
-        '';
+    // 1. Resolve Student Name from Live Item / Student Object
+    final student = item['studentId'] is Map
+        ? item['studentId'] as Map
+        : (item['student'] is Map ? item['student'] as Map : null);
 
-    final batch = item['batchId'] is Map ? item['batchId'] : item['batch'];
-    final batchName = (batch is Map
-            ? (batch['name'] ?? batch['title'])
-            : item['batchName'])
-        ?.toString() ??
-        'Training Batch';
+    String studentName = (item['studentName'] ?? '').toString().trim();
+    if (studentName.isEmpty && student != null) {
+      final fName = (student['firstName'] ?? '').toString().trim();
+      final lName = (student['lastName'] ?? '').toString().trim();
+      final full = '$fName $lName'.trim();
+      if (full.isNotEmpty) {
+        studentName = full;
+      } else {
+        studentName = (student['name'] ?? student['fullName'] ?? student['studentName'] ?? '').toString().trim();
+      }
+    }
+    if (studentName.isEmpty) {
+      studentName = 'Academy Student';
+    }
 
+    // 2. Resolve Reg No / Biometric ID
+    String regNo = (item['regNo'] ?? item['employeeNo'] ?? '').toString().trim();
+    if (regNo.isEmpty && student != null) {
+      regNo = (student['employeeNo'] ?? student['regNo'] ?? student['cardNo'] ?? student['rollNo'] ?? '').toString().trim();
+    }
+
+    // 3. Resolve Batch Name
+    final batch = item['batchId'] is Map
+        ? item['batchId'] as Map
+        : (item['batch'] is Map ? item['batch'] as Map : null);
+    String batchName = (item['batchName'] ?? '').toString().trim();
+    if (batchName.isEmpty && batch != null) {
+      batchName = (batch['name'] ?? batch['title'] ?? batch['batchName'] ?? '').toString().trim();
+    }
+    if (batchName.isEmpty) {
+      batchName = 'Training Squad';
+    }
+
+    // 4. Resolve Live Scores, Percentages, and Grade
     final summary = item['summary'] is Map ? item['summary'] as Map : item;
-    final totalScore = summary['overallScore']?.toString() ??
-        summary['score']?.toString() ??
-        '210/240';
-    final percentage = (summary['percentage'] as num?)?.toDouble() ??
+    final num overallScoreNum = (summary['overallScore'] ?? summary['score'] ?? summary['totalScore'] as num?) ?? 0;
+    final num totalPossibleScoreNum = (summary['totalPossibleScore'] ?? summary['maxScore'] as num?) ?? 240;
+    final double percentage = (summary['percentage'] as num?)?.toDouble() ??
         (summary['overallPercentage'] as num?)?.toDouble() ??
-        85.0;
-    final grade = summary['grade']?.toString() ?? 'A';
-    final level = summary['performanceLevel']?.toString() ??
-        summary['level']?.toString() ??
-        'Excellent';
-    final remarks = (summary['coachRemarks'] ?? summary['remarks'])?.toString() ?? '';
+        (totalPossibleScoreNum > 0 ? (overallScoreNum / totalPossibleScoreNum) * 100.0 : 0.0);
+
+    // Compute live grade if absent
+    String grade = (summary['grade']?.toString() ?? '').trim().toUpperCase();
+    if (grade.isEmpty || grade == 'N/A') {
+      if (percentage >= 90) {
+        grade = 'A+';
+      } else if (percentage >= 80) {
+        grade = 'A';
+      } else if (percentage >= 70) {
+        grade = 'B';
+      } else if (percentage >= 60) {
+        grade = 'C';
+      } else {
+        grade = 'D';
+      }
+    }
+
+    // Compute live performance tier
+    String level = (summary['performanceLevel'] ?? summary['level']?.toString() ?? '').trim();
+    if (level.isEmpty || level.toLowerCase() == 'unassessed') {
+      if (percentage >= 90) {
+        level = 'Elite';
+      } else if (percentage >= 80) {
+        level = 'Excellent';
+      } else if (percentage >= 70) {
+        level = 'Good';
+      } else if (percentage >= 60) {
+        level = 'Satisfactory';
+      } else {
+        level = 'Needs Improvement';
+      }
+    }
+
+    final remarks = (summary['coachRemarks'] ?? summary['remarks'] ?? item['remarks'] ?? item['coachRemarks'])?.toString().trim() ?? '';
+    final totalScoreText = '${overallScoreNum.toInt()} / ${totalPossibleScoreNum.toInt()}';
+
+    // Category breakdown scores
+    final pScore = (summary['physicalScore'] ?? item['physicalScore'] as num?)?.toDouble();
+    final mScore = (summary['mentalScore'] ?? item['mentalScore'] as num?)?.toDouble();
+    final sScore = (summary['skillScore'] ?? item['skillScore'] as num?)?.toDouble();
+    final aScore = (summary['attitudeScore'] ?? item['attitudeScore'] as num?)?.toDouble();
+
+    // Date
+    final rawDate = summary['evaluationDate'] ?? summary['date'] ?? item['createdAt'] ?? item['evaluationDate'];
+    String formattedDate = '';
+    if (rawDate != null) {
+      try {
+        final dt = DateTime.parse(rawDate.toString()).toLocal();
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        formattedDate = '${dt.day} ${months[dt.month - 1]} ${dt.year}';
+      } catch (_) {}
+    }
 
     return Container(
       margin: EdgeInsets.only(bottom: 14.h),
@@ -395,6 +463,18 @@ class CoachEvaluationsScreen extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
+                    if (formattedDate.isNotEmpty) ...[
+                      SizedBox(height: 2.h),
+                      Text(
+                        'Evaluated on $formattedDate',
+                        style: TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: 11.sp,
+                          color: const Color(0xFF94A3B8),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -448,7 +528,7 @@ class CoachEvaluationsScreen extends StatelessWidget {
                     Icon(Icons.stars_rounded, size: 16.sp, color: goldAccent),
                     SizedBox(width: 6.w),
                     Text(
-                      'Score: $totalScore (${percentage.toStringAsFixed(1)}%)',
+                      'Score: $totalScoreText (${percentage.toStringAsFixed(1)}%)',
                       style: TextStyle(
                         fontFamily: 'Nunito',
                         fontSize: 12.5.sp,
@@ -478,6 +558,25 @@ class CoachEvaluationsScreen extends StatelessWidget {
             ),
           ),
 
+          // Category Score Breakdown Pills if available
+          if (pScore != null || mScore != null || sScore != null || aScore != null) ...[
+            SizedBox(height: 10.h),
+            Wrap(
+              spacing: 6.w,
+              runSpacing: 6.h,
+              children: [
+                if (pScore != null)
+                  _buildCategoryBadge('Physical', pScore.toInt(), const Color(0xFF10B981)),
+                if (mScore != null)
+                  _buildCategoryBadge('Mental', mScore.toInt(), const Color(0xFF3B82F6)),
+                if (sScore != null)
+                  _buildCategoryBadge('Skill', sScore.toInt(), const Color(0xFFD4AF37)),
+                if (aScore != null)
+                  _buildCategoryBadge('Attitude', aScore.toInt(), const Color(0xFF8B5CF6)),
+              ],
+            ),
+          ],
+
           if (remarks.isNotEmpty) ...[
             SizedBox(height: 10.h),
             Text(
@@ -501,13 +600,17 @@ class CoachEvaluationsScreen extends StatelessWidget {
               Expanded(
                 child: GestureDetector(
                   onTap: () {
-                    final report = controller.convertToReport(item);
+                    final enrichedItem = Map<String, dynamic>.from(item);
+                    enrichedItem['studentName'] = studentName;
+                    enrichedItem['regNo'] = regNo;
+                    enrichedItem['batchName'] = batchName;
+                    final report = controller.convertToReport(enrichedItem);
                     Get.toNamed(
                       AppRoutes.coachingReport,
                       arguments: {
                         'report': report,
                         'studentName': studentName,
-                        'studentId': student is Map ? (student['_id'] ?? student['id']) : null,
+                        'studentId': student is Map ? (student['_id'] ?? student['id']) : (item['studentId']?.toString()),
                       },
                     );
                   },
@@ -576,6 +679,37 @@ class CoachEvaluationsScreen extends StatelessWidget {
                 ),
               ],
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryBadge(String title, int score, Color color) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(8.r),
+        border: Border.all(color: color.withValues(alpha: 0.4), width: 0.9),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6.w,
+            height: 6.w,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+          ),
+          SizedBox(width: 5.w),
+          Text(
+            '$title: $score/60',
+            style: TextStyle(
+              fontFamily: 'Nunito',
+              fontSize: 10.5.sp,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
           ),
         ],
       ),

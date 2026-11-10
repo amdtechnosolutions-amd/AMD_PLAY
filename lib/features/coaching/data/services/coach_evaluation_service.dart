@@ -27,6 +27,8 @@ class CoachEvaluationService {
   Future<List<Map<String, dynamic>>> getCoachBatches() async {
     try {
       final token = await _getToken();
+      final url = '${ApiEndpoints.baseUrl}${ApiEndpoints.coachingBatches}';
+      debugPrint('[CoachEvaluationService] FETCHING BATCHES: $url');
       final response = await _apiClient.dio.get(
         ApiEndpoints.coachingBatches,
         options: Options(
@@ -34,12 +36,15 @@ class CoachEvaluationService {
         ),
       );
 
+      debugPrint('[CoachEvaluationService] BATCHES RESPONSE: status=${response.statusCode}');
       if (response.statusCode == 200 && response.data != null) {
         final body = response.data;
         final list = body is Map && body['data'] is List
             ? body['data'] as List
             : (body is List ? body : []);
-        return list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+        final parsed = list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+        debugPrint('[CoachEvaluationService] Parsed ${parsed.length} coaching batches');
+        return parsed;
       }
     } catch (e) {
       debugPrint('[CoachEvaluationService] getCoachBatches error: $e');
@@ -188,6 +193,13 @@ class CoachEvaluationService {
         throw Exception('Please sign in to your coach account to view evaluations.');
       }
 
+      final url = '${ApiEndpoints.baseUrl}${ApiEndpoints.coachEvaluations}';
+      debugPrint('====================================================');
+      debugPrint('[CoachEvaluationService] FETCHING LIVE EVALUATIONS:');
+      debugPrint('URL: $url');
+      debugPrint('Authorization: Bearer ${token.substring(0, token.length > 12 ? 12 : token.length)}...');
+      debugPrint('====================================================');
+
       final response = await _apiClient.dio.get(
         ApiEndpoints.coachEvaluations,
         options: Options(
@@ -195,15 +207,35 @@ class CoachEvaluationService {
         ),
       );
 
+      debugPrint('====================================================');
+      debugPrint('[CoachEvaluationService] EVALUATIONS API RESPONSE:');
+      debugPrint('Status Code: ${response.statusCode}');
+      debugPrint('Response Body: ${response.data}');
+      debugPrint('====================================================');
+
       if (response.statusCode == 200 && response.data != null) {
         final body = response.data;
         final list = body is Map && body['data'] is List
             ? body['data'] as List
-            : (body is List ? body : []);
-        return list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+            : (body is Map && body['evaluations'] is List
+                ? body['evaluations'] as List
+                : (body is List ? body : []));
+
+        final result = list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+        debugPrint('[CoachEvaluationService] Successfully parsed ${result.length} student evaluations');
+        return result;
       }
     } catch (e) {
-      debugPrint('[CoachEvaluationService] getCoachingEvaluations error: $e');
+      debugPrint('====================================================');
+      debugPrint('[CoachEvaluationService] GET COACH EVALUATIONS ERROR:');
+      if (e is DioException) {
+        debugPrint('DioException Status: ${e.response?.statusCode}');
+        debugPrint('DioException Data: ${e.response?.data}');
+        debugPrint('DioException Message: ${e.message}');
+      } else {
+        debugPrint('Error: $e');
+      }
+      debugPrint('====================================================');
       rethrow;
     }
     return [];
@@ -213,12 +245,24 @@ class CoachEvaluationService {
   Future<StudentEvaluationReport?> getStudentEvaluation(String studentId) async {
     try {
       final token = await _getToken();
+      final url = '${ApiEndpoints.baseUrl}${ApiEndpoints.coachStudentEvaluations}/$studentId';
+      debugPrint('====================================================');
+      debugPrint('[CoachEvaluationService] FETCHING STUDENT EVALUATION:');
+      debugPrint('URL: $url');
+      debugPrint('====================================================');
+
       final response = await _apiClient.dio.get(
         '${ApiEndpoints.coachStudentEvaluations}/$studentId',
         options: Options(
           headers: token != null ? {'Authorization': 'Bearer $token'} : null,
         ),
       );
+
+      debugPrint('====================================================');
+      debugPrint('[CoachEvaluationService] STUDENT EVALUATION RESPONSE:');
+      debugPrint('Status Code: ${response.statusCode}');
+      debugPrint('Response Body: ${response.data}');
+      debugPrint('====================================================');
 
       if (response.statusCode == 200 && response.data != null) {
         final body = response.data;
