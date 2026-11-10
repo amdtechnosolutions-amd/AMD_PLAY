@@ -109,7 +109,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Brand Logo Emblem with Glow & EST. 2024 Badge
+                    // Brand Logo Emblem in Black Circle with Gold Border & Glow
                     _buildLogoEmblem(),
                     SizedBox(height: 28.h),
 
@@ -119,7 +119,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         Text(
                           'INERTIA',
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontFamily: 'Nunito', 
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
                             fontSize: 28.sp,
                             fontWeight: FontWeight.w900,
                             color: Colors.white,
@@ -130,10 +131,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         Text(
                           'SPORTS ACADEMY',
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontFamily: 'Nunito', 
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
                             fontSize: 17.sp,
                             fontWeight: FontWeight.w900,
-                            color: const Color(0xFFF59E0B),
+                            color: const Color(0xFFD4AF37),
                             letterSpacing: 4.5,
                           ),
                         ),
@@ -148,13 +150,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         color: const Color(0x0DFFFFFF),
                         borderRadius: BorderRadius.circular(20.r),
                         border: Border.all(
-                          color: const Color(0x40F59E0B),
+                          color: const Color(0x40D4AF37),
                           width: 1,
                         ),
                       ),
                       child: Text(
                         'GATEWAY TO SPORTS EXCELLENCE',
-                        style: TextStyle(fontFamily: 'Nunito', 
+                        style: TextStyle(
+                          fontFamily: 'Nunito',
                           color: const Color(0xFF94A3B8),
                           fontWeight: FontWeight.w700,
                           letterSpacing: 1.8,
@@ -182,13 +185,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     height: 20.w,
                     child: const CircularProgressIndicator(
                       strokeWidth: 2.0,
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFF59E0B)),
+                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFD4AF37)),
                     ),
                   ),
                   SizedBox(height: 14.h),
                   Text(
                     'MULTI-SPORT TRAINING & ARENA BOOKINGS',
-                    style: TextStyle(fontFamily: 'Nunito', 
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
                       fontSize: 10.sp,
                       fontWeight: FontWeight.w600,
                       color: const Color(0x66FFFFFF),
@@ -205,15 +209,41 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   Widget _buildLogoEmblem() {
-    return Image.asset(
-      'assets/logo/logo.png',
-      height: 120.h,
-      fit: BoxFit.contain,
-      errorBuilder: (context, error, stackTrace) => Center(
-        child: Icon(
-          Icons.sports_tennis_rounded,
-          size: 68.sp,
-          color: const Color(0xFFF59E0B),
+    return Container(
+      width: 140.w,
+      height: 140.w,
+      decoration: BoxDecoration(
+        color: Colors.black,
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: const Color(0xFFD4AF37),
+          width: 2.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+            blurRadius: 30,
+            spreadRadius: 3,
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.7),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      padding: EdgeInsets.all(22.w),
+      child: Center(
+        child: Image.asset(
+          'assets/logo/logo.png',
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) => Center(
+            child: Icon(
+              Icons.sports_tennis_rounded,
+              size: 56.sp,
+              color: const Color(0xFFD4AF37),
+            ),
+          ),
         ),
       ),
     );
