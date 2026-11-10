@@ -47,13 +47,13 @@ class ParameterCardWidget extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  parameter.name,
+                  parameter.name.toUpperCase(),
                   style: TextStyle(
                     fontFamily: 'Nunito',
-                    fontSize: 14.5.sp,
-                    fontWeight: FontWeight.w800,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w900,
                     color: const Color(0xFF0F172A),
-                    letterSpacing: -0.2,
+                    letterSpacing: 0.3,
                   ),
                 ),
                 SizedBox(height: 2.h),
