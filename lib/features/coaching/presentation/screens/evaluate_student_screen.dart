@@ -23,11 +23,55 @@ class _EvaluateStudentScreenState extends State<EvaluateStudentScreen> {
   final TextEditingController _remarksController = TextEditingController();
 
   String? _selectedBatchId;
+  String? _selectedStudentId;
   double _physicalScore = 48.0;
   double _mentalScore = 52.0;
   double _skillScore = 54.0;
   double _attitudeScore = 56.0;
   bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initFromArguments();
+    });
+  }
+
+  void _initFromArguments() {
+    final controller = Get.isRegistered<CoachEvaluationController>()
+        ? Get.find<CoachEvaluationController>()
+        : Get.put(CoachEvaluationController());
+
+    final args = Get.arguments;
+    if (args is Map) {
+      if (args['batchId'] != null) {
+        final bId = args['batchId'].toString();
+        setState(() {
+          _selectedBatchId = bId;
+        });
+        controller.loadStudentsForBatch(bId);
+      }
+      if (args['studentId'] != null) {
+        final sId = args['studentId'].toString();
+        setState(() {
+          _selectedStudentId = sId;
+          _studentIdController.text = sId;
+        });
+      }
+      if (args['studentName'] != null) {
+        _studentNameController.text = args['studentName'].toString();
+      }
+    } else if (controller.batches.isNotEmpty && _selectedBatchId == null) {
+      final firstBatchId = (controller.batches.first['_id'] ?? controller.batches.first['id'])?.toString();
+      if (firstBatchId != null && firstBatchId.isNotEmpty) {
+        setState(() {
+          _selectedBatchId = firstBatchId;
+        });
+        controller.loadStudentsForBatch(firstBatchId);
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -57,6 +101,34 @@ class _EvaluateStudentScreenState extends State<EvaluateStudentScreen> {
   }
 
   Future<void> _handleSubmit() async {
+    if (_selectedBatchId == null || _selectedBatchId!.isEmpty) {
+      Get.snackbar(
+        'Batch Required',
+        'Please select a coaching batch first.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.white,
+        colorText: const Color(0xFFEF4444),
+        borderColor: const Color(0xFFEF4444),
+        borderWidth: 1.2,
+        margin: const EdgeInsets.all(16),
+      );
+      return;
+    }
+
+    if (_studentIdController.text.trim().isEmpty) {
+      Get.snackbar(
+        'Student Required',
+        'Please select an enrolled student from the batch dropdown.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.white,
+        colorText: const Color(0xFFEF4444),
+        borderColor: const Color(0xFFEF4444),
+        borderWidth: 1.2,
+        margin: const EdgeInsets.all(16),
+      );
+      return;
+    }
+
     if (!_formKey.currentState!.validate()) return;
 
     final controller = Get.isRegistered<CoachEvaluationController>()
@@ -145,43 +217,50 @@ class _EvaluateStudentScreenState extends State<EvaluateStudentScreen> {
               _buildGradePreviewBanner(),
               SizedBox(height: 20.h),
 
-              // Student & Batch Info
-              Text(
-                'Student Information',
-                style: TextStyle(
-                  fontFamily: 'Nunito',
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w800,
-                  color: darkText,
-                ),
+              // Student & Batch Info Section
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Student Information',
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w800,
+                      color: darkText,
+                    ),
+                  ),
+                  Text(
+                    'Batch Roster',
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF9E7B1A),
+                    ),
+                  ),
+                ],
               ),
               SizedBox(height: 10.h),
 
-              // Student Name
-              _buildTextFormField(
-                controller: _studentNameController,
-                label: 'Student Name',
-                hint: 'e.g. Rahul Sharma',
-                icon: Icons.person_outline_rounded,
-                validator: (val) =>
-                    val == null || val.trim().isEmpty ? 'Please enter student name' : null,
+              // 1. Coaching Batch Dropdown
+              Text(
+                '1. Select Coaching Batch',
+                style: TextStyle(
+                  fontFamily: 'Nunito',
+                  fontSize: 12.5.sp,
+                  fontWeight: FontWeight.w700,
+                  color: darkText,
+                ),
               ),
-              SizedBox(height: 12.h),
-
-              // Student ID / Reg No
-              _buildTextFormField(
-                controller: _studentIdController,
-                label: 'Student Reg. No / Student ID',
-                hint: 'e.g. 1024 or MongoDB Student ID',
-                icon: Icons.badge_outlined,
-                validator: (val) =>
-                    val == null || val.trim().isEmpty ? 'Please enter student ID' : null,
-              ),
-              SizedBox(height: 12.h),
-
-              // Batch Selector
+              SizedBox(height: 6.h),
               Obx(() {
                 final batches = controller.batches;
+                final isBatchInList = batches.any(
+                  (b) => ((b['_id'] ?? b['id'])?.toString() == _selectedBatchId),
+                );
+                final effectiveBatchId = isBatchInList ? _selectedBatchId : null;
+
                 return Container(
                   padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
                   decoration: BoxDecoration(
@@ -192,38 +271,333 @@ class _EvaluateStudentScreenState extends State<EvaluateStudentScreen> {
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       isExpanded: true,
-                      value: _selectedBatchId,
-                      hint: Text(
-                        'Select Coaching Batch',
-                        style: TextStyle(
-                          fontFamily: 'Nunito',
-                          fontSize: 13.5.sp,
-                          color: const Color(0xFF94A3B8),
-                        ),
-                      ),
-                      items: batches.map((b) {
-                        final id = b['_id']?.toString() ?? '';
-                        final name = b['name']?.toString() ?? b['title']?.toString() ?? 'Batch';
-                        return DropdownMenuItem<String>(
-                          value: id,
-                          child: Text(
-                            name,
+                      value: effectiveBatchId,
+                      hint: Row(
+                        children: [
+                          Icon(Icons.groups_rounded, size: 20.sp, color: const Color(0xFFD4AF37)),
+                          SizedBox(width: 8.w),
+                          Text(
+                            'Select Coaching Batch',
                             style: TextStyle(
                               fontFamily: 'Nunito',
                               fontSize: 13.5.sp,
-                              fontWeight: FontWeight.w700,
-                              color: darkText,
+                              color: const Color(0xFF94A3B8),
                             ),
+                          ),
+                        ],
+                      ),
+                      icon: Icon(Icons.keyboard_arrow_down_rounded, color: darkText, size: 22.sp),
+                      items: batches.map((b) {
+                        final id = (b['_id'] ?? b['id'])?.toString() ?? '';
+                        final name = b['name']?.toString() ?? b['title']?.toString() ?? 'Batch';
+                        final sport = (b['sport'] is Map ? b['sport']['name'] : b['sport'])?.toString();
+                        return DropdownMenuItem<String>(
+                          value: id,
+                          child: Row(
+                            children: [
+                              Icon(Icons.groups_rounded, size: 19.sp, color: const Color(0xFF9E7B1A)),
+                              SizedBox(width: 8.w),
+                              Expanded(
+                                child: Text(
+                                  sport != null && sport.isNotEmpty ? '$name ($sport)' : name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontFamily: 'Nunito',
+                                    fontSize: 13.5.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: darkText,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         );
                       }).toList(),
                       onChanged: (val) {
-                        setState(() => _selectedBatchId = val);
+                        if (val != _selectedBatchId) {
+                          setState(() {
+                            _selectedBatchId = val;
+                            _selectedStudentId = null;
+                            _studentNameController.clear();
+                            _studentIdController.clear();
+                          });
+                          if (val != null && val.isNotEmpty) {
+                            controller.loadStudentsForBatch(val);
+                          }
+                        }
                       },
                     ),
                   ),
                 );
               }),
+              SizedBox(height: 14.h),
+
+              // 2. Student Dropdown (ONLY students belonging to the selected batch)
+              Text(
+                '2. Select Student from Batch',
+                style: TextStyle(
+                  fontFamily: 'Nunito',
+                  fontSize: 12.5.sp,
+                  fontWeight: FontWeight.w700,
+                  color: darkText,
+                ),
+              ),
+              SizedBox(height: 6.h),
+              Obx(() {
+                final students = controller.batchStudents;
+                final isLoading = controller.isLoadingStudents.value;
+
+                if (_selectedBatchId == null || _selectedBatchId!.isEmpty) {
+                  return Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(14.r),
+                      border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.lock_outline_rounded, size: 20.sp, color: const Color(0xFF94A3B8)),
+                        SizedBox(width: 8.w),
+                        Text(
+                          'Choose a coaching batch above first',
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 13.sp,
+                            color: const Color(0xFF94A3B8),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                if (isLoading) {
+                  return Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFFDF5),
+                      borderRadius: BorderRadius.circular(14.r),
+                      border: Border.all(color: const Color(0x60D4AF37), width: 1.2),
+                    ),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 16.h,
+                          height: 16.h,
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: goldAccent,
+                          ),
+                        ),
+                        SizedBox(width: 12.w),
+                        Text(
+                          'Loading students enrolled in this batch...',
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 13.sp,
+                            color: const Color(0xFF9E7B1A),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                if (students.isEmpty) {
+                  return Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFFDF5),
+                      borderRadius: BorderRadius.circular(14.r),
+                      border: Border.all(color: const Color(0x40D4AF37), width: 1.2),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.info_outline_rounded, size: 20.sp, color: const Color(0xFF9E7B1A)),
+                        SizedBox(width: 8.w),
+                        Expanded(
+                          child: Text(
+                            'No enrolled students found in this batch',
+                            style: TextStyle(
+                              fontFamily: 'Nunito',
+                              fontSize: 13.sp,
+                              color: const Color(0xFF64748B),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                final isStudentInList = students.any(
+                  (s) => ((s['_id'] ?? s['studentId'])?.toString() == _selectedStudentId),
+                );
+                final effectiveStudentId = isStudentInList ? _selectedStudentId : null;
+
+                return Container(
+                  padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14.r),
+                    border: Border.all(color: const Color(0x60D4AF37), width: 1.2),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      isExpanded: true,
+                      value: effectiveStudentId,
+                      hint: Row(
+                        children: [
+                          Icon(Icons.person_outline_rounded, size: 20.sp, color: const Color(0xFFD4AF37)),
+                          SizedBox(width: 8.w),
+                          Text(
+                            'Select Student (${students.length} Enrolled)',
+                            style: TextStyle(
+                              fontFamily: 'Nunito',
+                              fontSize: 13.5.sp,
+                              color: const Color(0xFF94A3B8),
+                            ),
+                          ),
+                        ],
+                      ),
+                      icon: Icon(Icons.keyboard_arrow_down_rounded, color: darkText, size: 22.sp),
+                      items: students.map((s) {
+                        final id = (s['_id'] ?? s['studentId'])?.toString() ?? '';
+                        final name = (s['name'] ?? s['fullName'] ?? 'Trainee').toString();
+                        final regNo = (s['regNo'] ?? s['employeeNo'] ?? s['phone'] ?? '').toString();
+                        return DropdownMenuItem<String>(
+                          value: id,
+                          child: Row(
+                            children: [
+                              Icon(Icons.person_rounded, size: 19.sp, color: const Color(0xFF9E7B1A)),
+                              SizedBox(width: 8.w),
+                              Expanded(
+                                child: Text(
+                                  regNo.isNotEmpty ? '$name (ID: $regNo)' : name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontFamily: 'Nunito',
+                                    fontSize: 13.5.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: darkText,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        final s = students.firstWhereOrNull(
+                          (st) => (st['_id'] ?? st['studentId'])?.toString() == val,
+                        );
+                        setState(() {
+                          _selectedStudentId = val;
+                          if (s != null) {
+                            final name = (s['name'] ?? s['fullName'] ?? 'Trainee').toString();
+                            final idVal = (s['_id'] ?? s['studentId'] ?? val)?.toString() ?? '';
+                            _studentNameController.text = name;
+                            _studentIdController.text = idVal;
+                          }
+                        });
+                      },
+                    ),
+                  ),
+                );
+              }),
+
+              // 3. Selected Student Confirmation Card
+              if (_selectedStudentId != null && _studentNameController.text.isNotEmpty) ...[
+                SizedBox(height: 12.h),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 11.h),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFFDF5),
+                    borderRadius: BorderRadius.circular(14.r),
+                    border: Border.all(color: const Color(0xFFD4AF37), width: 1.2),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x12D4AF37),
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40.h,
+                        height: 40.h,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFFFF8E1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.sports_tennis_rounded,
+                            size: 22.sp,
+                            color: const Color(0xFF9E7B1A),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _studentNameController.text,
+                              style: TextStyle(
+                                fontFamily: 'Nunito',
+                                fontSize: 14.5.sp,
+                                fontWeight: FontWeight.w800,
+                                color: darkText,
+                              ),
+                            ),
+                            SizedBox(height: 2.h),
+                            Text(
+                              'Student Reg / ID: ${_studentIdController.text}',
+                              style: TextStyle(
+                                fontFamily: 'Nunito',
+                                fontSize: 11.5.sp,
+                                fontWeight: FontWeight.w600,
+                                color: slateText,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE8F5E9),
+                          borderRadius: BorderRadius.circular(8.r),
+                          border: Border.all(color: const Color(0xFF81C784), width: 0.8),
+                        ),
+                        child: Text(
+                          'READY',
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 10.5.sp,
+                            fontWeight: FontWeight.w900,
+                            color: const Color(0xFF2E7D32),
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               SizedBox(height: 24.h),
 
               // 4 Core Category Sliders
@@ -471,54 +845,6 @@ class _EvaluateStudentScreenState extends State<EvaluateStudentScreen> {
     );
   }
 
-  Widget _buildTextFormField({
-    required TextEditingController controller,
-    required String label,
-    required String hint,
-    required IconData icon,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      validator: validator,
-      style: TextStyle(
-        fontFamily: 'Nunito',
-        fontSize: 13.5.sp,
-        fontWeight: FontWeight.w600,
-        color: darkText,
-      ),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(
-          fontFamily: 'Nunito',
-          fontSize: 13.sp,
-          color: slateText,
-        ),
-        hintText: hint,
-        hintStyle: TextStyle(
-          fontFamily: 'Nunito',
-          fontSize: 12.5.sp,
-          color: const Color(0xFF94A3B8),
-        ),
-        prefixIcon: Icon(icon, size: 18.sp, color: goldAccent),
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14.r),
-          borderSide: const BorderSide(color: Color(0x60D4AF37), width: 1.2),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14.r),
-          borderSide: const BorderSide(color: Color(0x60D4AF37), width: 1.2),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14.r),
-          borderSide: const BorderSide(color: goldAccent, width: 1.5),
-        ),
-      ),
-    );
-  }
 
   Widget _buildCategorySlider({
     required String title,

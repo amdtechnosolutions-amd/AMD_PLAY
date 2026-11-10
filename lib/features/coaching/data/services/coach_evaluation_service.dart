@@ -47,6 +47,75 @@ class CoachEvaluationService {
     return [];
   }
 
+  /// Fetch students enrolled specifically in a batch
+  Future<List<Map<String, dynamic>>> getBatchStudents(String batchId) async {
+    if (batchId.isEmpty) return [];
+    try {
+      final token = await _getToken();
+      final headers = token != null ? {'Authorization': 'Bearer $token'} : null;
+
+      // 1. Query /students?batchId=:batchId
+      try {
+        final res = await _apiClient.dio.get(
+          '/students',
+          queryParameters: {'batchId': batchId, 'limit': 100},
+          options: Options(headers: headers),
+        );
+        if (res.statusCode == 200 && res.data != null) {
+          final body = res.data;
+          final list = body is Map && body['data'] is List
+              ? body['data'] as List
+              : (body is List ? body : []);
+          if (list.isNotEmpty) {
+            return list.map((e) {
+              final m = Map<String, dynamic>.from(e as Map);
+              final firstName = m['firstName']?.toString() ?? '';
+              final lastName = m['lastName']?.toString() ?? '';
+              final name = (m['name'] ?? m['fullName'] ?? '$firstName $lastName').toString().trim();
+              final regNo = (m['employeeNo'] ?? m['regNo'] ?? m['phone'] ?? m['_id'])?.toString() ?? '';
+              return {
+                '_id': m['_id']?.toString() ?? '',
+                'studentId': m['_id']?.toString() ?? '',
+                'name': name.isNotEmpty ? name : 'Trainee',
+                'regNo': regNo,
+                'email': m['email']?.toString() ?? '',
+                'phone': m['phone']?.toString() ?? '',
+              };
+            }).toList();
+          }
+        }
+      } catch (e) {
+        debugPrint('[CoachEvaluationService] /students query notice: $e');
+      }
+
+      // 2. Fallback: Query /coaching/batches/:id
+      final batchRes = await _apiClient.dio.get(
+        '${ApiEndpoints.coachingBatches}/$batchId',
+        options: Options(headers: headers),
+      );
+      if (batchRes.statusCode == 200 && batchRes.data != null) {
+        final body = batchRes.data;
+        final data = body is Map && body['data'] != null ? body['data'] : body;
+        if (data is Map && data['students'] is List) {
+          return (data['students'] as List).map((e) {
+            final m = Map<String, dynamic>.from(e as Map);
+            return {
+              '_id': (m['_id'] ?? m['studentId'])?.toString() ?? '',
+              'studentId': (m['_id'] ?? m['studentId'])?.toString() ?? '',
+              'name': (m['name'] ?? m['fullName'] ?? 'Trainee').toString(),
+              'regNo': (m['regNo'] ?? m['employeeNo'] ?? m['phone'] ?? m['_id'])?.toString() ?? '',
+              'email': m['email']?.toString() ?? '',
+              'phone': m['phone']?.toString() ?? '',
+            };
+          }).toList();
+        }
+      }
+    } catch (e) {
+      debugPrint('[CoachEvaluationService] getBatchStudents error: $e');
+    }
+    return [];
+  }
+
   /// Fetch all student evaluations accessible to coach
   Future<List<Map<String, dynamic>>> getCoachingEvaluations() async {
     try {

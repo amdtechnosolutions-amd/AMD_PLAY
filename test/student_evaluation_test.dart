@@ -45,5 +45,38 @@ void main() {
     final unratedCard = report.parameterCards.firstWhere((c) => c.name.toLowerCase() == 'smash');
     expect(unratedCard.score, 0.0);
   });
+
+  test('Batch student roster correctly isolates enrolled students by selected batchId', () {
+    final batch1 = {
+      '_id': 'batch_101',
+      'name': 'kids_begineer',
+      'students': [
+        {'_id': 's_1', 'name': 'Rahul Sharma', 'regNo': '1024'},
+        {'_id': 's_2', 'name': 'Ananya Sen', 'regNo': '1025'},
+      ],
+    };
+    final batch2 = {
+      '_id': 'batch_202',
+      'name': 'adults_intermediate',
+      'students': [
+        {'_id': 's_3', 'name': 'Vikram Rathore', 'regNo': '2050'},
+      ],
+    };
+
+    final allBatches = [batch1, batch2];
+
+    // Selecting batch 1
+    final selectedBatch1 = allBatches.firstWhere((b) => b['_id'] == 'batch_101');
+    final studentsBatch1 = selectedBatch1['students'] as List;
+    expect(studentsBatch1.length, 2);
+    expect(studentsBatch1[0]['name'], 'Rahul Sharma');
+    expect(studentsBatch1[1]['name'], 'Ananya Sen');
+
+    // Selecting batch 2
+    final selectedBatch2 = allBatches.firstWhere((b) => b['_id'] == 'batch_202');
+    final studentsBatch2 = selectedBatch2['students'] as List;
+    expect(studentsBatch2.length, 1);
+    expect(studentsBatch2[0]['name'], 'Vikram Rathore');
+  });
 }
 

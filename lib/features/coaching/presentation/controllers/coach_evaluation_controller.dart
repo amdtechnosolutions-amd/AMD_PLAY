@@ -14,6 +14,8 @@ class CoachEvaluationController extends GetxController {
 
   final RxList<Map<String, dynamic>> evaluations = <Map<String, dynamic>>[].obs;
   final RxList<Map<String, dynamic>> batches = <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> batchStudents = <Map<String, dynamic>>[].obs;
+  final RxBool isLoadingStudents = false.obs;
 
   final RxString selectedBatchId = 'ALL'.obs;
   final RxString searchQuery = ''.obs;
@@ -43,6 +45,37 @@ class CoachEvaluationController extends GetxController {
       errorMessage.value = e.toString().replaceAll('Exception:', '').trim();
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  /// Load students belonging specifically to the requested batch
+  Future<void> loadStudentsForBatch(String batchId) async {
+    if (batchId.isEmpty) {
+      batchStudents.clear();
+      return;
+    }
+
+    isLoadingStudents.value = true;
+    try {
+      // 1. First check if cached batch in controller has students list
+      final cachedBatch = batches.firstWhereOrNull((b) => (b['_id'] ?? b['id'])?.toString() == batchId);
+      if (cachedBatch != null && cachedBatch['students'] is List && (cachedBatch['students'] as List).isNotEmpty) {
+        final list = (cachedBatch['students'] as List)
+            .map((e) => Map<String, dynamic>.from(e as Map))
+            .toList();
+        batchStudents.value = list;
+        isLoadingStudents.value = false;
+        return;
+      }
+
+      // 2. Fetch live batch students via service
+      final list = await _service.getBatchStudents(batchId);
+      batchStudents.value = list;
+    } catch (e) {
+      debugPrint('[CoachEvaluationController] loadStudentsForBatch error: $e');
+      batchStudents.clear();
+    } finally {
+      isLoadingStudents.value = false;
     }
   }
 
