@@ -315,9 +315,14 @@ class AuthController extends GetxController {
             SizedBox(height: 16.h),
             ...dynamicList.map((item) {
               final s = item as Map<String, dynamic>;
-              final sId = s['id'] ?? s['studentId'] ?? s['_id'];
-              final name = s['fullName'] ?? '${s['firstName']} ${s['lastName'] ?? ''}'.trim();
-              final regNo = s['regNo'] ?? s['employeeNo'] ?? '';
+              final sId = (s['id'] ?? s['studentId'] ?? s['_id'] ?? '').toString();
+              final fName = (s['firstName'] ?? '').toString().trim();
+              final lName = (s['lastName'] ?? '').toString().trim();
+              final combined = '$fName $lName'.trim();
+              final name = (s['fullName']?.toString().trim().isNotEmpty == true)
+                  ? s['fullName'].toString().trim()
+                  : (combined.isNotEmpty ? combined : 'Trainee');
+              final regNo = (s['regNo'] ?? s['employeeNo'] ?? '').toString().trim();
 
               return Container(
                 margin: EdgeInsets.only(bottom: 10.h),
@@ -327,7 +332,7 @@ class AuthController extends GetxController {
                   leading: CircleAvatar(
                     backgroundColor: const Color(0xFFF59E0B),
                     child: Text(
-                      name.isNotEmpty ? name[0] : 'S',
+                      name.isNotEmpty ? name[0].toUpperCase() : 'S',
                       style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -342,6 +347,8 @@ class AuthController extends GetxController {
                         ApiEndpoints.studentLogin,
                         data: {
                           'studentId': sId,
+                          if (regNo.isNotEmpty) 'regNo': regNo,
+                          if (regNo.isNotEmpty) 'identifier': regNo,
                           'password': password,
                         },
                       );

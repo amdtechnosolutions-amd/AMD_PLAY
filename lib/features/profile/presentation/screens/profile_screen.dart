@@ -5,6 +5,7 @@ import '../../../../core/routes/app_routes.dart';
 import '../../../home/presentation/controllers/home_controller.dart';
 import '../../../main_nav/presentation/controllers/main_nav_controller.dart';
 import '../../../coaching/presentation/screens/coaching_batches_screen.dart';
+import '../../../siblings/presentation/widgets/student_sibling_switcher_sheet.dart';
 import '../../../auth/presentation/widgets/change_password_sheet.dart';
 import '../controllers/profile_controller.dart';
 
@@ -817,12 +818,26 @@ class ProfileScreen extends StatelessWidget {
                       subtitle: 'Score across 24 parameters in Physical, Mental, Skill & Attitude',
                       onTap: () => Get.toNamed(AppRoutes.evaluateStudent),
                     ),
+                    const Divider(color: Color(0x1AD4AF37), height: 1),
+                    _buildActionTile(
+                      icon: Icons.family_restroom_rounded,
+                      title: 'Sibling Families & Linking',
+                      subtitle: 'Manage family groups, link siblings & update phone numbers',
+                      onTap: () => Get.toNamed(AppRoutes.siblings),
+                    ),
                   ],
                 );
               }
               if (homeCtrl.isPayAndPlay) return const SizedBox.shrink();
               return Column(
                 children: [
+                  const Divider(color: Color(0x1AD4AF37), height: 1),
+                  _buildActionTile(
+                    icon: Icons.family_restroom_rounded,
+                    title: 'Family & Sibling Profiles',
+                    subtitle: 'View linked siblings & switch active student profile',
+                    onTap: () => StudentSiblingSwitcherSheet.show(homeCtrl),
+                  ),
                   const Divider(color: Color(0x1AD4AF37), height: 1),
                   _buildActionTile(
                     icon: Icons.fitness_center_outlined,

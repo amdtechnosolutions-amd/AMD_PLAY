@@ -12,6 +12,7 @@ import '../../../../core/storage/storage_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:mobile_app/features/attendance/presentation/controllers/attendance_controller.dart';
 import 'package:mobile_app/features/booking/data/models/booking_pass_model.dart';
+import 'package:mobile_app/features/siblings/data/models/sibling_models.dart';
 import '../widgets/payment_receipt_dialog.dart';
 
 class EnrolledSportItem {
@@ -490,64 +491,123 @@ class HomeController extends GetxController {
 
   /// 2. Fetch Enrolled Sports & Sibling Accounts
   Future<void> _fetchEnrolledSportsAndSiblings() async {
-    if (isPayAndPlay) return;
+    if (isPayAndPlay || isCoach) return;
     final token = await _storage.getAccessToken();
     if (token == null || token.trim().isEmpty) return;
 
     final List<EnrolledSportItem> list = [];
 
+    void appendStudentEntries(Map item, {required bool isCurrentOverride}) {
+      final sId = (item['studentId'] ?? item['id'] ?? item['_id'] ?? '').toString();
+      if (sId.isEmpty) return;
+
+      final fName = (item['firstName'] ?? '').toString().trim();
+      final lName = (item['lastName'] ?? '').toString().trim();
+      final fullName = (item['fullName'] ?? item['name'] ?? '$fName $lName').toString().trim();
+      final displayName = fullName.isNotEmpty ? fullName : (fName.isNotEmpty ? fName : 'Trainee');
+      final enrollments = item['enrollments'] as List? ?? [];
+      final isCurrent = isCurrentOverride || (sId == currentStudentId.value);
+
+      if (enrollments.isNotEmpty) {
+        for (final enr in enrollments) {
+          if (enr is! Map) continue;
+          final batch = enr['batchId'] is Map ? enr['batchId'] as Map : null;
+          final sportName = (batch?['sportId'] is Map ? batch!['sportId']['name'] : null)?.toString() ??
+              batch?['sport']?.toString() ??
+              enr['sportName']?.toString() ??
+              enr['sport']?.toString() ??
+              'Badminton';
+          final batchName = (batch?['name'] ?? item['batchName'] ?? 'Regular Coaching').toString();
+          final schedule = SiblingBatchScheduleFormatter.format(
+            batch?['schedule'] ?? enr['schedule'],
+            fallback: 'Active Coaching',
+          );
+
+          list.add(
+            EnrolledSportItem(
+              id: enr['_id']?.toString() ?? '${sId}_${list.length}',
+              studentId: sId,
+              name: displayName,
+              sport: sportName,
+              batchName: batchName,
+              schedule: schedule,
+              isCurrent: isCurrent,
+            ),
+          );
+        }
+      } else {
+        final fallbackBatch = (item['batchName'] ?? '').toString().trim();
+        list.add(
+          EnrolledSportItem(
+            id: sId,
+            studentId: sId,
+            name: displayName,
+            sport: 'Training',
+            batchName: fallbackBatch.isNotEmpty ? fallbackBatch : 'Coaching Trainee',
+            schedule: 'Active Enrollment',
+            isCurrent: isCurrent,
+          ),
+        );
+      }
+    }
+
+    // 1. Add currently logged-in student's profile first from session cache if available
+    if (currentStudentId.value.isNotEmpty) {
+      final userJsonStr = await _storage.getUserJson();
+      if (userJsonStr != null && userJsonStr.isNotEmpty) {
+        try {
+          final decoded = jsonDecode(userJsonStr);
+          if (decoded is Map) {
+            appendStudentEntries(decoded, isCurrentOverride: true);
+          }
+        } catch (_) {}
+      }
+    }
+
+    // 2. Fetch Siblings linked via siblingGroupId / parentPhone (/students/my/siblings)
     try {
-      // 1. Fetch Siblings under parent contact
       final res = await _apiClient.dio.get(ApiEndpoints.studentSiblings);
       if (res.data is Map && res.data['success'] == true && res.data['data'] is List) {
         final siblings = res.data['data'] as List;
 
         for (final item in siblings) {
           if (item is! Map) continue;
-          final sId = item['studentId']?.toString() ?? item['id']?.toString() ?? '';
-          final fName = item['firstName']?.toString() ?? '';
-          final lName = item['lastName']?.toString() ?? '';
-          final fullName = (item['fullName'] ?? '$fName $lName').toString().trim();
-          final displayName = fullName.isNotEmpty ? fullName : (fName.isNotEmpty ? fName : 'Trainee');
-          final enrollments = item['enrollments'] as List? ?? [];
+          final sId = (item['studentId'] ?? item['id'] ?? item['_id'] ?? '').toString();
+          if (sId.isEmpty) continue;
 
-          if (enrollments.isNotEmpty) {
-            for (final enr in enrollments) {
-              if (enr is! Map) continue;
-              final batch = enr['batchId'] is Map ? enr['batchId'] as Map : null;
-              final sportName = batch?['sport']?.toString() ?? enr['sport']?.toString() ?? 'Badminton';
-              final batchName = batch?['name']?.toString() ?? 'Regular Coaching';
-              final schedule = batch?['schedule']?.toString() ?? 'Weekdays 3 Days';
-
-              list.add(
-                EnrolledSportItem(
-                  id: enr['_id']?.toString() ?? sId,
-                  studentId: sId,
-                  name: displayName,
-                  sport: sportName,
-                  batchName: batchName,
-                  schedule: schedule,
-                  isCurrent: sId == currentStudentId.value,
-                ),
-              );
-            }
-          } else {
-            list.add(
-              EnrolledSportItem(
-                id: sId,
-                studentId: sId,
-                name: displayName,
-                sport: 'Training',
-                batchName: 'Coaching Trainee',
-                schedule: 'Active Enrollment',
-                isCurrent: sId == currentStudentId.value,
-              ),
-            );
+          // Avoid duplicating active profile if backend already includes current student
+          if (sId == currentStudentId.value && list.any((e) => e.studentId == sId)) {
+            continue;
           }
+          appendStudentEntries(item, isCurrentOverride: sId == currentStudentId.value);
         }
       }
     } catch (e) {
       debugPrint('Error fetching siblings: $e');
+    }
+
+    // 3. Fallback: if active student had no enrollments cached in userJson, try /students/:id/siblings
+    if (list.isEmpty && currentStudentId.value.isNotEmpty) {
+      try {
+        final detailRes = await _apiClient.dio.get(
+          ApiEndpoints.studentSiblingsById(currentStudentId.value),
+        );
+        if (detailRes.data is Map && detailRes.data['data'] is Map) {
+          final data = detailRes.data['data'] as Map;
+          if (data['student'] is Map) {
+            appendStudentEntries(data['student'] as Map, isCurrentOverride: true);
+          }
+          if (data['siblings'] is List) {
+            for (final sib in data['siblings'] as List) {
+              if (sib is Map) {
+                appendStudentEntries(sib, isCurrentOverride: false);
+              }
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('Error fetching student sibling detail fallback: $e');
+      }
     }
 
     if (list.isEmpty && currentStudentId.value.isNotEmpty) {
@@ -838,7 +898,7 @@ class HomeController extends GetxController {
 
   /// Switch active student profile among siblings
   Future<void> switchProfile(String targetStudentId) async {
-    if (targetStudentId == currentStudentId.value) return;
+    if (targetStudentId.isEmpty || targetStudentId == currentStudentId.value) return;
 
     Get.dialog(
       const Center(child: CircularProgressIndicator(color: AppColors.primary)),
@@ -848,29 +908,36 @@ class HomeController extends GetxController {
     try {
       final res = await _apiClient.dio.post(
         ApiEndpoints.switchStudentProfile,
-        data: {'studentId': targetStudentId},
+        data: {'targetStudentId': targetStudentId},
       );
 
-      if (res.data is Map && res.data['success'] == true) {
-        final data = res.data['data'];
+      if (res.data is Map && res.data['success'] == true && res.data['data'] is Map) {
+        final data = res.data['data'] as Map;
         final accessToken = data['accessToken']?.toString() ?? '';
         final refreshToken = data['refreshToken']?.toString() ?? accessToken;
         final tenantId = data['tenantId']?.toString();
-        final user = data['user'] is Map ? data['user'] as Map<String, dynamic> : <String, dynamic>{};
-        final fullName = (user['fullName'] ?? '${user['firstName']} ${user['lastName']}').toString().trim();
+        final role = (data['role'] ?? (data['user'] is Map ? data['user']['role'] : null))?.toString();
+        final user = data['user'] is Map ? Map<String, dynamic>.from(data['user'] as Map) : <String, dynamic>{};
+        final fName = (user['firstName'] ?? '').toString().trim();
+        final lName = (user['lastName'] ?? '').toString().trim();
+        final combinedName = '$fName $lName'.trim();
+        final fullName = (user['fullName']?.toString().trim().isNotEmpty == true)
+            ? user['fullName'].toString().trim()
+            : (combinedName.isNotEmpty ? combinedName : 'Trainee');
 
         await _storage.saveUserSession(
           accessToken: accessToken,
           refreshToken: refreshToken,
           tenantId: tenantId,
           studentId: targetStudentId,
+          role: role,
           userName: fullName,
           userJson: jsonEncode(user),
         );
 
         currentStudentId.value = targetStudentId;
         userName.value = fullName;
-        greetingName.value = (user['firstName']?.toString() ?? fullName).toUpperCase();
+        greetingName.value = (fName.isNotEmpty ? fName : fullName).toUpperCase();
 
         Get.back(); // close dialog
         Get.snackbar(
@@ -889,6 +956,14 @@ class HomeController extends GetxController {
         }
       } else {
         Get.back();
+        final err = res.data is Map ? res.data['message']?.toString() : null;
+        Get.snackbar(
+          'Switch Failed',
+          err ?? 'Unable to switch trainee profile.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFF0F172A),
+          colorText: Colors.white,
+        );
       }
     } catch (e) {
       Get.back();
