@@ -11,49 +11,41 @@ void main() {
     expect(formatted, 'Mon, Wed, Fri • 17:00 - 18:30');
   });
 
-  test('SiblingFamilyGroupModel parses GET /students/siblings payload', () {
-    final family = SiblingFamilyGroupModel.fromJson({
+  test('SiblingStudentModel parses GET /students/my/siblings item', () {
+    final sibling = SiblingStudentModel.fromJson({
+      'id': '6af1e2ae185e913f71898a76',
+      'studentId': '6af1e2ae185e913f71898a76',
+      'firstName': 'RUTHVI',
+      'lastName': 'PANDIAN',
+      'fullName': 'RUTHVI PANDIAN',
+      'regNo': 'isabd006',
+      'employeeNo': 'isabd006',
+      'cardNo': 'CARD98211',
+      'phone': '9444154854',
       'siblingGroupId': '6af4929053cf12c1662f4b5a',
-      'familyPhone': '9894789477',
-      'parentName': 'Arunmozhidevan',
-      'studentCount': 2,
-      'students': [
+      'parentPhone': '9894789477',
+      'enrollments': [
         {
-          'id': '6ae3bfa56989d6280874ef35',
-          'studentId': '6ae3bfa56989d6280874ef35',
-          'fullName': 'Keshika Devan',
-          'firstName': 'Keshika',
-          'lastName': 'Devan',
-          'regNo': 'isabd001',
-          'phone': '9894789477',
-          'parentPhone': '9894789477',
-          'parentName': 'Arunmozhidevan',
-          'batchName': 'Badminton Morning Elite Stars',
-          'status': 'active',
-        },
-        {
-          'id': '6af1e2ae185e913f71898a76',
-          'studentId': '6af1e2ae185e913f71898a76',
-          'fullName': 'RUTHVI PANDIAN',
-          'firstName': 'RUTHVI',
-          'lastName': 'PANDIAN',
-          'regNo': 'isabd006',
-          'phone': '9444154854',
-          'parentPhone': '9894789477',
-          'parentName': 'Arunmozhidevan',
-          'batchName': 'Evening Badminton Stars',
+          '_id': '6af1e2ae185e913f71898888',
+          'batchId': {
+            '_id': '6ae101a9185e913f71898777',
+            'name': 'Evening Badminton Stars',
+            'schedule': {
+              'daysOfWeek': [1, 3, 5],
+              'startTime': '17:00',
+              'endTime': '18:30',
+            },
+          },
           'status': 'active',
         },
       ],
     });
 
-    expect(family.siblingGroupId, '6af4929053cf12c1662f4b5a');
-    expect(family.familyPhone, '9894789477');
-    expect(family.parentName, 'Arunmozhidevan');
-    expect(family.studentCount, 2);
-    expect(family.students.length, 2);
-    expect(family.students[0].regNo, 'isabd001');
-    expect(family.students[1].phone, '9444154854');
+    expect(sibling.studentId, '6af1e2ae185e913f71898a76');
+    expect(sibling.fullName, 'RUTHVI PANDIAN');
+    expect(sibling.regNo, 'isabd006');
+    expect(sibling.batchName, 'Evening Badminton Stars');
+    expect(sibling.enrollments.first.scheduleText, 'Mon, Wed, Fri • 17:00 - 18:30');
   });
 
   test('StudentSiblingDetailsModel parses GET /students/:id/siblings payload', () {

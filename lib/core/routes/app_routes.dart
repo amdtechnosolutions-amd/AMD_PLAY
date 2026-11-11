@@ -30,7 +30,6 @@ abstract class AppRoutes {
   static const String coachingReport = '/coaching-report';
   static const String coachEvaluations = '/coach-evaluations';
   static const String evaluateStudent = '/evaluate-student';
-  static const String siblings = '/siblings';
   static const String attendance = '/attendance';
   static const String membership = '/membership';
   static const String profile = '/profile';

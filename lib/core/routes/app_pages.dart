@@ -25,7 +25,6 @@ import '../../features/coaching/presentation/screens/coach_evaluations_screen.da
 import '../../features/coaching/presentation/screens/evaluate_student_screen.dart';
 import '../../features/coaching/bindings/student_evaluation_binding.dart';
 import '../../features/coaching/bindings/coach_evaluation_binding.dart';
-import '../../features/siblings/presentation/screens/sibling_families_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/profile/presentation/screens/invoices_receipts_screen.dart';
 import 'app_routes.dart';
@@ -158,11 +157,6 @@ class AppPages {
       name: AppRoutes.evaluateStudent,
       page: () => const EvaluateStudentScreen(),
       binding: CoachEvaluationBinding(),
-      transition: Transition.rightToLeftWithFade,
-    ),
-    GetPage(
-      name: AppRoutes.siblings,
-      page: () => const SiblingFamiliesScreen(),
       transition: Transition.rightToLeftWithFade,
     ),
     GetPage(

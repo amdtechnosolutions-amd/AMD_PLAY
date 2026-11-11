@@ -818,13 +818,6 @@ class ProfileScreen extends StatelessWidget {
                       subtitle: 'Score across 24 parameters in Physical, Mental, Skill & Attitude',
                       onTap: () => Get.toNamed(AppRoutes.evaluateStudent),
                     ),
-                    const Divider(color: Color(0x1AD4AF37), height: 1),
-                    _buildActionTile(
-                      icon: Icons.family_restroom_rounded,
-                      title: 'Sibling Families & Linking',
-                      subtitle: 'Manage family groups, link siblings & update phone numbers',
-                      onTap: () => Get.toNamed(AppRoutes.siblings),
-                    ),
                   ],
                 );
               }

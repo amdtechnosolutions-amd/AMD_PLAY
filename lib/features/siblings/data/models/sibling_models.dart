@@ -168,38 +168,6 @@ class SiblingStudentModel {
   }
 }
 
-class SiblingFamilyGroupModel {
-  final String siblingGroupId;
-  final String familyPhone;
-  final String parentName;
-  final int studentCount;
-  final List<SiblingStudentModel> students;
-
-  const SiblingFamilyGroupModel({
-    required this.siblingGroupId,
-    this.familyPhone = '',
-    this.parentName = '',
-    required this.studentCount,
-    required this.students,
-  });
-
-  factory SiblingFamilyGroupModel.fromJson(Map<String, dynamic> json) {
-    final rawStudents = json['students'] as List? ?? [];
-    final parsed = rawStudents
-        .whereType<Map>()
-        .map((s) => SiblingStudentModel.fromJson(Map<String, dynamic>.from(s)))
-        .toList();
-
-    return SiblingFamilyGroupModel(
-      siblingGroupId: (json['siblingGroupId'] ?? json['_id'] ?? json['id'] ?? '').toString(),
-      familyPhone: (json['familyPhone'] ?? '').toString().trim(),
-      parentName: (json['parentName'] ?? '').toString().trim(),
-      studentCount: (json['studentCount'] as num?)?.toInt() ?? parsed.length,
-      students: parsed,
-    );
-  }
-}
-
 class StudentSiblingDetailsModel {
   final SiblingStudentModel? student;
   final bool hasSiblings;
@@ -238,3 +206,4 @@ class StudentSiblingDetailsModel {
     );
   }
 }
+

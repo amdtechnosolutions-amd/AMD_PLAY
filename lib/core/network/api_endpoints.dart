@@ -54,12 +54,9 @@ class ApiEndpoints {
   static String studentDirectResetPassword(String id) => '/students/$id/reset-password';
 
   // Students & Trainees
-  static const String students = '/students';
   static const String studentAttendance = '/students/my/attendance';
   static const String studentSiblings = '/students/my/siblings';
-  static const String siblings = '/students/siblings';
   static String studentSiblingsById(String studentId) => '/students/$studentId/siblings';
-  static String siblingById(String studentId) => '/students/siblings/$studentId';
   static const String studentFees = '/students/my/fees';
   static const String markAttendance = '/students/attendance/mark';
   static const String studentEvaluations = '/students/my/evaluations';
