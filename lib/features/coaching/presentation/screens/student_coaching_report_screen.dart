@@ -62,129 +62,204 @@ class _StudentCoachingReportScreenState
           IconButton(
             icon: const Icon(Icons.refresh_rounded, color: goldAccent),
             tooltip: 'Refresh Evaluations',
-            onPressed: controller.fetchEvaluations,
+            onPressed: controller.refreshActiveReport,
           ),
         ],
       ),
       body: RefreshIndicator(
         color: goldAccent,
         backgroundColor: Colors.white,
-        onRefresh: controller.fetchEvaluations,
+        onRefresh: controller.refreshActiveReport,
         child: Obx(() {
-          if (controller.isLoading.value) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: goldAccent,
-                  ),
-                  SizedBox(height: 16.h),
-                  Text(
-                    'Loading performance report...',
-                    style: TextStyle(
-                      fontFamily: 'Nunito',
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: slateText,
+          final hasSiblings = controller.familyProfiles.length > 1;
+
+          Widget buildMainContent() {
+            if (controller.isLoading.value) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: goldAccent,
                     ),
-                  ),
-                ],
-              ),
-            );
-          }
+                    SizedBox(height: 16.h),
+                    Text(
+                      'Loading performance report...',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: slateText,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
 
-          if (controller.hasError.value && controller.report.value == null) {
+            if (controller.hasError.value && controller.report.value == null) {
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 40.h),
+                child: EmptyState(
+                  title: 'Report Unavailable',
+                  message: controller.errorMessage.value.isNotEmpty
+                      ? controller.errorMessage.value
+                      : 'Unable to load coaching performance report. Please check your connection or sign in as a student.',
+                  icon: Icons.assessment_outlined,
+                  buttonText: 'RETRY',
+                  onButtonPressed: controller.refreshActiveReport,
+                ),
+              );
+            }
+
+            final report = controller.report.value;
+            if (report == null) {
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 40.h),
+                child: EmptyState(
+                  title: 'No Performance Evaluations Yet',
+                  message:
+                      'Your academy coaches have not published an evaluation scorecard for ${controller.targetStudentName.value.isNotEmpty ? controller.targetStudentName.value : "this profile"} yet.',
+                  icon: Icons.sports_score_rounded,
+                  buttonText: 'REFRESH',
+                  onButtonPressed: controller.refreshActiveReport,
+                ),
+              );
+            }
+
+            final summary = report.summary;
+            final physicalParams = report.parameterCards
+                .where((p) => p.category.toLowerCase().contains('physical'))
+                .toList();
+            final mentalParams = report.parameterCards
+                .where((p) => p.category.toLowerCase().contains('mental'))
+                .toList();
+            final skillParams = report.parameterCards
+                .where((p) => p.category.toLowerCase().contains('skill'))
+                .toList();
+            final attitudeParams = report.parameterCards
+                .where((p) => p.category.toLowerCase().contains('attitude'))
+                .toList();
+
             return SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 60.h),
-              child: EmptyState(
-                title: 'Report Unavailable',
-                message: controller.errorMessage.value.isNotEmpty
-                    ? controller.errorMessage.value
-                    : 'Unable to load coaching performance report. Please check your connection or sign in as a student.',
-                icon: Icons.assessment_outlined,
-                buttonText: 'RETRY',
-                onButtonPressed: controller.fetchEvaluations,
-              ),
-            );
-          }
+              padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 40.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 1. Dynamic Student Profile Header
+                  _buildStudentHeader(summary, controller),
+                  SizedBox(height: 12.h),
 
-          final report = controller.report.value;
-          if (report == null) {
-            return SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 60.h),
-              child: EmptyState(
-                title: 'No Performance Evaluations Yet',
-                message: 'Your academy coaches have not published an evaluation scorecard for your profile yet. Once assessed, your skill radar, 24-parameter metrics, and historical trends will appear here.',
-                icon: Icons.sports_score_rounded,
-                buttonText: 'REFRESH',
-                onButtonPressed: controller.fetchEvaluations,
-              ),
-            );
-          }
+                  // 2. Quick Score Bar & Toggle for Spider Radar / Trend Charts
+                  _buildScoreSummaryBar(summary, report),
+                  SizedBox(height: 8.h),
 
-          final summary = report.summary;
-          final physicalParams = report.parameterCards
-              .where((p) => p.category.toLowerCase().contains('physical'))
-              .toList();
-          final mentalParams = report.parameterCards
-              .where((p) => p.category.toLowerCase().contains('mental'))
-              .toList();
-          final skillParams = report.parameterCards
-              .where((p) => p.category.toLowerCase().contains('skill'))
-              .toList();
-          final attitudeParams = report.parameterCards
-              .where((p) => p.category.toLowerCase().contains('attitude'))
-              .toList();
-
-          return SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 40.h),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 1. Dynamic Student Profile Header
-                _buildStudentHeader(summary, controller),
-                SizedBox(height: 12.h),
-
-                // 2. Quick Score Bar & Toggle for Spider Radar / Trend Charts
-                _buildScoreSummaryBar(summary, report),
-                SizedBox(height: 8.h),
-
-                // 3. Collapsible Analytics (Radar & Trend)
-                if (_showFullAnalytics) ...[
-                  if (summary.coachRemarks.isNotEmpty) ...[
+                  // 3. Collapsible Analytics (Radar & Trend)
+                  if (_showFullAnalytics) ...[
+                    if (summary.coachRemarks.isNotEmpty) ...[
+                      _buildCoachRemarksCard(summary),
+                      SizedBox(height: 16.h),
+                    ],
+                    if (report.radarData.isNotEmpty) ...[
+                      EvaluationRadarChart(categories: report.radarData),
+                      SizedBox(height: 16.h),
+                    ],
+                    if (report.trend.isNotEmpty) ...[
+                      EvaluationTrendChart(trend: report.trend),
+                      SizedBox(height: 16.h),
+                    ],
+                  ] else if (summary.coachRemarks.isNotEmpty) ...[
                     _buildCoachRemarksCard(summary),
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 8.h),
                   ],
-                  if (report.radarData.isNotEmpty) ...[
-                    EvaluationRadarChart(categories: report.radarData),
-                    SizedBox(height: 16.h),
-                  ],
-                  if (report.trend.isNotEmpty) ...[
-                    EvaluationTrendChart(trend: report.trend),
-                    SizedBox(height: 16.h),
-                  ],
+
+                  // 4. Physical Section
+                  _buildCategorySection('PHYSICAL :', physicalParams),
+
+                  // 5. Mental Section
+                  _buildCategorySection('MENTAL :', mentalParams),
+
+                  // 6. Skill Section
+                  _buildCategorySection('SKILL :', skillParams),
+
+                  // 7. Attitude Section
+                  _buildCategorySection('ATTITUDE :', attitudeParams),
                 ],
+              ),
+            );
+          }
 
-                // 4. Physical Section
-                _buildCategorySection('PHYSICAL :', physicalParams),
-
-                // 5. Mental Section
-                _buildCategorySection('MENTAL :', mentalParams),
-
-                // 6. Skill Section
-                _buildCategorySection('SKILL :', skillParams),
-
-                // 7. Attitude Section
-                _buildCategorySection('ATTITUDE :', attitudeParams),
-              ],
-            ),
+          return Column(
+            children: [
+              if (hasSiblings) _buildSiblingSwitcherBar(controller),
+              Expanded(child: buildMainContent()),
+            ],
           );
         }),
+      ),
+    );
+  }
+
+  Widget _buildSiblingSwitcherBar(StudentEvaluationController controller) {
+    final activeId = controller.selectedStudentId.value;
+    return Container(
+      width: double.infinity,
+      color: Colors.white,
+      padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 10.h),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: controller.familyProfiles.map((sib) {
+            final isSelected = sib.studentId == activeId;
+            return GestureDetector(
+              onTap: () => controller.selectSiblingScorecard(sib),
+              child: Container(
+                margin: EdgeInsets.only(right: 8.w),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
+                decoration: BoxDecoration(
+                  color: isSelected ? const Color(0xFFFFFDF5) : const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(14.r),
+                  border: Border.all(
+                    color: isSelected ? goldAccent : const Color(0xFFE2E8F0),
+                    width: isSelected ? 1.4 : 1.0,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircleAvatar(
+                      radius: 10.r,
+                      backgroundColor: isSelected ? goldAccent : const Color(0xFFCBD5E1),
+                      child: Text(
+                        sib.fullName.isNotEmpty ? sib.fullName[0].toUpperCase() : 'S',
+                        style: TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 7.w),
+                    Text(
+                      sib.regNo.isNotEmpty ? '${sib.fullName} (${sib.regNo})' : sib.fullName,
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 12.sp,
+                        fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                        color: isSelected ? darkText : slateText,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
       ),
     );
   }

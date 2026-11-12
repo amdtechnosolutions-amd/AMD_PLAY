@@ -32,13 +32,14 @@ class EvaluationSummary {
 
   factory EvaluationSummary.fromJson(Map<String, dynamic> json) {
     final oScore = (json['overallScore'] ?? json['score'] ?? json['totalScore'] ?? 0).toDouble();
-    final maxScore = (json['totalPossibleScore'] ?? json['maxScore'] ?? json['totalPossible'] ?? 240).toDouble();
+    final maxScore = (json['overallMaxScore'] ?? json['totalPossibleScore'] ?? json['maxScore'] ?? json['totalPossible'] ?? 240).toDouble();
     final pct = (json['percentage'] ?? json['overallPercentage'] ?? (maxScore > 0 ? (oScore / maxScore) * 100 : 0)).toDouble();
+    final formattedOScore = oScore % 1 == 0 ? oScore.toInt().toString() : oScore.toStringAsFixed(1);
 
     return EvaluationSummary(
       overallScore: oScore,
       totalPossibleScore: maxScore,
-      scoreText: json['scoreText']?.toString() ?? '${oScore.toInt()}/${maxScore.toInt()}',
+      scoreText: json['scoreText']?.toString() ?? '$formattedOScore/${maxScore.toInt()}',
       percentage: pct,
       grade: json['grade']?.toString().toUpperCase() ?? (oScore == 0 ? 'N/A' : (pct >= 85 ? 'A' : pct >= 70 ? 'B' : 'C')),
       performanceLevel: json['performanceLevel']?.toString() ?? (oScore == 0 ? 'Unassessed' : (pct >= 85 ? 'Excellent' : pct >= 70 ? 'Proficient' : 'Developing')),
@@ -85,7 +86,7 @@ class RadarCategoryData {
   factory RadarCategoryData.fromJson(Map<String, dynamic> json) {
     final cat = json['category']?.toString() ?? json['name']?.toString() ?? 'General';
     final sc = (json['score'] ?? json['totalScore'] ?? 0).toDouble();
-    final mx = (json['maxScore'] ?? json['totalPossible'] ?? 60).toDouble();
+    final mx = (json['maxScore'] ?? json['max'] ?? json['totalPossible'] ?? 60).toDouble();
     final pct = (json['percentage'] ?? (mx > 0 ? (sc / mx) * 100 : 0)).toDouble();
 
     Color resolvedColor = const Color(0xFFD4AF37);
@@ -94,7 +95,7 @@ class RadarCategoryData {
       resolvedColor = const Color(0xFF10B981);
     } else if (lower.contains('mental')) {
       resolvedColor = const Color(0xFF3B82F6);
-    } else if (lower.contains('skill')) {
+    } else if (lower.contains('skill') || lower.contains('technical')) {
       resolvedColor = const Color(0xFFD4AF37);
     } else if (lower.contains('attitude')) {
       resolvedColor = const Color(0xFF8B5CF6);
@@ -399,8 +400,11 @@ class StudentEvaluationReport {
   });
 
   factory StudentEvaluationReport.fromJson(Map<String, dynamic> json) {
-    // 1. Parse Summary
-    final summaryObj = json['summary'] is Map ? json['summary'] as Map<String, dynamic> : json;
+    // 1. Parse Summary (merge root-level fields like coachRemarks, batchId, studentId, evaluationDate)
+    final Map<String, dynamic> summaryObj = <String, dynamic>{
+      ...json,
+      if (json['summary'] is Map) ...Map<String, dynamic>.from(json['summary'] as Map),
+    };
     final summary = EvaluationSummary.fromJson(summaryObj);
 
     // 2. Parse Radar Data
@@ -410,6 +414,8 @@ class StudentEvaluationReport {
       for (final r in rawRadar) {
         if (r is Map<String, dynamic>) {
           radarList.add(RadarCategoryData.fromJson(r));
+        } else if (r is Map) {
+          radarList.add(RadarCategoryData.fromJson(Map<String, dynamic>.from(r)));
         }
       }
     } else if (rawRadar is Map<String, dynamic>) {
@@ -445,11 +451,41 @@ class StudentEvaluationReport {
       });
     }
 
+    // Extract categoryScores from summaryObj (e.g. { physical: { score: 26, maxScore: 50 }, ... })
+    if (summaryObj['categoryScores'] is Map) {
+      final catScores = summaryObj['categoryScores'] as Map;
+      catScores.forEach((catKey, catVal) {
+        final kLower = catKey.toString().trim().toLowerCase();
+        if (catVal is Map && catVal['score'] is num) {
+          final sc = (catVal['score'] as num).toDouble();
+          if (kLower.contains('physical')) liveScores['physicalscore'] = sc;
+          if (kLower.contains('mental')) liveScores['mentalscore'] = sc;
+          if (kLower.contains('skill') || kLower.contains('technical')) liveScores['skillscore'] = sc;
+          if (kLower.contains('attitude')) liveScores['attitudescore'] = sc;
+        }
+      });
+    }
+
+    // Extract category scores from radarData if categoryScores wasn't provided
+    for (final r in radarList) {
+      final lower = r.category.toLowerCase();
+      if (lower.contains('physical') && !liveScores.containsKey('physicalscore')) {
+        liveScores['physicalscore'] = r.score;
+      } else if (lower.contains('mental') && !liveScores.containsKey('mentalscore')) {
+        liveScores['mentalscore'] = r.score;
+      } else if ((lower.contains('skill') || lower.contains('technical')) &&
+          !liveScores.containsKey('skillscore')) {
+        liveScores['skillscore'] = r.score;
+      } else if (lower.contains('attitude') && !liveScores.containsKey('attitudescore')) {
+        liveScores['attitudescore'] = r.score;
+      }
+    }
+
     final rawCards = json['parameterCards'] ?? json['parameters'];
     if (rawCards is List) {
       for (final c in rawCards) {
         if (c is Map) {
-          final name = (c['name'] ?? c['parameter'] ?? c['key'] ?? '')
+          final name = (c['key'] ?? c['name'] ?? c['parameter'] ?? '')
               .toString()
               .trim()
               .toLowerCase()

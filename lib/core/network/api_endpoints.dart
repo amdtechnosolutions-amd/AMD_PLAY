@@ -61,6 +61,7 @@ class ApiEndpoints {
   static const String markAttendance = '/students/attendance/mark';
   static const String studentEvaluations = '/students/my/evaluations';
   static const String studentLatestEvaluation = '/students/my/evaluations/latest';
+  static String studentLatestEvaluationById(String studentId) => '/students/$studentId/evaluations/latest';
 
   // Sports & Facilities
   static const String sports = '/sports';

@@ -117,33 +117,54 @@ class StudentEvaluationService {
     return null;
   }
 
-  /// Fetch evaluation for a specific student (used by coaches)
+  /// Direct Query by Student ID (Without Switching Token):
+  /// 1. Primary: GET /api/v1/students/:studentId/evaluations/latest
+  /// 2. Fallback: GET /api/v1/coaching/evaluations/student/:studentId
   Future<StudentEvaluationReport?> getEvaluationForStudent(String studentId) async {
-    try {
-      final token = await _storage.getAccessToken();
-      final response = await _apiClient.dio.get(
-        '${ApiEndpoints.coachStudentEvaluations}/$studentId',
-        options: Options(
-          headers: token != null ? {'Authorization': 'Bearer $token'} : null,
-        ),
-      );
+    if (studentId.trim().isEmpty) return null;
 
+    final token = await _storage.getAccessToken();
+    final headers = token != null ? {'Authorization': 'Bearer $token'} : null;
+
+    StudentEvaluationReport? parseResponse(Response response) {
       if (response.statusCode == 200 && response.data != null) {
         final body = response.data;
         final rawData = body is Map && body['data'] != null ? body['data'] : body;
-        if (rawData is Map<String, dynamic>) {
-          return StudentEvaluationReport.fromJson(rawData);
+        if (rawData is Map) {
+          return StudentEvaluationReport.fromJson(Map<String, dynamic>.from(rawData));
         } else if (rawData is List) {
           if (rawData.isNotEmpty && rawData.first is Map) {
             return StudentEvaluationReport.fromJson(Map<String, dynamic>.from(rawData.first as Map));
-          } else {
-            return StudentEvaluationReport.initialEmpty();
           }
+          return null;
         }
       }
-    } catch (e) {
-      debugPrint('[StudentEvaluationService] getEvaluationForStudent error: $e');
+      return null;
     }
+
+    // 1. Primary: /students/:studentId/evaluations/latest
+    try {
+      final url = ApiEndpoints.studentLatestEvaluationById(studentId);
+      debugPrint('[StudentEvaluationService] Direct Scorecard GET ${ApiEndpoints.baseUrl}$url');
+      final response = await _apiClient.dio.get(url, options: Options(headers: headers));
+      debugPrint('[StudentEvaluationService] Direct Scorecard response (${response.statusCode}): ${response.data}');
+      final parsed = parseResponse(response);
+      if (parsed != null) return parsed;
+    } catch (e) {
+      debugPrint('[StudentEvaluationService] /students/:id/evaluations/latest notice: $e');
+    }
+
+    // 2. Fallback: /coaching/evaluations/student/:studentId
+    try {
+      final fallbackUrl = '${ApiEndpoints.coachStudentEvaluations}/$studentId';
+      debugPrint('[StudentEvaluationService] Fallback Scorecard GET ${ApiEndpoints.baseUrl}$fallbackUrl');
+      final response = await _apiClient.dio.get(fallbackUrl, options: Options(headers: headers));
+      final parsed = parseResponse(response);
+      if (parsed != null) return parsed;
+    } catch (e) {
+      debugPrint('[StudentEvaluationService] getEvaluationForStudent fallback error: $e');
+    }
+
     return null;
   }
 }

@@ -78,5 +78,63 @@ void main() {
     expect(studentsBatch2.length, 1);
     expect(studentsBatch2[0]['name'], 'Vikram Rathore');
   });
+
+  test('Direct sibling scorecard GET /students/:id/evaluations/latest parses nested summary, radarData, parameterCards, and root remarks', () {
+    final report = StudentEvaluationReport.fromJson({
+      'studentId': {
+        '_id': '6af1e2ae185e913f71898a76',
+        'firstName': 'RUTHVI',
+        'lastName': 'PANDIAN',
+        'employeeNo': 'isabd006',
+      },
+      'batchId': {'name': 'Evening Badminton Stars'},
+      'title': 'Coach Performance Assessment & Feedback',
+      'evaluationDate': '2026-11-11',
+      'period': 'November 2026',
+      'summary': {
+        'overallScore': 191.5,
+        'overallMaxScore': 240,
+        'overallPercentage': 79.8,
+        'performanceLevel': 'Good',
+        'grade': 'B',
+        'categoryScores': {
+          'physical': {'score': 26, 'maxScore': 50, 'percentage': 52},
+          'mental': {'score': 43.5, 'maxScore': 50, 'percentage': 87},
+          'skill': {'score': 80, 'maxScore': 80, 'percentage': 100},
+          'attitude': {'score': 42, 'maxScore': 60, 'percentage': 70},
+        },
+      },
+      'radarData': [
+        {'category': 'Physical', 'score': 26, 'max': 50, 'percentage': 52},
+        {'category': 'Mental', 'score': 43.5, 'max': 50, 'percentage': 87},
+        {'category': 'Technical', 'score': 80, 'max': 80, 'percentage': 100},
+        {'category': 'Attitude', 'score': 42, 'max': 60, 'percentage': 70},
+      ],
+      'parameterCards': [
+        {'key': 'agility', 'label': 'Agility & Court Coverage', 'score': 5, 'maxScore': 10},
+        {'key': 'smash', 'label': 'Smash Accuracy & Power', 'score': 10, 'maxScore': 10},
+      ],
+      'coachRemarks': 'Excellent technical execution; continue working on physical conditioning.',
+    });
+
+    expect(report.studentName, 'RUTHVI PANDIAN');
+    expect(report.summary.batchName, 'Evening Badminton Stars');
+    expect(report.summary.overallScore, 191.5);
+    expect(report.summary.totalPossibleScore, 240.0);
+    expect(report.summary.scoreText, '191.5/240');
+    expect(report.summary.percentage, 79.8);
+    expect(report.summary.grade, 'B');
+    expect(report.summary.performanceLevel, 'Good');
+    expect(report.summary.coachRemarks, 'Excellent technical execution; continue working on physical conditioning.');
+
+    expect(report.radarData.length, 4);
+    expect(report.radarData[2].category, 'Technical');
+    expect(report.radarData[2].maxScore, 80.0);
+
+    final agility = report.parameterCards.firstWhere((c) => c.id == 'agility');
+    expect(agility.score, 5.0);
+    final smash = report.parameterCards.firstWhere((c) => c.id == 'smash');
+    expect(smash.score, 10.0);
+  });
 }
 
