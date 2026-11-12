@@ -8,6 +8,8 @@ import 'package:mobile_app/features/booking/data/models/booking_pass_model.dart'
 import 'package:mobile_app/features/booking/presentation/screens/digital_pass_screen.dart';
 import 'package:mobile_app/features/booking/presentation/screens/court_booking_screen.dart';
 import 'package:mobile_app/features/main_nav/presentation/controllers/main_nav_controller.dart';
+import '../../data/models/student_payments_model.dart';
+import '../../data/services/student_payments_service.dart';
 
 /// Screen displaying 100% Live Invoices, Pending Coaching Fees, and Settled Payment Receipts.
 class PaymentsInvoicesScreen extends StatefulWidget {
@@ -20,11 +22,41 @@ class PaymentsInvoicesScreen extends StatefulWidget {
 class _PaymentsInvoicesScreenState extends State<PaymentsInvoicesScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final HomeController _homeController = Get.isRegistered<HomeController>() ? Get.find<HomeController>() : Get.put(HomeController());
+  final StudentPaymentsService _paymentsService = StudentPaymentsService();
+
+  StudentPaymentsResponse? _studentPayments;
+  bool _isLoadingPayments = false;
+  String _selectedSiblingId = 'ALL';
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    if (!_homeController.isPayAndPlay && !_homeController.isCoach) {
+      _loadStudentPayments();
+    }
+  }
+
+  Future<void> _loadStudentPayments() async {
+    if (!mounted) return;
+    setState(() => _isLoadingPayments = true);
+    final res = await _paymentsService.getMyPayments();
+    if (!mounted) return;
+    setState(() {
+      _studentPayments = res;
+      _isLoadingPayments = false;
+    });
+  }
+
+  Future<void> _refreshAll() async {
+    if (!_homeController.isPayAndPlay && !_homeController.isCoach) {
+      await Future.wait([
+        _loadStudentPayments(),
+        _homeController.refreshDashboard(),
+      ]);
+    } else {
+      await _homeController.refreshDashboard();
+    }
   }
 
   @override
@@ -55,7 +87,7 @@ class _PaymentsInvoicesScreenState extends State<PaymentsInvoicesScreen> with Si
           IconButton(
             icon: Icon(Icons.refresh_rounded, color: const Color(0xFF0F172A), size: 22.sp),
             tooltip: 'Refresh Invoices',
-            onPressed: () => _homeController.refreshDashboard(),
+            onPressed: _refreshAll,
           ),
         ],
         bottom: PreferredSize(
@@ -95,19 +127,19 @@ class _PaymentsInvoicesScreenState extends State<PaymentsInvoicesScreen> with Si
         ),
       ),
       body: Obx(() {
-        if (_homeController.isLoading.value && _homeController.monthlyFees.isEmpty) {
+        final isPayAndPlay = _homeController.isPayAndPlay;
+        final isLoadingHome = _homeController.isLoading.value && _homeController.monthlyFees.isEmpty;
+
+        if ((isLoadingHome || _isLoadingPayments) && _studentPayments == null && _homeController.monthlyFees.isEmpty) {
           return const Center(
             child: CircularProgressIndicator(color: AppColors.primary),
           );
         }
 
-        final isPayAndPlay = _homeController.isPayAndPlay;
-        final allFees = _homeController.monthlyFees;
-        final pendingFees = allFees.where((f) => !f.isPaid).toList();
-        final paidFees = allFees.where((f) => f.isPaid).toList();
-        final passes = _homeController.myBookings;
-
         if (isPayAndPlay) {
+          final allFees = _homeController.monthlyFees;
+          final paidFees = allFees.where((f) => f.isPaid).toList();
+          final passes = _homeController.myBookings;
           return TabBarView(
             controller: _tabController,
             children: [
@@ -126,6 +158,15 @@ class _PaymentsInvoicesScreenState extends State<PaymentsInvoicesScreen> with Si
           );
         }
 
+        // Student Role: Prefer live GET /students/my/payments (with sibling breakdown)
+        if (_studentPayments != null) {
+          return _buildStudentFamilyPaymentsView(_studentPayments!);
+        }
+
+        // Fallback to HomeController monthlyFees if /students/my/payments isn't loaded yet
+        final allFees = _homeController.monthlyFees;
+        final pendingFees = allFees.where((f) => !f.isPaid).toList();
+        final paidFees = allFees.where((f) => f.isPaid).toList();
         return TabBarView(
           controller: _tabController,
           children: [
@@ -135,6 +176,432 @@ class _PaymentsInvoicesScreenState extends State<PaymentsInvoicesScreen> with Si
           ],
         );
       }),
+    );
+  }
+
+  Widget _buildStudentFamilyPaymentsView(StudentPaymentsResponse data) {
+    final siblings = data.siblings;
+    final activeSiblings = _selectedSiblingId == 'ALL'
+        ? siblings
+        : siblings.where((s) => s.studentId == _selectedSiblingId).toList();
+
+    final allEntries = activeSiblings.expand((s) => s.fees).toList();
+    final pendingEntries = allEntries.where((e) => !e.feeItem.isPaid).toList();
+    final paidEntries = allEntries.where((e) => e.feeItem.isPaid).toList();
+    final transactions = activeSiblings.expand((s) => s.payments).toList();
+
+    // Compute active summary (either full family or selected sibling)
+    int totalPaid = data.summary.totalPaid;
+    int totalPending = data.summary.totalPending;
+    int paidCount = data.summary.paidInvoices;
+    int totalCount = data.summary.totalInvoices;
+
+    if (_selectedSiblingId != 'ALL' && activeSiblings.isNotEmpty) {
+      final sel = activeSiblings.first;
+      totalPaid = sel.summary.totalPaid;
+      totalPending = sel.summary.totalPending;
+      paidCount = sel.summary.paidCount;
+      totalCount = sel.summary.invoiceCount;
+    }
+
+    return Column(
+      children: [
+        if (siblings.length > 1) _buildSiblingFilterBar(siblings, data.totalStudents),
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _buildStudentEntriesListView(
+                entries: allEntries,
+                transactions: const [],
+                data: data,
+                totalPaid: totalPaid,
+                totalPending: totalPending,
+                paidCount: paidCount,
+                totalCount: totalCount,
+                emptyMessage: 'No fee records or invoices found.',
+              ),
+              _buildStudentEntriesListView(
+                entries: pendingEntries,
+                transactions: const [],
+                data: data,
+                totalPaid: totalPaid,
+                totalPending: totalPending,
+                paidCount: paidCount,
+                totalCount: totalCount,
+                emptyMessage: 'All caught up! No pending fee dues.',
+              ),
+              _buildStudentEntriesListView(
+                entries: paidEntries,
+                transactions: transactions,
+                data: data,
+                totalPaid: totalPaid,
+                totalPending: totalPending,
+                paidCount: paidCount,
+                totalCount: totalCount,
+                emptyMessage: 'No settled payment receipts yet.',
+                isReceiptTab: true,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSiblingFilterBar(List<SiblingPaymentGroup> siblings, int totalStudents) {
+    return Container(
+      width: double.infinity,
+      color: Colors.white,
+      padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 6.h),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            _buildSiblingChip(
+              label: 'All Family ($totalStudents)',
+              isSelected: _selectedSiblingId == 'ALL',
+              onTap: () => setState(() => _selectedSiblingId = 'ALL'),
+            ),
+            ...siblings.map((sib) {
+              final label = sib.regNo.isNotEmpty ? '${sib.fullName} (${sib.regNo})' : sib.fullName;
+              return _buildSiblingChip(
+                label: label,
+                isSelected: _selectedSiblingId == sib.studentId,
+                onTap: () => setState(() => _selectedSiblingId = sib.studentId),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSiblingChip({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: EdgeInsets.only(right: 8.w),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFFFFDF5) : const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(14.r),
+          border: Border.all(
+            color: isSelected ? const Color(0xFFD4AF37) : const Color(0xFFE2E8F0),
+            width: isSelected ? 1.4 : 1.0,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontFamily: 'Nunito',
+            fontSize: 12.sp,
+            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+            color: isSelected ? const Color(0xFF0F172A) : const Color(0xFF64748B),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStudentEntriesListView({
+    required List<SiblingFeeEntry> entries,
+    required List<SiblingPaymentTransaction> transactions,
+    required StudentPaymentsResponse data,
+    required int totalPaid,
+    required int totalPending,
+    required int paidCount,
+    required int totalCount,
+    required String emptyMessage,
+    bool isReceiptTab = false,
+  }) {
+    if (entries.isEmpty && transactions.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: _refreshAll,
+        color: AppColors.primary,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.all(32.w),
+          children: [
+            SizedBox(height: 40.h),
+            Center(
+              child: Container(
+                padding: EdgeInsets.all(20.w),
+                decoration: BoxDecoration(
+                  color: isReceiptTab ? const Color(0xFFECFDF5) : const Color(0xFFFEF3C7),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  isReceiptTab ? Icons.receipt_long_outlined : Icons.check_circle_outline_rounded,
+                  size: 48.sp,
+                  color: isReceiptTab ? const Color(0xFF10B981) : const Color(0xFFD97706),
+                ),
+              ),
+            ),
+            SizedBox(height: 16.h),
+            Text(
+              emptyMessage,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF475569),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final showTransactionsSection = isReceiptTab && transactions.isNotEmpty;
+    final totalItems = 1 + entries.length + (showTransactionsSection ? 1 + transactions.length : 0);
+
+    return RefreshIndicator(
+      onRefresh: _refreshAll,
+      color: AppColors.primary,
+      child: ListView.separated(
+        padding: EdgeInsets.all(16.w),
+        itemCount: totalItems,
+        separatorBuilder: (context, index) => SizedBox(height: 12.h),
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return _buildFamilySummaryCard(
+              data: data,
+              totalPaid: totalPaid,
+              totalPending: totalPending,
+              paidCount: paidCount,
+              totalCount: totalCount,
+            );
+          }
+          final feeIndex = index - 1;
+          if (feeIndex < entries.length) {
+            final entry = entries[feeIndex];
+            return _buildFeeCard(entry.feeItem, studentNameOverride: entry.studentName);
+          }
+
+          final txOffset = feeIndex - entries.length;
+          if (txOffset == 0) {
+            return Padding(
+              padding: EdgeInsets.only(top: 6.h),
+              child: Text(
+                'Payment Transactions (${transactions.length})',
+                style: TextStyle(
+                  fontFamily: 'Nunito',
+                  fontSize: 14.5.sp,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF0F172A),
+                ),
+              ),
+            );
+          }
+          return _buildTransactionCard(transactions[txOffset - 1]);
+        },
+      ),
+    );
+  }
+
+  Widget _buildFamilySummaryCard({
+    required StudentPaymentsResponse data,
+    required int totalPaid,
+    required int totalPending,
+    required int paidCount,
+    required int totalCount,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      margin: EdgeInsets.only(bottom: 4.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(color: const Color(0x60D4AF37), width: 1.2),
+        boxShadow: const [
+          BoxShadow(color: Color(0x24D4AF37), blurRadius: 16, offset: Offset(0, 5)),
+          BoxShadow(color: Color(0x0A000000), blurRadius: 4, offset: Offset(0, 1)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (data.parentName.isNotEmpty || data.familyPhone.isNotEmpty) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    [
+                      if (data.parentName.isNotEmpty) 'Parent: ${data.parentName}',
+                      if (data.familyPhone.isNotEmpty) data.familyPhone,
+                    ].join(' • '),
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 11.5.sp,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF64748B),
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFFDF5),
+                    borderRadius: BorderRadius.circular(8.r),
+                    border: Border.all(color: const Color(0x60D4AF37)),
+                  ),
+                  child: Text(
+                    '$paidCount/$totalCount PAID',
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF9E7B1A),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10.h),
+            const Divider(color: Color(0x20D4AF37), height: 1),
+            SizedBox(height: 10.h),
+          ],
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'PENDING DUES',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF64748B),
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      '₹$totalPending',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w900,
+                        color: totalPending > 0 ? const Color(0xFFD97706) : const Color(0xFF059669),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(height: 36.h, width: 1, color: const Color(0x30D4AF37)),
+              SizedBox(width: 16.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'TOTAL PAID',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF64748B),
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      '₹$totalPaid',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w900,
+                        color: const Color(0xFF059669),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTransactionCard(SiblingPaymentTransaction tx) {
+    return Container(
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 38.w,
+            height: 38.w,
+            decoration: BoxDecoration(
+              color: const Color(0xFFECFDF5),
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: Icon(Icons.check_circle_rounded, color: const Color(0xFF059669), size: 20.sp),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  tx.regNo.isNotEmpty ? '${tx.studentName} (${tx.regNo})' : tx.studentName,
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 13.5.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF0F172A),
+                  ),
+                ),
+                Text(
+                  '${tx.paymentMethod} • ${tx.createdAtFormatted}',
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 11.5.sp,
+                    color: const Color(0xFF64748B),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '₹${tx.amount}',
+                style: TextStyle(
+                  fontFamily: 'Nunito',
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w900,
+                  color: const Color(0xFF059669),
+                ),
+              ),
+              Text(
+                tx.status,
+                style: TextStyle(
+                  fontFamily: 'Nunito',
+                  fontSize: 9.5.sp,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF059669),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -651,7 +1118,7 @@ class _PaymentsInvoicesScreenState extends State<PaymentsInvoicesScreen> with Si
     );
   }
 
-  Widget _buildFeeCard(FeeItem fee) {
+  Widget _buildFeeCard(FeeItem fee, {String? studentNameOverride}) {
     final isPaid = fee.isPaid;
 
     return Container(
@@ -843,7 +1310,9 @@ class _PaymentsInvoicesScreenState extends State<PaymentsInvoicesScreen> with Si
                         PaymentReceiptDialog.show(
                           context,
                           fee: fee,
-                          studentName: _homeController.userName.value,
+                          studentName: (studentNameOverride != null && studentNameOverride.isNotEmpty)
+                              ? studentNameOverride
+                              : _homeController.userName.value,
                         );
                       },
                     ),
