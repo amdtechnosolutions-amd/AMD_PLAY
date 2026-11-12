@@ -408,7 +408,7 @@ class _StudentCoachingReportScreenState
   ) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: const Color(0xFFFFFDF5),
         borderRadius: BorderRadius.circular(14.r),
@@ -422,49 +422,59 @@ class _StudentCoachingReportScreenState
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFD4AF37),
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                child: Text(
-                  'GRADE ${summary.grade}',
-                  style: TextStyle(
-                    fontFamily: 'Nunito',
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                    letterSpacing: 0.5,
-                  ),
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD4AF37),
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: Text(
+                        'GRADE ${summary.grade}',
+                        style: TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: 10.5.sp,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 7.w),
+                    Text(
+                      'Total: ${summary.scoreText}',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF0F172A),
+                      ),
+                    ),
+                    SizedBox(width: 5.w),
+                    Text(
+                      '(${summary.percentage.toStringAsFixed(1)}%)',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 11.5.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF9E7B1A),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(width: 8.w),
-              Text(
-                'Total: ${summary.scoreText}',
-                style: TextStyle(
-                  fontFamily: 'Nunito',
-                  fontSize: 13.5.sp,
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFF0F172A),
-                ),
-              ),
-              SizedBox(width: 6.w),
-              Text(
-                '(${summary.percentage.toStringAsFixed(1)}%)',
-                style: TextStyle(
-                  fontFamily: 'Nunito',
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF9E7B1A),
-                ),
-              ),
-            ],
+            ),
           ),
+          SizedBox(width: 6.w),
           InkWell(
             onTap: () {
               setState(() {
