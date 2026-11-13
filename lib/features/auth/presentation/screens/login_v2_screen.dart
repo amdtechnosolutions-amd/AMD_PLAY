@@ -135,10 +135,10 @@ class LoginV2Screen extends GetView<AuthController> {
             height: 84.h,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFF131722),
+              color: Colors.black,
               border: Border.all(
-                color: const Color(0xFFF59E0B),
-                width: 2.8,
+                color: Colors.white,
+                width: 2.0,
               ),
             ),
             child: ClipOval(

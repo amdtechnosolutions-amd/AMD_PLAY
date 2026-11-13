@@ -431,10 +431,10 @@ class LoginV3Screen extends GetView<AuthController> {
               height: 68.h,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF131722),
+                color: Colors.black,
                 border: Border.all(
-                  color: const Color(0xFFFFD54F),
-                  width: 2.5,
+                  color: Colors.white,
+                  width: 2.0,
                 ),
                 boxShadow: [
                   BoxShadow(

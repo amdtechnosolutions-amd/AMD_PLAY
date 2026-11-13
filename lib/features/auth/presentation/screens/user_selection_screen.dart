@@ -234,28 +234,37 @@ class UserSelectionScreen extends GetView<AuthController> {
   Widget _buildLogo() {
     return Center(
       child: Container(
-        width: 125.h,
-        height: 125.h,
-        decoration: const BoxDecoration(
+        width: 118.h,
+        height: 118.h,
+        padding: EdgeInsets.all(16.h),
+        decoration: BoxDecoration(
           shape: BoxShape.circle,
-          gradient: RadialGradient(
-            colors: [
-              Color(0x35D4AF37),
-              Color(0x10D4AF37),
-              Colors.transparent,
-            ],
-            stops: [0.0, 0.55, 1.0],
+          color: Colors.black,
+          border: Border.all(
+            color: Colors.white,
+            width: 2.0,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.3),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
+            ),
+            const BoxShadow(
+              color: Color(0x35D4AF37),
+              blurRadius: 10,
+              offset: Offset(0, 2),
+            ),
+          ],
         ),
         alignment: Alignment.center,
         child: Image.asset(
           'assets/logo/logo.png',
-          height: 98.h,
           fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) => Center(
             child: Icon(
               Icons.sports_tennis_rounded,
-              size: 68.sp,
+              size: 60.sp,
               color: goldAccent,
             ),
           ),
