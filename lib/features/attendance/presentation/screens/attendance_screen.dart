@@ -149,7 +149,6 @@ class AttendanceScreen extends StatelessWidget {
     final activeId = controller.selectedSiblingId.value;
     return Container(
       width: double.infinity,
-      color: Colors.white,
       padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 10.h),
       decoration: const BoxDecoration(
         color: Colors.white,
