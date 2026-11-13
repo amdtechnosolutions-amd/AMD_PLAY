@@ -26,31 +26,24 @@ class StudentSiblingSwitcherSheet {
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
         ),
-        child: FutureBuilder<StudentSiblingDetailsModel?>(
-          future: activeId.isNotEmpty
-              ? service.getStudentSiblings(activeId).catchError((_) => StudentSiblingDetailsModel(hasSiblings: false, siblingCount: 0))
-              : Future.value(null),
+        child: FutureBuilder<StudentSiblingDetailsModel>(
+          future: service.getMyProfile(),
           builder: (context, snapshot) {
-            return FutureBuilder<List<SiblingStudentModel>>(
-              future: service.getMySiblings(),
-              builder: (context, mySnap) {
-                final isLoading = (snapshot.connectionState == ConnectionState.waiting &&
-                        mySnap.connectionState == ConnectionState.waiting);
-                final details = snapshot.data;
-                final mySiblings = mySnap.data ?? const <SiblingStudentModel>[];
+            final isLoading = snapshot.connectionState == ConnectionState.waiting;
+            final details = snapshot.data;
 
-                // Combine current student + sibling profiles cleanly
-                final List<SiblingStudentModel> allProfiles = [];
-                if (details?.student != null) {
-                  allProfiles.add(details!.student!);
-                }
-                final seen = allProfiles.map((e) => e.studentId).toSet();
-                for (final sib in [...(details?.siblings ?? const <SiblingStudentModel>[]), ...mySiblings]) {
-                  if (sib.studentId.isNotEmpty && !seen.contains(sib.studentId)) {
-                    seen.add(sib.studentId);
-                    allProfiles.add(sib);
-                  }
-                }
+            // Combine current student + sibling profiles cleanly
+            final List<SiblingStudentModel> allProfiles = [];
+            if (details?.student != null) {
+              allProfiles.add(details!.student!);
+            }
+            final seen = allProfiles.map((e) => e.studentId).toSet();
+            for (final sib in (details?.siblings ?? const <SiblingStudentModel>[])) {
+              if (sib.studentId.isNotEmpty && !seen.contains(sib.studentId)) {
+                seen.add(sib.studentId);
+                allProfiles.add(sib);
+              }
+            }
 
                 return Column(
                   mainAxisSize: MainAxisSize.min,
@@ -217,12 +210,10 @@ class StudentSiblingSwitcherSheet {
                   ],
                 );
               },
-            );
-          },
-        ),
-      ),
-      isScrollControlled: true,
-    );
-  }
-}
+            ),
+          ),
+          isScrollControlled: true,
+        );
+      }
+    }
 

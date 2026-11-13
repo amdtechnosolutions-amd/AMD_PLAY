@@ -21,6 +21,58 @@ class SiblingService {
     return {'Authorization': 'Bearer $token'};
   }
 
+  /// Fetch Recommended Current Student Profile with Sibling Group
+  /// GET /api/v1/students/my/profile
+  /// or Switch Active Student:
+  /// GET /api/v1/students/my/profile?studentId=`<siblingId>`
+  Future<StudentSiblingDetailsModel> getMyProfile({String? studentId}) async {
+    try {
+      final headers = await _authHeaders();
+      final endpoint = (studentId != null && studentId.trim().isNotEmpty)
+          ? ApiEndpoints.studentProfileSwitch(studentId.trim())
+          : ApiEndpoints.studentProfile;
+      debugPrint('[SiblingService] GET $endpoint');
+      final response = await _apiClient.dio.get(
+        endpoint,
+        options: Options(headers: headers),
+      );
+      debugPrint('[SiblingService] Student profile response (${response.statusCode}): ${response.data}');
+
+      final body = response.data;
+      final data = body is Map && body['data'] is Map
+          ? Map<String, dynamic>.from(body['data'] as Map)
+          : <String, dynamic>{};
+      return StudentSiblingDetailsModel.fromJson(data);
+    } catch (e) {
+      debugPrint('[SiblingService] getMyProfile error: $e');
+      return const StudentSiblingDetailsModel(hasSiblings: false, siblingCount: 0);
+    }
+  }
+
+  /// Fetch Universal Student Details (including full sibling array)
+  /// GET /api/v1/students/:id
+  Future<StudentSiblingDetailsModel> getUniversalStudentDetails(String studentId) async {
+    try {
+      final headers = await _authHeaders();
+      final endpoint = ApiEndpoints.studentById(studentId.trim());
+      debugPrint('[SiblingService] GET $endpoint');
+      final response = await _apiClient.dio.get(
+        endpoint,
+        options: Options(headers: headers),
+      );
+      debugPrint('[SiblingService] Universal student details response (${response.statusCode}): ${response.data}');
+
+      final body = response.data;
+      final data = body is Map && body['data'] is Map
+          ? Map<String, dynamic>.from(body['data'] as Map)
+          : (body is Map ? Map<String, dynamic>.from(body) : <String, dynamic>{});
+      return StudentSiblingDetailsModel.fromJson(data);
+    } catch (e) {
+      debugPrint('[SiblingService] getUniversalStudentDetails error: $e');
+      return const StudentSiblingDetailsModel(hasSiblings: false, siblingCount: 0);
+    }
+  }
+
   /// Fetch Sibling Records for a Specific Student
   /// GET /api/v1/students/:id/siblings
   Future<StudentSiblingDetailsModel> getStudentSiblings(String studentId) async {

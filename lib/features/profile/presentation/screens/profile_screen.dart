@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+
 import '../../../../core/routes/app_routes.dart';
 import '../../../home/presentation/controllers/home_controller.dart';
 import '../../../main_nav/presentation/controllers/main_nav_controller.dart';
@@ -151,10 +152,7 @@ class ProfileScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22.r),
-        border: Border.all(
-          color: const Color(0x60D4AF37),
-          width: 1.5,
-        ),
+        border: Border.all(color: const Color(0x60D4AF37), width: 1.5),
         boxShadow: const [
           BoxShadow(
             color: Color(0x28D4AF37),
@@ -177,10 +175,7 @@ class ProfileScreen extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: const Color(0xFFFFFDF5),
-              border: Border.all(
-                color: const Color(0xFFD4AF37),
-                width: 2,
-              ),
+              border: Border.all(color: const Color(0xFFD4AF37), width: 2),
               boxShadow: const [
                 BoxShadow(
                   color: Color(0x25D4AF37),
@@ -271,10 +266,7 @@ class ProfileScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(
-                color: const Color(0xFFD4AF37),
-                width: 1.8,
-              ),
+              border: Border.all(color: const Color(0xFFD4AF37), width: 1.8),
               boxShadow: const [
                 BoxShadow(
                   color: Color(0x28D4AF37),
@@ -350,7 +342,11 @@ class ProfileScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.login_rounded, size: 20.sp, color: const Color(0xFFD4AF37)),
+              Icon(
+                Icons.login_rounded,
+                size: 20.sp,
+                color: const Color(0xFFD4AF37),
+              ),
               SizedBox(width: 10.w),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -401,7 +397,10 @@ class ProfileScreen extends StatelessWidget {
   // 1. HERO PROFILE CARD (REAL DATA ONLY)
   // ===========================================================================
 
-  Widget _buildProfileHeroCard(ProfileController controller, HomeController homeCtrl) {
+  Widget _buildProfileHeroCard(
+    ProfileController controller,
+    HomeController homeCtrl,
+  ) {
     return Obx(() {
       final name = controller.fullName.value.isNotEmpty
           ? controller.fullName.value
@@ -423,10 +422,7 @@ class ProfileScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(
-            color: const Color(0x60D4AF37),
-            width: 1.3,
-          ),
+          border: Border.all(color: const Color(0x60D4AF37), width: 1.3),
           boxShadow: const [
             BoxShadow(
               color: Color(0x28D4AF37),
@@ -471,7 +467,9 @@ class ProfileScreen extends StatelessWidget {
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Center(
                         child: Text(
-                          name.isNotEmpty ? name.substring(0, 1).toUpperCase() : 'P',
+                          name.isNotEmpty
+                              ? name.substring(0, 1).toUpperCase()
+                              : 'P',
                           style: TextStyle(
                             fontFamily: 'Nunito',
                             fontSize: 22.sp,
@@ -507,7 +505,10 @@ class ProfileScreen extends StatelessWidget {
                         children: [
                           // Role pill
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 3.h),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 9.w,
+                              vertical: 3.h,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFFFDF5),
                               borderRadius: BorderRadius.circular(6.r),
@@ -530,7 +531,10 @@ class ProfileScreen extends StatelessWidget {
                           SizedBox(width: 8.w),
                           // Status pill
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8.w,
+                              vertical: 3.h,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFECFDF5),
                               borderRadius: BorderRadius.circular(6.r),
@@ -580,7 +584,11 @@ class ProfileScreen extends StatelessWidget {
                 Expanded(
                   child: Row(
                     children: [
-                      Icon(Icons.email_outlined, size: 14.sp, color: const Color(0xFFD4AF37)),
+                      Icon(
+                        Icons.email_outlined,
+                        size: 14.sp,
+                        color: const Color(0xFFD4AF37),
+                      ),
                       SizedBox(width: 6.w),
                       Expanded(
                         child: Text(
@@ -601,7 +609,11 @@ class ProfileScreen extends StatelessWidget {
                 SizedBox(width: 8.w),
                 Row(
                   children: [
-                    Icon(Icons.phone_outlined, size: 14.sp, color: const Color(0xFFD4AF37)),
+                    Icon(
+                      Icons.phone_outlined,
+                      size: 14.sp,
+                      color: const Color(0xFFD4AF37),
+                    ),
                     SizedBox(width: 6.w),
                     Text(
                       phone,
@@ -616,6 +628,35 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ],
             ),
+            if (controller.regNo.value.isNotEmpty || controller.parentName.value.isNotEmpty) ...[
+              SizedBox(height: 8.h),
+              Wrap(
+                spacing: 12.w,
+                runSpacing: 4.h,
+                children: [
+                  if (controller.regNo.value.isNotEmpty)
+                    Text(
+                      'Reg No: ${controller.regNo.value}',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF0F172A),
+                      ),
+                    ),
+                  if (controller.parentName.value.isNotEmpty)
+                    Text(
+                      'Parent: ${controller.parentName.value}',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF64748B),
+                      ),
+                    ),
+                ],
+              ),
+            ],
             if (memberId.isNotEmpty) ...[
               SizedBox(height: 8.h),
               Align(
@@ -643,10 +684,18 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildAccountDetailsCard(ProfileController controller) {
     return Obx(() {
-      final email = controller.email.value.isNotEmpty ? controller.email.value : 'Not provided';
-      final phone = controller.phone.value.isNotEmpty ? controller.phone.value : 'Not provided';
-      final memberId = controller.memberId.value.isNotEmpty ? controller.memberId.value : '—';
-      final role = controller.role.value.isNotEmpty ? controller.role.value : 'Customer';
+      final email = controller.email.value.isNotEmpty
+          ? controller.email.value
+          : 'Not provided';
+      final phone = controller.phone.value.isNotEmpty
+          ? controller.phone.value
+          : 'Not provided';
+      final memberId = controller.memberId.value.isNotEmpty
+          ? controller.memberId.value
+          : '—';
+      final role = controller.role.value.isNotEmpty
+          ? controller.role.value
+          : 'Customer';
 
       return Container(
         width: double.infinity,
@@ -654,10 +703,7 @@ class ProfileScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(18.r),
-          border: Border.all(
-            color: const Color(0x50D4AF37),
-            width: 1.2,
-          ),
+          border: Border.all(color: const Color(0x50D4AF37), width: 1.2),
           boxShadow: const [
             BoxShadow(
               color: Color(0x20D4AF37),
@@ -671,7 +717,11 @@ class ProfileScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.badge_outlined, size: 18.sp, color: const Color(0xFFD4AF37)),
+                Icon(
+                  Icons.badge_outlined,
+                  size: 18.sp,
+                  color: const Color(0xFFD4AF37),
+                ),
                 SizedBox(width: 8.w),
                 Text(
                   'Account Details (Live /auth/me)',
@@ -685,13 +735,25 @@ class ProfileScreen extends StatelessWidget {
               ],
             ),
             SizedBox(height: 12.h),
-            _buildDetailRow('Email Address', email, Icons.alternate_email_rounded),
+            _buildDetailRow(
+              'Email Address',
+              email,
+              Icons.alternate_email_rounded,
+            ),
             const Divider(color: Color(0x1AD4AF37), height: 16),
             _buildDetailRow('Phone Number', phone, Icons.phone_android_rounded),
             const Divider(color: Color(0x1AD4AF37), height: 16),
-            _buildDetailRow('Assigned Role', role.capitalizeFirst ?? role, Icons.admin_panel_settings_outlined),
+            _buildDetailRow(
+              'Assigned Role',
+              role.capitalizeFirst ?? role,
+              Icons.admin_panel_settings_outlined,
+            ),
             const Divider(color: Color(0x1AD4AF37), height: 16),
-            _buildDetailRow('User Identifier', memberId, Icons.fingerprint_rounded),
+            _buildDetailRow(
+              'User Identifier',
+              memberId,
+              Icons.fingerprint_rounded,
+            ),
           ],
         ),
       );
@@ -740,16 +802,16 @@ class ProfileScreen extends StatelessWidget {
   // ===========================================================================
 
   Widget _buildQuickActionsCard(
-      BuildContext context, ProfileController controller, HomeController homeCtrl) {
+    BuildContext context,
+    ProfileController controller,
+    HomeController homeCtrl,
+  ) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(
-          color: const Color(0x50D4AF37),
-          width: 1.2,
-        ),
+        border: Border.all(color: const Color(0x50D4AF37), width: 1.2),
         boxShadow: const [
           BoxShadow(
             color: Color(0x20D4AF37),
@@ -770,7 +832,9 @@ class ProfileScreen extends StatelessWidget {
               subtitle: 'View active reservations & entry PINs',
               onTap: () {
                 if (Get.isRegistered<MainNavController>()) {
-                  Get.find<MainNavController>().changeTab(homeCtrl.isCoach ? 3 : 1); // Bookings
+                  Get.find<MainNavController>().changeTab(
+                    homeCtrl.isCoach ? 3 : 1,
+                  ); // Bookings
                 }
               },
             ),
@@ -828,7 +892,8 @@ class ProfileScreen extends StatelessWidget {
                   _buildActionTile(
                     icon: Icons.family_restroom_rounded,
                     title: 'Family & Sibling Profiles',
-                    subtitle: 'View linked siblings & switch active student profile',
+                    subtitle:
+                        'View linked siblings & switch active student profile',
                     onTap: () => StudentSiblingSwitcherSheet.show(homeCtrl),
                   ),
                   const Divider(color: Color(0x1AD4AF37), height: 1),
@@ -875,16 +940,18 @@ class ProfileScreen extends StatelessWidget {
               },
             ),
             const Divider(color: Color(0x1AD4AF37), height: 1),
-            Obx(() => _buildActionTile(
-                  icon: Icons.swap_horiz_rounded,
-                  title: homeCtrl.isPayAndPlay
-                      ? 'Switch to Trainee / Student Mode'
-                      : 'Switch to Booking Mode',
-                  subtitle: homeCtrl.isPayAndPlay
-                      ? 'Current: Booking (Court reservations & equipment)'
-                      : 'Current: Student (Batches, Attendance & Monthly fees)',
-                  onTap: () => homeCtrl.toggleUserRole(),
-                )),
+            Obx(
+              () => _buildActionTile(
+                icon: Icons.swap_horiz_rounded,
+                title: homeCtrl.isPayAndPlay
+                    ? 'Switch to Trainee / Student Mode'
+                    : 'Switch to Booking Mode',
+                subtitle: homeCtrl.isPayAndPlay
+                    ? 'Current: Booking (Court reservations & equipment)'
+                    : 'Current: Student (Batches, Attendance & Monthly fees)',
+                onTap: () => homeCtrl.toggleUserRole(),
+              ),
+            ),
           ],
         ),
       ),
@@ -952,14 +1019,15 @@ class ProfileScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFFFFFDF7),
           borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(
-            color: const Color(0x40D4AF37),
-            width: 1.1,
-          ),
+          border: Border.all(color: const Color(0x40D4AF37), width: 1.1),
         ),
         child: Row(
           children: [
-            Icon(Icons.cloud_done_rounded, size: 18.sp, color: const Color(0xFF10B981)),
+            Icon(
+              Icons.cloud_done_rounded,
+              size: 18.sp,
+              color: const Color(0xFF10B981),
+            ),
             SizedBox(width: 10.w),
             Expanded(
               child: Column(
@@ -996,7 +1064,10 @@ class ProfileScreen extends StatelessWidget {
   // 5. LOGOUT BUTTON
   // ===========================================================================
 
-  Widget _buildLogoutButton(BuildContext context, ProfileController controller) {
+  Widget _buildLogoutButton(
+    BuildContext context,
+    ProfileController controller,
+  ) {
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
@@ -1005,7 +1076,9 @@ class ProfileScreen extends StatelessWidget {
           foregroundColor: const Color(0xFFEF4444),
           side: const BorderSide(color: Color(0xFFEF4444), width: 1.3),
           padding: EdgeInsets.symmetric(vertical: 12.h),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14.r),
+          ),
           elevation: 0,
         ),
         icon: const Icon(Icons.logout_rounded, size: 18),

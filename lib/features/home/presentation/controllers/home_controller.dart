@@ -12,6 +12,7 @@ import '../../../../core/storage/storage_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:mobile_app/features/attendance/presentation/controllers/attendance_controller.dart';
 import 'package:mobile_app/features/booking/data/models/booking_pass_model.dart';
+import 'package:mobile_app/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:mobile_app/features/siblings/data/models/sibling_models.dart';
 import '../widgets/payment_receipt_dialog.dart';
 
@@ -551,8 +552,42 @@ class HomeController extends GetxController {
       }
     }
 
-    // 1. Add currently logged-in student's profile first from session cache if available
-    if (currentStudentId.value.isNotEmpty) {
+    // 1. Fetch live recommended student profile & siblings via GET /students/my/profile
+    try {
+      final profileRes = await _apiClient.dio.get(ApiEndpoints.studentProfile);
+      if (profileRes.data is Map && profileRes.data['success'] == true && profileRes.data['data'] is Map) {
+        final data = profileRes.data['data'] as Map;
+        final student = data['student'] is Map ? data['student'] as Map : null;
+        if (student != null) {
+          final sId = (student['studentId'] ?? student['_id'] ?? student['id'] ?? '').toString();
+          if (sId.isNotEmpty) {
+            currentStudentId.value = sId;
+            final fullName = (student['fullName'] ?? '').toString().trim();
+            if (fullName.isNotEmpty) {
+              userName.value = fullName;
+              final fName = (student['firstName'] ?? '').toString().trim();
+              greetingName.value = (fName.isNotEmpty ? fName : fullName).toUpperCase();
+            }
+            appendStudentEntries(student, isCurrentOverride: true);
+          }
+        }
+        final siblings = data['siblings'] is List
+            ? data['siblings'] as List
+            : (student != null && student['siblings'] is List ? student['siblings'] as List : []);
+        for (final item in siblings) {
+          if (item is! Map) continue;
+          final sId = (item['studentId'] ?? item['id'] ?? item['_id'] ?? '').toString();
+          if (sId.isEmpty || list.any((e) => e.studentId == sId)) continue;
+          final isCurrent = item['isCurrent'] == true || sId == currentStudentId.value;
+          appendStudentEntries(item, isCurrentOverride: isCurrent);
+        }
+      }
+    } catch (e) {
+      debugPrint('[HomeController] Error fetching /students/my/profile: $e');
+    }
+
+    // 2. Add currently logged-in student's profile from session cache if list still empty
+    if (list.isEmpty && currentStudentId.value.isNotEmpty) {
       final userJsonStr = await _storage.getUserJson();
       if (userJsonStr != null && userJsonStr.isNotEmpty) {
         try {
@@ -564,26 +599,27 @@ class HomeController extends GetxController {
       }
     }
 
-    // 2. Fetch Siblings linked via siblingGroupId / parentPhone (/students/my/siblings)
-    try {
-      final res = await _apiClient.dio.get(ApiEndpoints.studentSiblings);
-      if (res.data is Map && res.data['success'] == true && res.data['data'] is List) {
-        final siblings = res.data['data'] as List;
+    // 3. Fallback: Fetch Siblings linked via /students/my/siblings if needed
+    if (list.length <= 1) {
+      try {
+        final res = await _apiClient.dio.get(ApiEndpoints.studentSiblings);
+        if (res.data is Map && res.data['success'] == true && res.data['data'] is List) {
+          final siblings = res.data['data'] as List;
 
-        for (final item in siblings) {
-          if (item is! Map) continue;
-          final sId = (item['studentId'] ?? item['id'] ?? item['_id'] ?? '').toString();
-          if (sId.isEmpty) continue;
+          for (final item in siblings) {
+            if (item is! Map) continue;
+            final sId = (item['studentId'] ?? item['id'] ?? item['_id'] ?? '').toString();
+            if (sId.isEmpty) continue;
 
-          // Avoid duplicating active profile if backend already includes current student
-          if (sId == currentStudentId.value && list.any((e) => e.studentId == sId)) {
-            continue;
+            if (sId == currentStudentId.value && list.any((e) => e.studentId == sId)) {
+              continue;
+            }
+            appendStudentEntries(item, isCurrentOverride: sId == currentStudentId.value);
           }
-          appendStudentEntries(item, isCurrentOverride: sId == currentStudentId.value);
         }
+      } catch (e) {
+        debugPrint('Error fetching siblings: $e');
       }
-    } catch (e) {
-      debugPrint('Error fetching siblings: $e');
     }
 
     // 3. Fallback: if active student had no enrollments cached in userJson, try /students/:id/siblings
@@ -897,6 +933,7 @@ class HomeController extends GetxController {
   }
 
   /// Switch active student profile among siblings
+  /// Endpoint 2: GET /api/v1/students/my/profile?studentId=`<siblingId>`
   Future<void> switchProfile(String targetStudentId) async {
     if (targetStudentId.isEmpty || targetStudentId == currentStudentId.value) return;
 
@@ -906,40 +943,82 @@ class HomeController extends GetxController {
     );
 
     try {
-      final res = await _apiClient.dio.post(
-        ApiEndpoints.switchStudentProfile,
-        data: {'targetStudentId': targetStudentId},
-      );
+      dynamic res;
+      bool switchSucceeded = false;
+      Map<String, dynamic>? studentData;
+      String? accessToken;
+      String? refreshToken;
+      String? tenantId;
+      String? role;
 
-      if (res.data is Map && res.data['success'] == true && res.data['data'] is Map) {
-        final data = res.data['data'] as Map;
-        final accessToken = data['accessToken']?.toString() ?? '';
-        final refreshToken = data['refreshToken']?.toString() ?? accessToken;
-        final tenantId = data['tenantId']?.toString();
-        final role = (data['role'] ?? (data['user'] is Map ? data['user']['role'] : null))?.toString();
-        final user = data['user'] is Map ? Map<String, dynamic>.from(data['user'] as Map) : <String, dynamic>{};
-        final fName = (user['firstName'] ?? '').toString().trim();
-        final lName = (user['lastName'] ?? '').toString().trim();
+      // 1. Recommended Endpoint 2: GET /api/v1/students/my/profile?studentId=<siblingId>
+      try {
+        final getRes = await _apiClient.dio.get(
+          ApiEndpoints.studentProfileSwitch(targetStudentId),
+        );
+        if (getRes.data is Map && getRes.data['success'] == true && getRes.data['data'] is Map) {
+          final data = getRes.data['data'] as Map;
+          studentData = data['student'] is Map
+              ? Map<String, dynamic>.from(data['student'] as Map)
+              : Map<String, dynamic>.from(data);
+          tenantId = data['tenantId']?.toString();
+          switchSucceeded = true;
+          res = getRes;
+        }
+      } catch (getErr) {
+        debugPrint('[switchProfile] GET /students/my/profile?studentId error: $getErr, falling back to POST');
+      }
+
+      // 2. Fallback to POST /auth/student/switch-profile if GET not fulfilled
+      if (!switchSucceeded) {
+        res = await _apiClient.dio.post(
+          ApiEndpoints.switchStudentProfile,
+          data: {'targetStudentId': targetStudentId},
+        );
+        if (res.data is Map && res.data['success'] == true && res.data['data'] is Map) {
+          final data = res.data['data'] as Map;
+          accessToken = data['accessToken']?.toString();
+          refreshToken = data['refreshToken']?.toString();
+          tenantId = data['tenantId']?.toString();
+          role = (data['role'] ?? (data['user'] is Map ? data['user']['role'] : null))?.toString();
+          studentData = data['user'] is Map
+              ? Map<String, dynamic>.from(data['user'] as Map)
+              : Map<String, dynamic>.from(data);
+          switchSucceeded = true;
+        }
+      }
+
+      if (switchSucceeded && studentData != null) {
+        final fName = (studentData['firstName'] ?? '').toString().trim();
+        final lName = (studentData['lastName'] ?? '').toString().trim();
         final combinedName = '$fName $lName'.trim();
-        final fullName = (user['fullName']?.toString().trim().isNotEmpty == true)
-            ? user['fullName'].toString().trim()
+        final fullName = (studentData['fullName']?.toString().trim().isNotEmpty == true)
+            ? studentData['fullName'].toString().trim()
             : (combinedName.isNotEmpty ? combinedName : 'Trainee');
 
+        final storedToken = accessToken ?? await _storage.getAccessToken() ?? '';
+        final resolvedRefreshToken = refreshToken ?? await _storage.getRefreshToken() ?? storedToken;
+        final resolvedTenantId = tenantId ?? await _storage.getTenantId();
+        final resolvedRole = role ?? await _storage.getUserRole() ?? 'student';
+
         await _storage.saveUserSession(
-          accessToken: accessToken,
-          refreshToken: refreshToken,
-          tenantId: tenantId,
+          accessToken: storedToken,
+          refreshToken: resolvedRefreshToken,
+          tenantId: resolvedTenantId,
           studentId: targetStudentId,
-          role: role,
+          role: resolvedRole,
           userName: fullName,
-          userJson: jsonEncode(user),
+          userJson: jsonEncode(studentData),
         );
 
         currentStudentId.value = targetStudentId;
         userName.value = fullName;
         greetingName.value = (fName.isNotEmpty ? fName : fullName).toUpperCase();
 
-        Get.back(); // close dialog
+        if (Get.isDialogOpen ?? false) {
+          Get.back(); // close loading dialog
+        }
+
         Get.snackbar(
           'Profile Switched',
           'Switched active profile to $fullName',
@@ -952,11 +1031,16 @@ class HomeController extends GetxController {
 
         refreshDashboard();
         if (Get.isRegistered<AttendanceController>()) {
-          Get.find<AttendanceController>().fetchLiveAttendance();
+          Get.find<AttendanceController>().fetchLiveAttendance(studentId: targetStudentId);
+        }
+        if (Get.isRegistered<ProfileController>()) {
+          Get.find<ProfileController>().loadProfile();
         }
       } else {
-        Get.back();
-        final err = res.data is Map ? res.data['message']?.toString() : null;
+        if (Get.isDialogOpen ?? false) {
+          Get.back();
+        }
+        final err = res?.data is Map ? res.data['message']?.toString() : null;
         Get.snackbar(
           'Switch Failed',
           err ?? 'Unable to switch trainee profile.',
@@ -966,7 +1050,9 @@ class HomeController extends GetxController {
         );
       }
     } catch (e) {
-      Get.back();
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
       Get.snackbar(
         'Switch Failed',
         'Could not switch trainee profile: $e',

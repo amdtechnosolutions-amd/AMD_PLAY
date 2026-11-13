@@ -105,7 +105,10 @@ class SiblingStudentModel {
   final String siblingGroupId;
   final String batchId;
   final String batchName;
+  final String sportName;
   final String status;
+  final bool isCurrent;
+  final bool isSelected;
   final List<SiblingEnrollmentModel> enrollments;
 
   const SiblingStudentModel({
@@ -122,7 +125,10 @@ class SiblingStudentModel {
     this.siblingGroupId = '',
     this.batchId = '',
     this.batchName = '',
+    this.sportName = '',
     this.status = 'active',
+    this.isCurrent = false,
+    this.isSelected = false,
     this.enrollments = const [],
   });
 
@@ -148,6 +154,14 @@ class SiblingStudentModel {
       resolvedBatchName = parsedEnrollments.first.batchName;
     }
 
+    String resolvedSportName = (json['sportName'] ?? json['sport'] ?? '').toString().trim();
+    if (resolvedSportName.isEmpty && parsedEnrollments.isNotEmpty) {
+      resolvedSportName = parsedEnrollments.first.sportName;
+    }
+
+    final isCur = json['isCurrent'] == true;
+    final isSel = json['isSelected'] == true || isCur;
+
     return SiblingStudentModel(
       studentId: (json['studentId'] ?? json['id'] ?? json['_id'] ?? '').toString(),
       firstName: fName,
@@ -162,7 +176,10 @@ class SiblingStudentModel {
       siblingGroupId: (json['siblingGroupId'] ?? '').toString().trim(),
       batchId: (json['batchId'] ?? (parsedEnrollments.isNotEmpty ? parsedEnrollments.first.batchId : '')).toString(),
       batchName: resolvedBatchName,
+      sportName: resolvedSportName,
       status: (json['status'] ?? 'active').toString(),
+      isCurrent: isCur,
+      isSelected: isSel,
       enrollments: parsedEnrollments,
     );
   }
@@ -190,18 +207,31 @@ class StudentSiblingDetailsModel {
   factory StudentSiblingDetailsModel.fromJson(Map<String, dynamic> json) {
     final studentMap = json['student'] is Map ? Map<String, dynamic>.from(json['student'] as Map) : null;
     final rawSiblings = json['siblings'] as List? ?? [];
-    final parsedSiblings = rawSiblings
+    List<SiblingStudentModel> parsedSiblings = rawSiblings
         .whereType<Map>()
         .map((s) => SiblingStudentModel.fromJson(Map<String, dynamic>.from(s)))
         .toList();
 
+    // Fallback: If root siblings is empty, check student.siblings
+    if (parsedSiblings.isEmpty && studentMap != null && studentMap['siblings'] is List) {
+      final nestedList = studentMap['siblings'] as List;
+      parsedSiblings = nestedList
+          .whereType<Map>()
+          .map((s) => SiblingStudentModel.fromJson(Map<String, dynamic>.from(s)))
+          .toList();
+    }
+
+    final parentName = (json['parentName'] ?? studentMap?['parentName'] ?? '').toString().trim();
+    final familyPhone = (json['familyPhone'] ?? studentMap?['parentPhone'] ?? json['parentPhone'] ?? '').toString().trim();
+    final siblingGroupId = (json['siblingGroupId'] ?? studentMap?['siblingGroupId'] ?? '').toString().trim();
+
     return StudentSiblingDetailsModel(
       student: studentMap != null ? SiblingStudentModel.fromJson(studentMap) : null,
-      hasSiblings: json['hasSiblings'] == true || parsedSiblings.isNotEmpty,
+      hasSiblings: json['hasSiblings'] == true || parsedSiblings.length > 1,
       siblingCount: (json['siblingCount'] as num?)?.toInt() ?? parsedSiblings.length,
-      siblingGroupId: (json['siblingGroupId'] ?? '').toString().trim(),
-      familyPhone: (json['familyPhone'] ?? '').toString().trim(),
-      parentName: (json['parentName'] ?? '').toString().trim(),
+      siblingGroupId: siblingGroupId,
+      familyPhone: familyPhone,
+      parentName: parentName,
       siblings: parsedSiblings,
     );
   }
