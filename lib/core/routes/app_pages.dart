@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+
 import '../../features/auth/bindings/auth_binding.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/login_v2_screen.dart';

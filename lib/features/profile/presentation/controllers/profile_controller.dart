@@ -1,6 +1,9 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mobile_app/features/attendance/presentation/controllers/attendance_controller.dart';
+
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/routes/app_routes.dart';
@@ -32,6 +35,7 @@ class ProfileController extends GetxController {
   final RxMap<String, dynamic> rawUser = <String, dynamic>{}.obs;
 
   // Student & Sibling Profile Properties
+  final RxString selectedStudentId = ''.obs;
   final RxString regNo = ''.obs;
   final RxString parentName = ''.obs;
   final RxString parentPhone = ''.obs;
@@ -44,7 +48,9 @@ class ProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _apiClient = Get.isRegistered<ApiClient>() ? Get.find<ApiClient>() : ApiClient();
+    _apiClient = Get.isRegistered<ApiClient>()
+        ? Get.find<ApiClient>()
+        : ApiClient();
     loadProfile();
   }
 
@@ -138,32 +144,96 @@ class ProfileController extends GetxController {
               }
             }
 
-            // For student role, also fetch recommended /students/my/profile
-            if (role.value.toLowerCase().trim() == 'student') {
+            // For student role, fetch recommended /students/my/profile
+            final roleStr = role.value.toLowerCase().trim();
+            final isStudent =
+                roleStr == 'student' ||
+                roleStr.contains('student') ||
+                roleStr.contains('trainee');
+            final storedStudentId = await _storage.getStudentId();
+
+            if (isStudent ||
+                (storedStudentId != null && storedStudentId.isNotEmpty)) {
+              if (selectedStudentId.value.isEmpty &&
+                  storedStudentId != null &&
+                  storedStudentId.isNotEmpty) {
+                selectedStudentId.value = storedStudentId;
+              }
               try {
-                final profileRes = await _apiClient.dio.get(ApiEndpoints.studentProfile);
-                if (profileRes.data is Map && profileRes.data['success'] == true && profileRes.data['data'] is Map) {
+                final endpoint = (selectedStudentId.value.isNotEmpty &&
+                        selectedStudentId.value != storedStudentId)
+                    ? ApiEndpoints.studentProfileSwitch(selectedStudentId.value)
+                    : ApiEndpoints.studentProfile;
+                final profileRes = await _apiClient.dio.get(
+                  endpoint,
+                );
+                if (profileRes.data is Map &&
+                    profileRes.data['success'] == true &&
+                    profileRes.data['data'] is Map) {
                   final pData = profileRes.data['data'] as Map;
-                  final student = pData['student'] is Map ? pData['student'] as Map : null;
+                  final student = pData['student'] is Map
+                      ? pData['student'] as Map
+                      : null;
                   if (student != null) {
+                    final sId =
+                        (student['studentId'] ??
+                                student['_id'] ??
+                                student['id'] ??
+                                '')
+                            .toString();
+                    if (sId.isNotEmpty) {
+                      selectedStudentId.value = sId;
+                    }
+                    final sFullName = (student['fullName'] ?? '')
+                        .toString()
+                        .trim();
+                    if (sFullName.isNotEmpty) {
+                      fullName.value = sFullName;
+                    }
+                    if (student['phone'] != null &&
+                        student['phone'].toString().trim().isNotEmpty) {
+                      phone.value = student['phone'].toString().trim();
+                    }
+                    if (student['email'] != null &&
+                        student['email'].toString().trim().isNotEmpty) {
+                      email.value = student['email'].toString().trim();
+                    }
+
                     regNo.value = (student['regNo'] ?? '').toString().trim();
-                    parentName.value = (student['parentName'] ?? pData['parentName'] ?? '').toString().trim();
-                    parentPhone.value = (student['parentPhone'] ?? pData['familyPhone'] ?? '').toString().trim();
+                    parentName.value =
+                        (student['parentName'] ?? pData['parentName'] ?? '')
+                            .toString()
+                            .trim();
+                    parentPhone.value =
+                        (student['parentPhone'] ?? pData['familyPhone'] ?? '')
+                            .toString()
+                            .trim();
                     final enrollments = student['enrollments'] as List? ?? [];
                     if (enrollments.isNotEmpty && enrollments.first is Map) {
                       final enr = enrollments.first as Map;
-                      final b = enr['batchId'] is Map ? enr['batchId'] as Map : null;
+                      final b = enr['batchId'] is Map
+                          ? enr['batchId'] as Map
+                          : null;
                       batchName.value = (b?['name'] ?? '').toString().trim();
-                      sportName.value = (b?['sportId'] is Map ? b!['sportId']['name'] : '').toString().trim();
+                      sportName.value =
+                          (b?['sportId'] is Map ? b!['sportId']['name'] : '')
+                              .toString()
+                              .trim();
                     }
                   }
                   final sibList = pData['siblings'] is List
                       ? pData['siblings'] as List
-                      : (student != null && student['siblings'] is List ? student['siblings'] as List : []);
+                      : (student != null && student['siblings'] is List
+                            ? student['siblings'] as List
+                            : []);
                   if (sibList.isNotEmpty) {
                     final parsed = sibList
                         .whereType<Map>()
-                        .map((s) => SiblingStudentModel.fromJson(Map<String, dynamic>.from(s)))
+                        .map(
+                          (s) => SiblingStudentModel.fromJson(
+                            Map<String, dynamic>.from(s),
+                          ),
+                        )
                         .toList();
                     siblings.assignAll(parsed);
                     hasSiblings.value = parsed.length > 1;
@@ -171,7 +241,57 @@ class ProfileController extends GetxController {
                   }
                 }
               } catch (e) {
-                debugPrint('[ProfileController] /students/my/profile error: $e');
+                debugPrint(
+                  '[ProfileController] /students/my/profile error: $e',
+                );
+              }
+
+              // Fallback to /students/my/siblings if siblings list still empty
+              if (siblings.isEmpty) {
+                try {
+                  final sibRes = await _apiClient.dio.get(
+                    ApiEndpoints.studentSiblings,
+                  );
+                  if (sibRes.data is Map && sibRes.data['data'] is List) {
+                    final parsed = (sibRes.data['data'] as List)
+                        .whereType<Map>()
+                        .map(
+                          (s) => SiblingStudentModel.fromJson(
+                            Map<String, dynamic>.from(s),
+                          ),
+                        )
+                        .toList();
+                    if (parsed.isNotEmpty) {
+                      siblings.assignAll(parsed);
+                      hasSiblings.value = parsed.length > 1;
+                      siblingCount.value = parsed.length;
+                    }
+                  }
+                } catch (_) {}
+              }
+
+              // Fallback from HomeController's mySports if still empty
+              if (siblings.isEmpty && Get.isRegistered<HomeController>()) {
+                final hCtrl = Get.find<HomeController>();
+                final uniqueStudents = <String, SiblingStudentModel>{};
+                for (final sp in hCtrl.mySports) {
+                  if (sp.studentId.isNotEmpty &&
+                      !uniqueStudents.containsKey(sp.studentId)) {
+                    uniqueStudents[sp.studentId] = SiblingStudentModel(
+                      studentId: sp.studentId,
+                      fullName: sp.name,
+                      batchName: sp.batchName,
+                      sportName: sp.sport,
+                      isCurrent: sp.isCurrent,
+                      isSelected: sp.isCurrent,
+                    );
+                  }
+                }
+                if (uniqueStudents.length > 1) {
+                  siblings.assignAll(uniqueStudents.values);
+                  hasSiblings.value = true;
+                  siblingCount.value = uniqueStudents.length;
+                }
               }
             }
           } else {
@@ -221,7 +341,12 @@ class ProfileController extends GetxController {
 
     final fName = (user['firstName'] ?? '').toString().trim();
     final lName = (user['lastName'] ?? '').toString().trim();
-    final name = (user['fullName'] ?? user['name'] ?? (fName.isNotEmpty ? '$fName $lName' : '')).toString().trim();
+    final name =
+        (user['fullName'] ??
+                user['name'] ??
+                (fName.isNotEmpty ? '$fName $lName' : ''))
+            .toString()
+            .trim();
     fullName.value = name;
 
     email.value = (user['email'] ?? '').toString().trim();
@@ -229,7 +354,15 @@ class ProfileController extends GetxController {
     role.value = (user['role'] ?? '').toString().trim();
     status.value = (user['status'] ?? 'active').toString().trim();
 
-    final id = (user['regNo'] ?? user['cardNo'] ?? user['employeeNo'] ?? user['studentId'] ?? user['id'] ?? user['_id'])?.toString().trim();
+    final id =
+        (user['regNo'] ??
+                user['cardNo'] ??
+                user['employeeNo'] ??
+                user['studentId'] ??
+                user['id'] ??
+                user['_id'])
+            ?.toString()
+            .trim();
     memberId.value = id ?? '';
 
     // Endpoint 4: Support preloaded user.siblings from GET /api/v1/auth/me
@@ -237,11 +370,167 @@ class ProfileController extends GetxController {
     if (rawSiblings is List && rawSiblings.isNotEmpty) {
       final parsed = rawSiblings
           .whereType<Map>()
-          .map((s) => SiblingStudentModel.fromJson(Map<String, dynamic>.from(s)))
+          .map(
+            (s) => SiblingStudentModel.fromJson(Map<String, dynamic>.from(s)),
+          )
           .toList();
       siblings.assignAll(parsed);
       hasSiblings.value = parsed.length > 1;
       siblingCount.value = parsed.length;
+    }
+  }
+
+  /// Direct profile switching to selected sibling via GET /api/v1/students/my/profile?studentId=`<siblingId>`
+  Future<void> switchStudentProfile(
+    String targetStudentId, [
+    HomeController? homeCtrl,
+  ]) async {
+    if (targetStudentId.isEmpty || targetStudentId == selectedStudentId.value) {
+      return;
+    }
+
+    isLoading.value = true;
+    try {
+      final res = await _apiClient.dio.get(
+        ApiEndpoints.studentProfileSwitch(targetStudentId),
+      );
+
+      if (res.data is Map &&
+          res.data['success'] == true &&
+          res.data['data'] is Map) {
+        final data = res.data['data'] as Map;
+        final student = data['student'] is Map ? data['student'] as Map : null;
+
+        if (student != null) {
+          final sId =
+              (student['studentId'] ??
+                      student['_id'] ??
+                      student['id'] ??
+                      targetStudentId)
+                  .toString();
+          selectedStudentId.value = sId;
+
+          final fName = (student['firstName'] ?? '').toString().trim();
+          final lName = (student['lastName'] ?? '').toString().trim();
+          final combinedName = '$fName $lName'.trim();
+          final name =
+              (student['fullName']?.toString().trim().isNotEmpty == true)
+              ? student['fullName'].toString().trim()
+              : (combinedName.isNotEmpty ? combinedName : 'Trainee');
+          fullName.value = name;
+
+          if (student['email'] != null &&
+              student['email'].toString().trim().isNotEmpty) {
+            email.value = student['email'].toString().trim();
+          }
+          if (student['phone'] != null &&
+              student['phone'].toString().trim().isNotEmpty) {
+            phone.value = student['phone'].toString().trim();
+          }
+
+          regNo.value = (student['regNo'] ?? student['employeeNo'] ?? '')
+              .toString()
+              .trim();
+          parentName.value = (student['parentName'] ?? data['parentName'] ?? '')
+              .toString()
+              .trim();
+          parentPhone.value =
+              (student['parentPhone'] ?? data['familyPhone'] ?? '')
+                  .toString()
+                  .trim();
+
+          final enrollments = student['enrollments'] as List? ?? [];
+          if (enrollments.isNotEmpty && enrollments.first is Map) {
+            final enr = enrollments.first as Map;
+            final b = enr['batchId'] is Map ? enr['batchId'] as Map : null;
+            batchName.value = (b?['name'] ?? '').toString().trim();
+            sportName.value =
+                (b?['sportId'] is Map ? b!['sportId']['name'] : '')
+                    .toString()
+                    .trim();
+          }
+
+          final storedToken = await _storage.getAccessToken() ?? '';
+          final tenantId = (data['tenantId'] ?? await _storage.getTenantId())
+              ?.toString();
+          final roleStr =
+              (data['role'] ?? await _storage.getUserRole())?.toString() ??
+              'student';
+
+          await _storage.saveUserSession(
+            accessToken: storedToken,
+            refreshToken: storedToken,
+            tenantId: tenantId,
+            studentId: sId,
+            role: roleStr,
+            userName: name,
+            userJson: jsonEncode(student),
+          );
+
+          // Sync HomeController if registered
+          final hCtrl =
+              homeCtrl ??
+              (Get.isRegistered<HomeController>()
+                  ? Get.find<HomeController>()
+                  : null);
+          if (hCtrl != null) {
+            hCtrl.currentStudentId.value = sId;
+            hCtrl.userName.value = name;
+            hCtrl.greetingName.value = (fName.isNotEmpty ? fName : name)
+                .toUpperCase();
+            hCtrl.refreshDashboard();
+          }
+
+          // Sync AttendanceController if registered
+          if (Get.isRegistered<AttendanceController>()) {
+            Get.find<AttendanceController>().fetchLiveAttendance(
+              studentId: sId,
+            );
+          }
+
+          // Parse siblings list from response to update selection state
+          final sibList = data['siblings'] is List
+              ? data['siblings'] as List
+              : (student['siblings'] is List
+                    ? student['siblings'] as List
+                    : []);
+          if (sibList.isNotEmpty) {
+            final parsed = sibList
+                .whereType<Map>()
+                .map(
+                  (s) => SiblingStudentModel.fromJson(
+                    Map<String, dynamic>.from(s),
+                  ),
+                )
+                .toList();
+            siblings.assignAll(parsed);
+            hasSiblings.value = parsed.length > 1;
+            siblingCount.value = parsed.length;
+          }
+
+          Get.snackbar(
+            'Profile Switched',
+            'Switched active profile to $name',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: const Color(0xFF0F172A),
+            colorText: Colors.white,
+            margin: const EdgeInsets.all(16),
+            borderRadius: 12,
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('[ProfileController] switchStudentProfile error: $e');
+      final hCtrl =
+          homeCtrl ??
+          (Get.isRegistered<HomeController>()
+              ? Get.find<HomeController>()
+              : null);
+      if (hCtrl != null) {
+        await hCtrl.switchProfile(targetStudentId);
+      }
+    } finally {
+      isLoading.value = false;
     }
   }
 

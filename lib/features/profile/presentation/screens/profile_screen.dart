@@ -53,43 +53,43 @@ class ProfileScreen extends StatelessWidget {
           SizedBox(width: 4.w),
         ],
       ),
-      body: RefreshIndicator(
-        color: const Color(0xFFD4AF37),
-        backgroundColor: Colors.white,
-        onRefresh: () async {
-          await controller.loadProfile();
-          if (Get.isRegistered<HomeController>()) {
-            await Get.find<HomeController>().refreshDashboard();
-          }
-        },
-        child: Obx(() {
-          if (controller.isLoading.value) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: Color(0xFFD4AF37),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: Color(0xFFD4AF37),
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  'Loading profile...',
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF64748B),
                   ),
-                  SizedBox(height: 16.h),
-                  Text(
-                    'Loading profile...',
-                    style: TextStyle(
-                      fontFamily: 'Nunito',
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF64748B),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
+                ),
+              ],
+            ),
+          );
+        }
 
-          // If user is not registered or API returned error
-          if (!controller.isRegistered.value) {
-            return SingleChildScrollView(
+        // If user is not registered or API returned error
+        if (!controller.isRegistered.value) {
+          return RefreshIndicator(
+            color: const Color(0xFFD4AF37),
+            backgroundColor: Colors.white,
+            onRefresh: () async {
+              await controller.loadProfile();
+              if (Get.isRegistered<HomeController>()) {
+                await Get.find<HomeController>().refreshDashboard();
+              }
+            },
+            child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 90.h),
               child: Column(
@@ -106,37 +106,244 @@ class ProfileScreen extends StatelessWidget {
                   _buildSignInOptionCard(),
                 ],
               ),
-            );
-          }
-
-          // Registered user view: display REAL data from /auth/me
-          return SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 90.h),
-            child: Column(
-              children: [
-                // 1. Hero Profile Card with #d4af37 drop shadow
-                _buildProfileHeroCard(controller, homeCtrl),
-                SizedBox(height: 16.h),
-
-                // 2. Account Details Card
-                _buildAccountDetailsCard(controller),
-                SizedBox(height: 16.h),
-
-                // 3. Quick Actions & Navigation Section
-                _buildQuickActionsCard(context, controller, homeCtrl),
-                SizedBox(height: 16.h),
-
-                // 4. System & API Status Card
-                _buildSystemInfoCard(controller),
-                SizedBox(height: 20.h),
-
-                // 5. Logout Button
-                _buildLogoutButton(context, controller),
-              ],
             ),
           );
-        }),
+        }
+
+        final hasSiblings =
+            controller.siblings.length > 1 || controller.hasSiblings.value;
+
+        // Registered user view: display REAL data from /auth/me & /students/my/profile
+        return Column(
+          children: [
+            // Pinned Sibling Switcher Bar for fast 1-tap shifting
+            if (hasSiblings) _buildSiblingSwitcherBar(controller, homeCtrl),
+            Expanded(
+              child: RefreshIndicator(
+                color: const Color(0xFFD4AF37),
+                backgroundColor: Colors.white,
+                onRefresh: () async {
+                  await controller.loadProfile();
+                  if (Get.isRegistered<HomeController>()) {
+                    await Get.find<HomeController>().refreshDashboard();
+                  }
+                },
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 90.h),
+                  child: Column(
+                    children: [
+                      // 1. Hero Profile Card with #d4af37 drop shadow
+                      _buildProfileHeroCard(controller, homeCtrl),
+                      SizedBox(height: 16.h),
+
+                      // 2. Account Details Card
+                      _buildAccountDetailsCard(controller),
+                      SizedBox(height: 16.h),
+
+                      // 3. Quick Actions & Navigation Section
+                      _buildQuickActionsCard(context, controller, homeCtrl),
+                      SizedBox(height: 16.h),
+
+                      // 4. System & API Status Card
+                      _buildSystemInfoCard(controller),
+                      SizedBox(height: 20.h),
+
+                      // 5. Logout Button
+                      _buildLogoutButton(context, controller),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
+  // ===========================================================================
+  // 0. SIBLING PROFILE SWITCHER BAR (1-TAP DIRECT SHIFTING)
+  // ===========================================================================
+
+  Widget _buildSiblingSwitcherBar(
+    ProfileController controller,
+    HomeController homeCtrl,
+  ) {
+    const goldAccent = Color(0xFFD4AF37);
+    const darkSlate = Color(0xFF0F172A);
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(16.w, 6.h, 16.w, 10.h),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(color: Color(0x18D4AF37), width: 1),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.switch_account_rounded,
+                    size: 15.sp,
+                    color: goldAccent,
+                  ),
+                  SizedBox(width: 6.w),
+                  Text(
+                    'SWITCH PROFILE',
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.6,
+                      color: const Color(0xFF9A7B1C),
+                    ),
+                  ),
+                ],
+              ),
+              InkWell(
+                onTap: () => StudentSiblingSwitcherSheet.show(homeCtrl),
+                borderRadius: BorderRadius.circular(6.r),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                  child: Row(
+                    children: [
+                      Text(
+                        'View All',
+                        style: TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: 11.5.sp,
+                          fontWeight: FontWeight.w700,
+                          color: goldAccent,
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        size: 14.sp,
+                        color: goldAccent,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 6.h),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: controller.siblings.map((sib) {
+                final currentId = controller.selectedStudentId.value.isNotEmpty
+                    ? controller.selectedStudentId.value
+                    : (homeCtrl.currentStudentId.value.isNotEmpty
+                        ? homeCtrl.currentStudentId.value
+                        : controller.memberId.value);
+                final isSelected = sib.studentId == currentId ||
+                    (currentId.isEmpty && (sib.isCurrent || sib.isSelected));
+                final initial = sib.fullName.isNotEmpty
+                    ? sib.fullName[0].toUpperCase()
+                    : 'S';
+                final label = sib.regNo.isNotEmpty
+                    ? '${sib.fullName} (${sib.regNo})'
+                    : sib.fullName;
+
+                return GestureDetector(
+                  onTap: () {
+                    if (!isSelected && sib.studentId.isNotEmpty) {
+                      controller.switchStudentProfile(sib.studentId, homeCtrl);
+                    }
+                  },
+                  child: Container(
+                    margin: EdgeInsets.only(right: 8.w),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 7.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color(0xFFFFFDF5)
+                          : const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(14.r),
+                      border: Border.all(
+                        color: isSelected ? goldAccent : const Color(0xFFE2E8F0),
+                        width: isSelected ? 1.5 : 1.0,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 22.r,
+                          height: 22.r,
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? goldAccent
+                                : const Color(0xFFCBD5E1),
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            initial,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        Text(
+                          label,
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 12.5.sp,
+                            fontWeight: isSelected
+                                ? FontWeight.w700
+                                : FontWeight.w600,
+                            color: isSelected
+                                ? darkSlate
+                                : const Color(0xFF64748B),
+                          ),
+                        ),
+                        if (isSelected) ...[
+                          SizedBox(width: 6.w),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 6.w,
+                              vertical: 2.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0x2010B981),
+                              borderRadius: BorderRadius.circular(6.r),
+                            ),
+                            child: Text(
+                              'ACTIVE',
+                              style: TextStyle(
+                                fontFamily: 'Nunito',
+                                fontSize: 9.5.sp,
+                                fontWeight: FontWeight.w800,
+                                color: const Color(0xFF10B981),
+                                letterSpacing: 0.4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -569,6 +776,55 @@ class ProfileScreen extends StatelessWidget {
                           ),
                         ],
                       ),
+                      if (controller.sportName.value.isNotEmpty ||
+                          controller.batchName.value.isNotEmpty) ...[
+                        SizedBox(height: 6.h),
+                        Row(
+                          children: [
+                            if (controller.sportName.value.isNotEmpty)
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 7.w,
+                                  vertical: 2.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFFFDF5),
+                                  borderRadius: BorderRadius.circular(6.r),
+                                  border: Border.all(
+                                    color: const Color(0x60D4AF37),
+                                    width: 0.9,
+                                  ),
+                                ),
+                                child: Text(
+                                  controller.sportName.value.toUpperCase(),
+                                  style: TextStyle(
+                                    fontFamily: 'Nunito',
+                                    fontSize: 9.5.sp,
+                                    fontWeight: FontWeight.w800,
+                                    color: const Color(0xFF9E7B1A),
+                                  ),
+                                ),
+                              ),
+                            if (controller.sportName.value.isNotEmpty &&
+                                controller.batchName.value.isNotEmpty)
+                              SizedBox(width: 6.w),
+                            if (controller.batchName.value.isNotEmpty)
+                              Flexible(
+                                child: Text(
+                                  controller.batchName.value,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontFamily: 'Nunito',
+                                    fontSize: 11.5.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF64748B),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -754,6 +1010,40 @@ class ProfileScreen extends StatelessWidget {
               memberId,
               Icons.fingerprint_rounded,
             ),
+            if (controller.regNo.value.isNotEmpty) ...[
+              const Divider(color: Color(0x1AD4AF37), height: 16),
+              _buildDetailRow(
+                'Registration No',
+                controller.regNo.value,
+                Icons.confirmation_number_outlined,
+              ),
+            ],
+            if (controller.batchName.value.isNotEmpty) ...[
+              const Divider(color: Color(0x1AD4AF37), height: 16),
+              _buildDetailRow(
+                'Assigned Batch',
+                controller.sportName.value.isNotEmpty
+                    ? '${controller.sportName.value} • ${controller.batchName.value}'
+                    : controller.batchName.value,
+                Icons.sports_rounded,
+              ),
+            ],
+            if (controller.parentName.value.isNotEmpty) ...[
+              const Divider(color: Color(0x1AD4AF37), height: 16),
+              _buildDetailRow(
+                'Parent Name',
+                controller.parentName.value,
+                Icons.family_restroom_rounded,
+              ),
+            ],
+            if (controller.parentPhone.value.isNotEmpty) ...[
+              const Divider(color: Color(0x1AD4AF37), height: 16),
+              _buildDetailRow(
+                'Family Contact',
+                controller.parentPhone.value,
+                Icons.contact_phone_outlined,
+              ),
+            ],
           ],
         ),
       );
