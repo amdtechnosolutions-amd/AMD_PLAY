@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/storage/storage_service.dart';
+import '../../data/models/sibling_attendance_model.dart';
 
 /// Model representing a single session's attendance record
 class AttendanceSession {
@@ -64,6 +65,16 @@ class AttendanceController extends GetxController {
   final RxInt absentCount = 0.obs;
   final RxInt totalSessions = 0.obs;
 
+  // Sibling Switcher State
+  final RxList<SiblingAttendanceItem> siblings = <SiblingAttendanceItem>[].obs;
+  final RxString selectedSiblingId = ''.obs;
+  final RxString selectedStudentName = ''.obs;
+  final RxString selectedRegNo = ''.obs;
+  final RxString selectedBatchName = ''.obs;
+  final RxString selectedSportName = ''.obs;
+  final RxBool hasSiblings = false.obs;
+  final RxString familyPhone = ''.obs;
+
   // Monthly Filtered Counts
   final RxInt monthPresentCount = 0.obs;
   final RxInt monthAbsentCount = 0.obs;
@@ -119,8 +130,8 @@ class AttendanceController extends GetxController {
     return DateFormat('MMMM yyyy').format(currentMonth.value);
   }
 
-  /// Master fetch from live backend API
-  Future<void> fetchLiveAttendance() async {
+  /// Master fetch from live backend API (supports sibling query parameters)
+  Future<void> fetchLiveAttendance({String? studentId}) async {
     final role = (await _storage.getUserRole())?.toLowerCase().trim();
     final isPayAndPlay = role == 'customer' || role == 'guest' || role == 'pay_and_play' || role == 'booking';
     final token = await _storage.getAccessToken();
@@ -131,16 +142,39 @@ class AttendanceController extends GetxController {
       return;
     }
 
+    if (studentId != null && studentId.isNotEmpty) {
+      selectedSiblingId.value = studentId;
+    }
+
     isLoading.value = true;
     try {
-      final stId = await _storage.getStudentId();
+      final storedId = await _storage.getStudentId();
+      final targetId = (studentId != null && studentId.isNotEmpty)
+          ? studentId
+          : (selectedSiblingId.value.isNotEmpty ? selectedSiblingId.value : (storedId ?? ''));
+
+      final queryParams = <String, dynamic>{
+        'groupBy': 'sibling',
+      };
+      if (targetId.isNotEmpty) {
+        queryParams['studentId'] = targetId;
+      }
 
       dynamic response;
       try {
-        response = await _apiClient.dio.get(ApiEndpoints.studentAttendance);
-      } catch (_) {
-        if (stId != null && stId.isNotEmpty) {
-          response = await _apiClient.dio.get('/students/$stId/attendance');
+        response = await _apiClient.dio.get(
+          ApiEndpoints.studentAttendance,
+          queryParameters: queryParams,
+        );
+      } catch (dioErr) {
+        debugPrint('GET ${ApiEndpoints.studentAttendance} error: $dioErr');
+        if (targetId.isNotEmpty) {
+          try {
+            response = await _apiClient.dio.get(
+              '/students/$targetId/attendance',
+              queryParameters: {'groupBy': 'sibling'},
+            );
+          } catch (_) {}
         }
       }
 
@@ -161,11 +195,18 @@ class AttendanceController extends GetxController {
     }
   }
 
+  /// Select a specific sibling without switching authentication token
+  Future<void> selectSiblingAttendance(String studentId) async {
+    if (selectedSiblingId.value == studentId && !isLoading.value) return;
+    selectedSiblingId.value = studentId;
+    await fetchLiveAttendance(studentId: studentId);
+  }
+
   /// Pull to refresh
   Future<void> refreshAttendance() async {
     isRefreshing.value = true;
     try {
-      await fetchLiveAttendance();
+      await fetchLiveAttendance(studentId: selectedSiblingId.value);
     } finally {
       isRefreshing.value = false;
     }
@@ -175,11 +216,39 @@ class AttendanceController extends GetxController {
   void parseAttendanceDataForTest(Map data) => _parseAttendanceData(data);
 
   void _parseAttendanceData(Map data) {
-    totalSessions.value = (data['totalSessions'] as num?)?.toInt() ?? 0;
-    presentCount.value = (data['presentCount'] as num?)?.toInt() ?? 0;
-    absentCount.value = (data['absentCount'] as num?)?.toInt() ?? 0;
+    final parsed = StudentAttendanceResponse.fromJson(Map<String, dynamic>.from(data));
 
-    final rawPercentage = (data['attendancePercentage'] as num?)?.toInt() ?? 0;
+    // Update student identifiers and family metadata
+    if (parsed.studentId.isNotEmpty) {
+      selectedSiblingId.value = parsed.studentId;
+    }
+    selectedStudentName.value = parsed.studentName;
+    selectedRegNo.value = parsed.regNo;
+    selectedBatchName.value = parsed.batchName;
+    selectedSportName.value = parsed.sportName;
+    familyPhone.value = parsed.familyPhone;
+    hasSiblings.value = parsed.hasSiblings || parsed.siblings.length > 1;
+
+    // Update siblings collection
+    if (parsed.siblings.isNotEmpty) {
+      siblings.assignAll(parsed.siblings);
+      if (selectedSiblingId.value.isEmpty) {
+        final activeSib = parsed.siblings.firstWhere(
+          (s) => s.isSelected,
+          orElse: () => parsed.siblings.first,
+        );
+        selectedSiblingId.value = activeSib.studentId;
+        if (selectedStudentName.value.isEmpty) {
+          selectedStudentName.value = activeSib.fullName;
+        }
+      }
+    }
+
+    totalSessions.value = parsed.totalSessions;
+    presentCount.value = parsed.presentCount;
+    absentCount.value = parsed.absentCount;
+
+    final rawPercentage = parsed.attendancePercentage;
     // Guard against backend bug returning 100% when there are 0 total sessions
     if (totalSessions.value == 0 || (presentCount.value == 0 && absentCount.value == 0)) {
       overallPercentage.value = 0;
@@ -187,8 +256,8 @@ class AttendanceController extends GetxController {
       overallPercentage.value = rawPercentage;
     }
 
-    final sessionHistory = data['sessionHistory'] as List? ?? [];
-    final punchLogs = data['punchLogs'] as List? ?? [];
+    final sessionHistory = parsed.sessionHistory;
+    final punchLogs = parsed.punchLogs;
 
     final List<AttendanceSession> list = [];
     final Set<String> pDates = {};

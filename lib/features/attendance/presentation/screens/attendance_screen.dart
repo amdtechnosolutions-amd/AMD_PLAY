@@ -79,43 +79,324 @@ class AttendanceScreen extends StatelessWidget {
         ],
       ),
       body: Obx(() {
+        final hasSiblings = controller.siblings.length > 1;
+
         if (controller.isLoading.value && controller.allSessions.isEmpty) {
-          return const Center(
-            child: CircularProgressIndicator(color: goldAccent),
+          return Column(
+            children: [
+              if (hasSiblings) _buildSiblingSwitcherBar(controller),
+              const Expanded(
+                child: Center(
+                  child: CircularProgressIndicator(color: goldAccent),
+                ),
+              ),
+            ],
           );
         }
 
-        return RefreshIndicator(
-          color: goldAccent,
-          onRefresh: () => controller.refreshAttendance(),
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 90.h),
+        return Column(
+          children: [
+            if (hasSiblings) _buildSiblingSwitcherBar(controller),
+            Expanded(
+              child: RefreshIndicator(
+                color: goldAccent,
+                onRefresh: () => controller.refreshAttendance(),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 90.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Active student header banner if siblings exist
+                      if (hasSiblings || controller.selectedStudentName.value.isNotEmpty) ...[
+                        _buildActiveStudentCard(controller),
+                        SizedBox(height: 16.h),
+                      ],
+
+                      // 1. Top 3 Metric Summary Cards (Overall, Present, Absent)
+                      _buildMetricCards(controller),
+                      SizedBox(height: 22.h),
+
+                      // 2. Filter by Month Header Row
+                      _buildFilterByMonthHeader(context, controller),
+                      SizedBox(height: 16.h),
+
+                      // 3. View Mode Toggle: [Calendar View] | [List View]
+                      _buildViewToggle(controller),
+                      SizedBox(height: 18.h),
+
+                      // 4. Content based on active view mode
+                      if (controller.isCalendarView.value)
+                        _buildCalendarCard(context, controller)
+                      else
+                        _buildListView(controller),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
+  // ===========================================================================
+  // SIBLING SWITCHER & ACTIVE STUDENT HEADER
+  // ===========================================================================
+
+  Widget _buildSiblingSwitcherBar(AttendanceController controller) {
+    final activeId = controller.selectedSiblingId.value;
+    return Container(
+      width: double.infinity,
+      color: Colors.white,
+      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 10.h),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(color: Color(0x18D4AF37), width: 1),
+        ),
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        child: Row(
+          children: controller.siblings.map((sib) {
+            final isSelected = sib.studentId == activeId ||
+                (activeId.isEmpty && sib.isSelected);
+            final initial = sib.fullName.isNotEmpty
+                ? sib.fullName[0].toUpperCase()
+                : 'S';
+            final label = sib.regNo.isNotEmpty
+                ? '${sib.fullName} (${sib.regNo})'
+                : sib.fullName;
+
+            return GestureDetector(
+              onTap: () => controller.selectSiblingAttendance(sib.studentId),
+              child: Container(
+                margin: EdgeInsets.only(right: 8.w),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? const Color(0xFFFFFDF5)
+                      : const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(14.r),
+                  border: Border.all(
+                    color: isSelected ? goldAccent : const Color(0xFFE2E8F0),
+                    width: isSelected ? 1.5 : 1.0,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 22.r,
+                      height: 22.r,
+                      decoration: BoxDecoration(
+                        color: isSelected ? goldAccent : const Color(0xFFCBD5E1),
+                        shape: BoxShape.circle,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        initial,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 12.5.sp,
+                        fontWeight:
+                            isSelected ? FontWeight.w700 : FontWeight.w600,
+                        color: isSelected ? darkSlate : const Color(0xFF64748B),
+                      ),
+                    ),
+                    if (sib.attendancePercentage > 0) ...[
+                      SizedBox(width: 6.w),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 5.w, vertical: 1.5.h),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? const Color(0x2010B981)
+                              : const Color(0xFFE2E8F0),
+                          borderRadius: BorderRadius.circular(6.r),
+                        ),
+                        child: Text(
+                          '${sib.attendancePercentage}%',
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w700,
+                            color: isSelected
+                                ? const Color(0xFF059669)
+                                : const Color(0xFF64748B),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActiveStudentCard(AttendanceController controller) {
+    final name = controller.selectedStudentName.value.isNotEmpty
+        ? controller.selectedStudentName.value
+        : 'Student Profile';
+    final initial = name.isNotEmpty ? name[0].toUpperCase() : 'S';
+    final regNo = controller.selectedRegNo.value;
+    final batch = controller.selectedBatchName.value;
+    final sport = controller.selectedSportName.value;
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: const Color(0x40D4AF37), width: 1.2),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0C000000),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 42.r,
+            height: 42.r,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xFFFFFDF5),
+              border: Border.all(color: goldAccent, width: 2),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              initial,
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w800,
+                color: goldAccent,
+              ),
+            ),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. Top 3 Metric Summary Cards (Overall, Present, Absent)
-                _buildMetricCards(controller),
-                SizedBox(height: 22.h),
-
-                // 2. Filter by Month Header Row
-                _buildFilterByMonthHeader(context, controller),
-                SizedBox(height: 16.h),
-
-                // 3. View Mode Toggle: [Calendar View] | [List View]
-                _buildViewToggle(controller),
-                SizedBox(height: 18.h),
-
-                // 4. Content based on active view mode
-                if (controller.isCalendarView.value)
-                  _buildCalendarCard(context, controller)
-                else
-                  _buildListView(controller),
+                Text(
+                  name.toUpperCase(),
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w800,
+                    color: darkSlate,
+                    letterSpacing: 0.3,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 4.h),
+                Wrap(
+                  spacing: 6.w,
+                  runSpacing: 4.h,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    if (sport.isNotEmpty)
+                      Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF9E6),
+                          borderRadius: BorderRadius.circular(6.r),
+                          border: Border.all(
+                              color: const Color(0x80D4AF37), width: 0.8),
+                        ),
+                        child: Text(
+                          sport.toUpperCase(),
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFFB45309),
+                          ),
+                        ),
+                      ),
+                    if (batch.isNotEmpty)
+                      Text(
+                        batch,
+                        style: TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: 11.5.sp,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF64748B),
+                        ),
+                      ),
+                    if (regNo.isNotEmpty)
+                      Text(
+                        '• $regNo',
+                        style: TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: 11.5.sp,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF94A3B8),
+                        ),
+                      ),
+                  ],
+                ),
               ],
             ),
           ),
-        );
-      }),
+          SizedBox(width: 8.w),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFFECFDF5),
+              borderRadius: BorderRadius.circular(10.r),
+              border: Border.all(color: const Color(0xFF10B981), width: 1),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  '${controller.overallPercentage.value}%',
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF059669),
+                  ),
+                ),
+                Text(
+                  'Attendance',
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 9.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF059669),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

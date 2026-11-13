@@ -55,6 +55,9 @@ class ApiEndpoints {
 
   // Students & Trainees
   static const String studentAttendance = '/students/my/attendance';
+  static const String siblingFamilyAttendance = '/students/siblings/attendance';
+  static String siblingFamilyAttendanceByGroup(String siblingGroupId) =>
+      '/students/siblings/attendance?siblingGroupId=$siblingGroupId';
   static const String studentSiblings = '/students/my/siblings';
   static String studentSiblingsById(String studentId) => '/students/$studentId/siblings';
   static const String studentFees = '/students/my/fees';
