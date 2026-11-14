@@ -181,14 +181,15 @@ class ProfileController extends GetxController {
                     profileRes.data['success'] == true &&
                     profileRes.data['data'] is Map) {
                   final pData = profileRes.data['data'] as Map;
-                  final student = pData['student'] is Map
-                      ? pData['student'] as Map
-                      : (pData['user'] is Map
-                          ? pData['user'] as Map
-                          : (pData.containsKey('fullName') ||
-                                  pData.containsKey('firstName')
-                              ? pData
-                              : null));
+                  final student = _findStudentInPayload(pData, targetId) ??
+                      (targetId.isEmpty && pData['student'] is Map
+                          ? pData['student'] as Map
+                          : (pData['user'] is Map
+                              ? pData['user'] as Map
+                              : (pData.containsKey('fullName') ||
+                                      pData.containsKey('firstName')
+                                  ? pData
+                                  : null)));
                   if (student != null) {
                     final rawSId = student['studentId'] is Map
                         ? (student['studentId']['_id'] ??
@@ -423,6 +424,68 @@ class ProfileController extends GetxController {
     }
   }
 
+  Map<String, dynamic>? _findStudentInPayload(Map data, String targetId) {
+    if (targetId.isEmpty) {
+      if (data['selectedStudent'] is Map) {
+        return Map<String, dynamic>.from(data['selectedStudent'] as Map);
+      }
+      if (data['student'] is Map) {
+        return Map<String, dynamic>.from(data['student'] as Map);
+      }
+      return null;
+    }
+
+    // 1. Check data['selectedStudent']
+    if (data['selectedStudent'] is Map) {
+      final s = Map<String, dynamic>.from(data['selectedStudent'] as Map);
+      final id = (s['studentId'] is Map
+              ? s['studentId']['_id'] ?? s['studentId']['id']
+              : s['studentId'] ?? s['_id'] ?? s['id'])
+          ?.toString();
+      if (id == targetId) return s;
+    }
+
+    // 2. Check data['siblings'] or data['student']['siblings']
+    final sibList = data['siblings'] is List
+        ? data['siblings'] as List
+        : (data['student'] is Map && data['student']['siblings'] is List
+            ? data['student']['siblings'] as List
+            : null);
+    if (sibList != null) {
+      for (final item in sibList) {
+        if (item is Map) {
+          final id = (item['studentId'] is Map
+                  ? item['studentId']['_id'] ?? item['studentId']['id']
+                  : item['studentId'] ?? item['_id'] ?? item['id'])
+              ?.toString();
+          if (id == targetId) return Map<String, dynamic>.from(item);
+        }
+      }
+    }
+
+    // 3. Check data['student']
+    if (data['student'] is Map) {
+      final s = Map<String, dynamic>.from(data['student'] as Map);
+      final id = (s['studentId'] is Map
+              ? s['studentId']['_id'] ?? s['studentId']['id']
+              : s['studentId'] ?? s['_id'] ?? s['id'])
+          ?.toString();
+      if (id == targetId) return s;
+    }
+
+    // 4. Check root data if it has student fields matching targetId
+    final rootId = (data['studentId'] is Map
+            ? data['studentId']['_id'] ?? data['studentId']['id']
+            : data['studentId'] ?? data['_id'] ?? data['id'])
+        ?.toString();
+    if (rootId == targetId &&
+        (data.containsKey('fullName') || data.containsKey('firstName'))) {
+      return Map<String, dynamic>.from(data);
+    }
+
+    return null;
+  }
+
   /// Direct profile switching to selected sibling via GET /api/v1/students/my/profile?studentId=`<siblingId>`
   Future<void> switchStudentProfile(
     String targetStudentId, [
@@ -467,18 +530,14 @@ class ProfileController extends GetxController {
         );
         if (res.data is Map && res.data['success'] == true && res.data['data'] is Map) {
           final data = res.data['data'] as Map;
-          studentData = data['student'] is Map
-              ? data['student'] as Map
-              : (data['user'] is Map
-                  ? data['user'] as Map
-                  : (data.containsKey('fullName') || data.containsKey('firstName') ? data : null));
+          studentData = _findStudentInPayload(data, targetStudentId);
           tenantIdStr = data['tenantId']?.toString();
           roleStr = data['role']?.toString();
 
           final sibList = data['siblings'] is List
               ? data['siblings'] as List
-              : (studentData != null && studentData['siblings'] is List
-                  ? studentData['siblings'] as List
+              : (data['student'] is Map && data['student']['siblings'] is List
+                  ? data['student']['siblings'] as List
                   : []);
           if (sibList.isNotEmpty) {
             final parsed = sibList
@@ -498,7 +557,7 @@ class ProfileController extends GetxController {
         debugPrint('[ProfileController] GET switch error: $e');
       }
 
-      // 2. Fallback: GET /api/v1/students/:id (Universal student endpoint)
+      // 2. Direct endpoint: GET /api/v1/students/:id (Universal student endpoint)
       if (studentData == null) {
         try {
           final res = await _apiClient.dio.get(
@@ -506,9 +565,10 @@ class ProfileController extends GetxController {
           );
           if (res.data is Map && res.data['success'] == true && res.data['data'] is Map) {
             final data = res.data['data'] as Map;
-            studentData = data['student'] is Map
-                ? data['student'] as Map
-                : (data.containsKey('fullName') || data.containsKey('firstName') ? data : null);
+            studentData = _findStudentInPayload(data, targetStudentId) ??
+                (data['student'] is Map
+                    ? Map<String, dynamic>.from(data['student'] as Map)
+                    : (data.containsKey('fullName') || data.containsKey('firstName') ? Map<String, dynamic>.from(data) : null));
           }
         } catch (e) {
           debugPrint('[ProfileController] GET studentById error: $e');
@@ -524,15 +584,31 @@ class ProfileController extends GetxController {
           );
           if (res.data is Map && res.data['success'] == true && res.data['data'] is Map) {
             final data = res.data['data'] as Map;
-            studentData = data['user'] is Map
-                ? data['user'] as Map
-                : (data['student'] is Map ? data['student'] as Map : null);
+            studentData = _findStudentInPayload(data, targetStudentId) ??
+                (data['user'] is Map
+                    ? Map<String, dynamic>.from(data['user'] as Map)
+                    : (data['student'] is Map ? Map<String, dynamic>.from(data['student'] as Map) : null));
             tenantIdStr = data['tenantId']?.toString();
             roleStr = data['role']?.toString();
           }
         } catch (e) {
           debugPrint('[ProfileController] POST switch error: $e');
         }
+      }
+
+      // 4. Fallback to cached model if backend returned generic root student
+      if (studentData == null && cached != null) {
+        studentData = {
+          'studentId': cached.studentId,
+          'fullName': cached.fullName,
+          'regNo': cached.regNo,
+          'phone': cached.phone,
+          'email': cached.email,
+          'parentName': cached.parentName,
+          'parentPhone': cached.parentPhone,
+          'batchName': cached.batchName,
+          'sportName': cached.sportName,
+        };
       }
 
       // Populate resolved student details
@@ -567,11 +643,14 @@ class ProfileController extends GetxController {
         if (enrollments.isNotEmpty && enrollments.first is Map) {
           final enr = enrollments.first as Map;
           final b = enr['batchId'] is Map ? enr['batchId'] as Map : null;
-          batchName.value = (b?['name'] ?? '').toString().trim();
-          sportName.value = (b?['sportId'] is Map ? b!['sportId']['name'] : '').toString().trim();
+          batchName.value = (b?['name'] ?? enr['batchName'] ?? '').toString().trim();
+          sportName.value = (b?['sportId'] is Map ? b!['sportId']['name'] : (enr['sportName'] ?? '')).toString().trim();
         } else if (studentData['batchName'] != null && studentData['batchName'].toString().isNotEmpty) {
           batchName.value = studentData['batchName'].toString().trim();
           sportName.value = (studentData['sportName'] ?? 'Badminton').toString().trim();
+        } else if (cached != null) {
+          if (cached.batchName.isNotEmpty) batchName.value = cached.batchName;
+          if (cached.sportName.isNotEmpty) sportName.value = cached.sportName;
         }
 
         final storedToken = await _storage.getAccessToken() ?? '';

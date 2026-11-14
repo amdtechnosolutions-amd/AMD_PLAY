@@ -29,6 +29,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     super.initState();
     widget.controller.checkCustomerSession().then((_) {
       if (mounted) {
+        if (widget.controller.isCoach) {
+          widget.controller.selectedPaymentMethod.value = 'free';
+          _notesController.text = 'Coach personal training session';
+        } else if (widget.controller.isMember) {
+          widget.controller.selectedPaymentMethod.value = 'wallet';
+          _notesController.text = 'Member slot booking';
+        } else if (widget.controller.isStudent) {
+          widget.controller.selectedPaymentMethod.value = 'upi';
+          _notesController.text = 'Personal training practice';
+        }
         if (_phoneController.text.isEmpty && widget.controller.customerPhone.value.isNotEmpty) {
           _phoneController.text = widget.controller.customerPhone.value;
         }
@@ -231,11 +241,22 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               if (widget.controller.isGuestRegistered.value || widget.controller.isStudentOrCoach) {
                 final isStudent = widget.controller.isStudent;
                 final isCoach = widget.controller.isCoach;
+                final isMember = widget.controller.isMember;
                 final badgeLabel = isStudent
                     ? 'STUDENT'
-                    : isCoach
-                        ? 'COACH'
-                        : (widget.controller.isExistingCustomer.value ? 'CUSTOMER' : 'GUEST');
+                    : isMember
+                        ? 'MEMBER'
+                        : isCoach
+                            ? 'COACH'
+                            : (widget.controller.isExistingCustomer.value ? 'CUSTOMER' : 'GUEST');
+
+                final borderColor = isStudent
+                    ? const Color(0xFFD4AF37)
+                    : isMember
+                        ? const Color(0xFF059669)
+                        : isCoach
+                            ? const Color(0xFF2563EB)
+                            : const Color(0xFF10B981);
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -245,22 +266,31 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16.r),
-                        border: Border.all(
-                          color: isStudent ? const Color(0xFFD4AF37) : const Color(0xFF10B981),
-                          width: 1.2,
-                        ),
+                        border: Border.all(color: borderColor, width: 1.2),
                       ),
                       child: Row(
                         children: [
                           Container(
                             padding: EdgeInsets.all(8.w),
                             decoration: BoxDecoration(
-                              color: isStudent ? const Color(0xFFFFFBEB) : const Color(0xFFECFDF5),
+                              color: isStudent
+                                  ? const Color(0xFFFFFBEB)
+                                  : isMember
+                                      ? const Color(0xFFECFDF5)
+                                      : isCoach
+                                          ? const Color(0xFFEFF6FF)
+                                          : const Color(0xFFECFDF5),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
-                              isStudent ? Icons.school_rounded : Icons.verified_user_rounded,
-                              color: isStudent ? const Color(0xFFD4AF37) : const Color(0xFF10B981),
+                              isStudent
+                                  ? Icons.school_rounded
+                                  : isMember
+                                      ? Icons.workspace_premium_rounded
+                                      : isCoach
+                                          ? Icons.sports_rounded
+                                          : Icons.verified_user_rounded,
+                              color: borderColor,
                               size: 20.sp,
                             ),
                           ),
@@ -275,7 +305,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                       child: Text(
                                         widget.controller.customerName.value.isNotEmpty
                                             ? widget.controller.customerName.value
-                                            : (isStudent ? 'Academy Student' : 'Guest Player'),
+                                            : (isStudent
+                                                ? 'Academy Student'
+                                                : isMember
+                                                    ? 'Club Member'
+                                                    : isCoach
+                                                        ? 'Academy Coach'
+                                                        : 'Guest Player'),
                                         style: TextStyle(
                                           fontSize: 14.sp,
                                           fontWeight: FontWeight.bold,
@@ -289,7 +325,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     Container(
                                       padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                                       decoration: BoxDecoration(
-                                        color: isStudent ? const Color(0xFFFEF3C7) : const Color(0xFFDCFCE7),
+                                        color: isStudent
+                                            ? const Color(0xFFFEF3C7)
+                                            : isMember
+                                                ? const Color(0xFFD1FAE5)
+                                                : isCoach
+                                                    ? const Color(0xFFDBEAFE)
+                                                    : const Color(0xFFDCFCE7),
                                         borderRadius: BorderRadius.circular(6.r),
                                       ),
                                       child: Text(
@@ -297,7 +339,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                         style: TextStyle(
                                           fontSize: 9.5.sp,
                                           fontWeight: FontWeight.w800,
-                                          color: isStudent ? const Color(0xFF92400E) : const Color(0xFF166534),
+                                          color: isStudent
+                                              ? const Color(0xFF92400E)
+                                              : isMember
+                                                  ? const Color(0xFF065F46)
+                                                  : isCoach
+                                                      ? const Color(0xFF1E40AF)
+                                                      : const Color(0xFF166534),
                                         ),
                                       ),
                                     ),
@@ -307,7 +355,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 Text(
                                   widget.controller.customerPhone.value.isNotEmpty
                                       ? '+91 ${widget.controller.customerPhone.value}'
-                                      : (isStudent ? 'Verified Student Account' : 'Account Authenticated'),
+                                      : (isStudent
+                                          ? 'Verified Student Account'
+                                          : isMember
+                                              ? 'Active Club Membership'
+                                              : isCoach
+                                                  ? 'Certified Coach Session'
+                                                  : 'Account Authenticated'),
                                   style: TextStyle(fontSize: 12.sp, color: const Color(0xFF64748B)),
                                 ),
                               ],
@@ -323,6 +377,165 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ],
                       ),
                     ),
+
+                    // Member Privilege Alert
+                    if (isMember) ...[
+                      SizedBox(height: 10.h),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFECFDF5),
+                          borderRadius: BorderRadius.circular(10.r),
+                          border: Border.all(color: const Color(0xFFA7F3D0)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.stars_rounded, color: Color(0xFF059669), size: 18),
+                            SizedBox(width: 8.w),
+                            Expanded(
+                              child: Text(
+                                'Member Benefits Active: Special member discounts applied automatically by server.',
+                                style: TextStyle(
+                                  fontFamily: 'Nunito',
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF065F46),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
+                    // Coach Session Mode Selector (Case A vs Case B)
+                    if (isCoach) ...[
+                      SizedBox(height: 12.h),
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(12.w),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(14.r),
+                          border: Border.all(color: const Color(0xFFCBD5E1)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Coach Booking Objective',
+                              style: TextStyle(
+                                fontFamily: 'Nunito',
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w800,
+                                color: const Color(0xFF0F172A),
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ChoiceChip(
+                                    label: const Center(child: Text('Personal Practice')),
+                                    selected: widget.controller.coachBookingMode.value == 'personal',
+                                    selectedColor: const Color(0xFF0C2340),
+                                    backgroundColor: Colors.white,
+                                    labelStyle: TextStyle(
+                                      fontFamily: 'Nunito',
+                                      fontSize: 11.sp,
+                                      fontWeight: FontWeight.w800,
+                                      color: widget.controller.coachBookingMode.value == 'personal'
+                                          ? Colors.white
+                                          : const Color(0xFF475569),
+                                    ),
+                                    onSelected: (_) {
+                                      widget.controller.coachBookingMode.value = 'personal';
+                                      widget.controller.selectedPaymentMethod.value = 'free';
+                                      _notesController.text = 'Coach personal training session';
+                                    },
+                                  ),
+                                ),
+                                SizedBox(width: 8.w),
+                                Expanded(
+                                  child: ChoiceChip(
+                                    label: const Center(child: Text('For Student (Private)')),
+                                    selected: widget.controller.coachBookingMode.value == 'forStudent',
+                                    selectedColor: const Color(0xFFD4AF37),
+                                    backgroundColor: Colors.white,
+                                    labelStyle: TextStyle(
+                                      fontFamily: 'Nunito',
+                                      fontSize: 11.sp,
+                                      fontWeight: FontWeight.w800,
+                                      color: widget.controller.coachBookingMode.value == 'forStudent'
+                                          ? Colors.white
+                                          : const Color(0xFF475569),
+                                    ),
+                                    onSelected: (_) {
+                                      widget.controller.coachBookingMode.value = 'forStudent';
+                                      widget.controller.selectedPaymentMethod.value = 'cash';
+                                      _notesController.text = '1-on-1 private coaching with student';
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (widget.controller.coachBookingMode.value == 'forStudent') ...[
+                              SizedBox(height: 10.h),
+                              Text(
+                                'Select Enrolled Student or Enter Student ID:',
+                                style: TextStyle(
+                                  fontFamily: 'Nunito',
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF475569),
+                                ),
+                              ),
+                              SizedBox(height: 6.h),
+                              if (widget.controller.coachEnrolledStudents.isNotEmpty)
+                                Wrap(
+                                  spacing: 6.w,
+                                  runSpacing: 6.h,
+                                  children: widget.controller.coachEnrolledStudents.map((st) {
+                                    final stId = (st['_id'] ?? st['id'] ?? st['studentId'] ?? '').toString();
+                                    final stName = (st['fullName'] ?? st['name'] ?? st['studentName'] ?? 'Student').toString();
+                                    final isSel = widget.controller.coachSelectedStudent.value?['_id'] == stId ||
+                                        widget.controller.coachManualStudentId.value == stId;
+                                    return ChoiceChip(
+                                      label: Text(stName),
+                                      selected: isSel,
+                                      selectedColor: const Color(0xFFD4AF37),
+                                      backgroundColor: Colors.white,
+                                      labelStyle: TextStyle(
+                                        fontFamily: 'Nunito',
+                                        fontSize: 10.5.sp,
+                                        fontWeight: isSel ? FontWeight.w800 : FontWeight.w600,
+                                        color: isSel ? Colors.white : const Color(0xFF334155),
+                                      ),
+                                      onSelected: (_) {
+                                        widget.controller.coachSelectedStudent.value = st;
+                                        widget.controller.coachManualStudentId.value = stId;
+                                      },
+                                    );
+                                  }).toList(),
+                                ),
+                              SizedBox(height: 8.h),
+                              TextField(
+                                onChanged: (v) => widget.controller.coachManualStudentId.value = v.trim(),
+                                style: TextStyle(fontSize: 12.sp),
+                                decoration: InputDecoration(
+                                  prefixIcon: const Icon(Icons.badge_outlined, size: 18),
+                                  hintText: 'Or enter Student ID (e.g. 6ad6be501ee0aaebb67610ba)',
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
 
                     // Sibling Assignment Selector for family accounts
                     if (isStudent && widget.controller.familySiblings.length > 1) ...[
@@ -457,6 +670,192 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             Text('Payment Method', style: AppTypography.sectionTitle),
             SizedBox(height: 10.h),
             Obx(() {
+              if (widget.controller.isCoach) {
+                final selectedMethod = widget.controller.selectedPaymentMethod.value;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(14.w),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16.r),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildPaymentOption(
+                            id: 'free',
+                            title: 'Coach Facility Quota (Complimentary)',
+                            subtitle: 'Official coaching booking without court rental fee',
+                            icon: Icons.sports_rounded,
+                            badge: 'COMPLIMENTARY',
+                            isSelected: selectedMethod == 'free',
+                            onTap: () => widget.controller.selectedPaymentMethod.value = 'free',
+                          ),
+                          SizedBox(height: 10.h),
+                          _buildPaymentOption(
+                            id: 'cash',
+                            title: 'Pay at Desk (Cash / Facility Counter)',
+                            subtitle: 'Settle offline during facility entry check-in',
+                            icon: Icons.storefront_rounded,
+                            badge: 'DESK',
+                            isSelected: selectedMethod == 'cash',
+                            onTap: () => widget.controller.selectedPaymentMethod.value = 'cash',
+                          ),
+                          SizedBox(height: 10.h),
+                          _buildPaymentOption(
+                            id: 'upi',
+                            title: 'UPI (GPay / PhonePe / Paytm / BHIM)',
+                            subtitle: 'Instant direct confirmation for coach session',
+                            icon: Icons.qr_code_2_rounded,
+                            badge: 'UPI',
+                            isSelected: selectedMethod == 'upi',
+                            onTap: () => widget.controller.selectedPaymentMethod.value = 'upi',
+                          ),
+                          SizedBox(height: 10.h),
+                          _buildPaymentOption(
+                            id: 'card',
+                            title: 'Debit / Credit Card (POS Terminal)',
+                            subtitle: 'Swipe or tap card at the front desk terminal',
+                            icon: Icons.credit_card_rounded,
+                            badge: 'CARD',
+                            isSelected: selectedMethod == 'card',
+                            onTap: () => widget.controller.selectedPaymentMethod.value = 'card',
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 14.h),
+                    Text('Session Notes', style: AppTypography.sectionTitle),
+                    SizedBox(height: 8.h),
+                    TextField(
+                      controller: _notesController,
+                      style: TextStyle(fontSize: 13.sp, color: const Color(0xFF0F172A)),
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.edit_note_rounded, size: 20, color: Color(0xFF64748B)),
+                        hintText: 'e.g. 1-on-1 private coaching or drills practice',
+                        contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
+
+              if (widget.controller.isMember) {
+                final selectedMethod = widget.controller.selectedPaymentMethod.value;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(14.w),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16.r),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildPaymentOption(
+                            id: 'wallet',
+                            title: 'Member Wallet / Credits',
+                            subtitle: 'Deduct directly from your prepaid membership balance',
+                            icon: Icons.account_balance_wallet_rounded,
+                            badge: 'WALLET',
+                            isSelected: selectedMethod == 'wallet',
+                            onTap: () => widget.controller.selectedPaymentMethod.value = 'wallet',
+                          ),
+                          SizedBox(height: 10.h),
+                          _buildPaymentOption(
+                            id: 'free',
+                            title: 'Complimentary Quota (Zero Cost)',
+                            subtitle: 'Complimentary membership subscription hours',
+                            icon: Icons.card_membership_rounded,
+                            badge: 'QUOTA',
+                            isSelected: selectedMethod == 'free',
+                            onTap: () => widget.controller.selectedPaymentMethod.value = 'free',
+                          ),
+                          SizedBox(height: 10.h),
+                          _buildPaymentOption(
+                            id: 'upi',
+                            title: 'UPI (GPay / PhonePe / Paytm / BHIM)',
+                            subtitle: 'Instant direct confirmation linked to member identity',
+                            icon: Icons.qr_code_2_rounded,
+                            badge: 'INSTANT',
+                            isSelected: selectedMethod == 'upi',
+                            onTap: () => widget.controller.selectedPaymentMethod.value = 'upi',
+                          ),
+                          SizedBox(height: 10.h),
+                          _buildPaymentOption(
+                            id: 'razorpay',
+                            title: 'Razorpay Payment Gateway',
+                            subtitle: 'Debit/Credit Cards, NetBanking, and all online channels',
+                            icon: Icons.credit_card_rounded,
+                            badge: 'ONLINE',
+                            isSelected: selectedMethod == 'razorpay',
+                            onTap: () => widget.controller.selectedPaymentMethod.value = 'razorpay',
+                          ),
+                          SizedBox(height: 10.h),
+                          _buildPaymentOption(
+                            id: 'card',
+                            title: 'Debit / Credit Card (POS Terminal)',
+                            subtitle: 'Swipe or tap card at reception terminal',
+                            icon: Icons.credit_card_outlined,
+                            badge: 'POS',
+                            isSelected: selectedMethod == 'card',
+                            onTap: () => widget.controller.selectedPaymentMethod.value = 'card',
+                          ),
+                          SizedBox(height: 10.h),
+                          _buildPaymentOption(
+                            id: 'cash',
+                            title: 'Pay at Front Desk',
+                            subtitle: 'Front-desk cash settlement during check-in',
+                            icon: Icons.storefront_rounded,
+                            badge: 'DESK',
+                            isSelected: selectedMethod == 'cash',
+                            onTap: () => widget.controller.selectedPaymentMethod.value = 'cash',
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 14.h),
+                    Text('Booking Notes', style: AppTypography.sectionTitle),
+                    SizedBox(height: 8.h),
+                    TextField(
+                      controller: _notesController,
+                      style: TextStyle(fontSize: 13.sp, color: const Color(0xFF0F172A)),
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.edit_note_rounded, size: 20, color: Color(0xFF64748B)),
+                        hintText: 'e.g. Member slot booking',
+                        contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
+
               if (widget.controller.isStudent) {
                 final selectedMethod = widget.controller.selectedPaymentMethod.value;
                 return Column(
@@ -571,23 +970,66 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             SizedBox(height: 32.h),
 
-            // 5. Submit Button (Adaptive for Student Direct Contract vs. Gateway)
+            // 5. Submit Button (Adaptive for Coach, Member, Student Direct Contract vs. Gateway)
             Obx(
               () {
                 final isStudent = widget.controller.isStudent;
-                final isRazorpay = widget.controller.selectedPaymentMethod.value == 'razorpay';
-                final buttonText = isStudent
-                    ? (isRazorpay
-                        ? 'PAY ₹${total.toInt()} VIA RAZORPAY'
-                        : 'CONFIRM & BOOK SLOT (₹${total.toInt()})')
-                    : 'PAY ₹${total.toInt()} VIA RAZORPAY';
+                final isMember = widget.controller.isMember;
+                final isCoach = widget.controller.isCoach;
+                final selectedMethod = widget.controller.selectedPaymentMethod.value;
+                final isRazorpay = selectedMethod == 'razorpay';
+                final isFree = selectedMethod == 'free';
+
+                String buttonText;
+                if (isCoach) {
+                  final isForStudent = widget.controller.coachBookingMode.value == 'forStudent';
+                  buttonText = isForStudent
+                      ? 'BOOK FOR STUDENT & DISPATCH PIN'
+                      : (isFree ? 'CONFIRM COACH SESSION (FREE)' : 'CONFIRM COACH SESSION (₹${total.toInt()})');
+                } else if (isMember) {
+                  buttonText = isRazorpay
+                      ? 'PAY ₹${total.toInt()} VIA RAZORPAY'
+                      : (isFree
+                          ? 'CONFIRM WITH FREE QUOTA'
+                          : (selectedMethod == 'wallet'
+                              ? 'PAY ₹${total.toInt()} FROM WALLET'
+                              : 'CONFIRM & BOOK SLOT (₹${total.toInt()})'));
+                } else if (isStudent) {
+                  buttonText = isRazorpay
+                      ? 'PAY ₹${total.toInt()} VIA RAZORPAY'
+                      : 'CONFIRM & BOOK SLOT (₹${total.toInt()})';
+                } else {
+                  buttonText = 'PAY ₹${total.toInt()} VIA RAZORPAY';
+                }
 
                 return AppButton(
                   text: buttonText,
                   isLoading: widget.controller.isSubmitting.value ||
                       widget.controller.isRegisteringGuest.value,
                   onPressed: () async {
-                    // For student booking with UPI or Cash: use direct confirmStudentBooking
+                    // Coach flow: personal session or on behalf of student
+                    if (isCoach) {
+                      final pass = await widget.controller.confirmCoachBooking(
+                        notes: _notesController.text.trim(),
+                      );
+                      if (pass != null) {
+                        Get.off(() => DigitalPassScreen(pass: pass));
+                      }
+                      return;
+                    }
+
+                    // Member direct contract (wallet, free, upi, card, cash)
+                    if (isMember && !isRazorpay) {
+                      final pass = await widget.controller.confirmMemberBooking(
+                        notes: _notesController.text.trim(),
+                      );
+                      if (pass != null) {
+                        Get.off(() => DigitalPassScreen(pass: pass));
+                      }
+                      return;
+                    }
+
+                    // Student direct contract (upi, cash)
                     if (isStudent && !isRazorpay) {
                       final pass = await widget.controller.confirmStudentBooking(
                         notes: _notesController.text.trim(),
@@ -598,9 +1040,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       return;
                     }
 
-                    // Otherwise, for customer or student choosing Razorpay gateway
+                    // Otherwise, for customer or member/student choosing Razorpay gateway
                     if (!widget.controller.isGuestRegistered.value &&
-                        !widget.controller.isStudentOrCoach) {
+                        !widget.controller.isStudentOrCoach &&
+                        !widget.controller.isMember) {
                       final phone = _phoneController.text.trim();
                       final name = _nameController.text.trim();
                       final email = _emailController.text.trim();

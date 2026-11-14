@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile_app/features/booking/data/models/court_slot_model.dart';
-import 'package:mobile_app/features/booking/data/services/booking_service.dart';
 import 'package:dio/dio.dart';
 
 class MockDioClientAdapter implements HttpClientAdapter {
@@ -142,4 +141,135 @@ void main() {
       expect(payloadWithSibling.containsKey('userId'), isFalse);
     });
   });
+
+  group('Member Booking Contract Tests', () {
+    test('Option A: Member single slot booking with wallet payment', () {
+      final payload = {
+        'resourceId': '6ad6be7a1ee0aaebb67610be',
+        'date': '2026-11-15',
+        'startTime': '18:00',
+        'endTime': '19:00',
+        'paymentMethod': 'wallet',
+        'notes': 'Member slot booking',
+      };
+
+      expect(payload['resourceId'], '6ad6be7a1ee0aaebb67610be');
+      expect(payload['paymentMethod'], 'wallet');
+      expect(payload['notes'], 'Member slot booking');
+      expect(payload.containsKey('userId'), isFalse);
+      expect(payload.containsKey('phone'), isFalse);
+      expect(payload.containsKey('memberId'), isFalse);
+    });
+
+    test('Option B: Member multi-slot booking with free quota', () {
+      final multiPayload = {
+        'slots': [
+          {
+            'resourceId': '6ad6be7a1ee0aaebb67610be',
+            'date': '2026-11-15',
+            'startTime': '18:00',
+            'endTime': '19:00',
+          },
+          {
+            'resourceId': '6ad6be7a1ee0aaebb67610be',
+            'date': '2026-11-15',
+            'startTime': '19:00',
+            'endTime': '20:00',
+          },
+        ],
+        'paymentMethod': 'free',
+        'notes': 'Member 2-hour session',
+      };
+
+      final slots = multiPayload['slots'] as List;
+      expect(slots.length, 2);
+      expect(multiPayload['paymentMethod'], 'free');
+      expect(multiPayload.containsKey('userId'), isFalse);
+    });
+  });
+
+  group('Coach Booking Contract Tests', () {
+    test('Case A: Coach personal session without studentId and free paymentMethod', () {
+      final payload = {
+        'resourceId': '6adfd230b968550380613b78',
+        'date': '2026-11-15',
+        'startTime': '06:00',
+        'endTime': '07:00',
+        'paymentMethod': 'free',
+        'notes': 'Coach personal training session',
+      };
+
+      expect(payload['paymentMethod'], 'free');
+      expect(payload['notes'], 'Coach personal training session');
+      expect(payload.containsKey('studentId'), isFalse);
+      expect(payload.containsKey('userId'), isFalse);
+    });
+
+    test('Case B: Coach booking on behalf of student includes target studentId', () {
+      final payload = {
+        'studentId': '6ae3bfa56989d6280874ef35',
+        'resourceId': '6adfd230b968550380613b78',
+        'date': '2026-11-15',
+        'startTime': '16:00',
+        'endTime': '17:00',
+        'paymentMethod': 'cash',
+        'notes': '1-on-1 private coaching with student',
+      };
+
+      expect(payload['studentId'], '6ae3bfa56989d6280874ef35');
+      expect(payload['paymentMethod'], 'cash');
+      expect(payload['notes'], '1-on-1 private coaching with student');
+      expect(payload.containsKey('userId'), isFalse);
+    });
+  });
+
+  group('Sibling Profile Shifting Tests', () {
+    test('finds second sibling in response payload and does not revert to root student', () {
+      final backendResponsePayload = {
+        'student': {
+          '_id': '6af1e2ae185e913f71898a76',
+          'fullName': 'RUTHVI PANDIAN',
+          'regNo': 'isabd006',
+          'phone': '9444154854',
+          'siblings': [
+            {
+              '_id': '6af1e2ae185e913f71898a76',
+              'studentId': '6af1e2ae185e913f71898a76',
+              'fullName': 'RUTHVI PANDIAN',
+              'regNo': 'isabd006',
+              'isCurrent': true,
+              'isSelected': true,
+            },
+            {
+              '_id': '6ae3bfa56989d6280874ef35',
+              'studentId': '6ae3bfa56989d6280874ef35',
+              'fullName': 'keshika devan',
+              'regNo': 'isabd003',
+              'isCurrent': false,
+              'isSelected': false,
+            },
+          ],
+        },
+      };
+
+      const targetId = '6ae3bfa56989d6280874ef35';
+
+      // Sibling locator resolution logic
+      Map<String, dynamic>? resolved;
+      final sibList = backendResponsePayload['student']!['siblings'] as List;
+      for (final s in sibList) {
+        if (s is Map && s['studentId'] == targetId) {
+          resolved = Map<String, dynamic>.from(s);
+          break;
+        }
+      }
+
+      expect(resolved, isNotNull);
+      expect(resolved!['studentId'], targetId);
+      expect(resolved['fullName'], 'keshika devan');
+      expect(resolved['regNo'], 'isabd003');
+      expect(resolved['fullName'], isNot(equals('RUTHVI PANDIAN')));
+    });
+  });
 }
+

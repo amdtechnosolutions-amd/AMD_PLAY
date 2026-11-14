@@ -10,6 +10,7 @@ import '../../../../core/storage/storage_service.dart';
 import '../../../home/presentation/controllers/home_controller.dart';
 import '../../../siblings/data/models/sibling_models.dart';
 import '../../../siblings/data/services/sibling_service.dart';
+import '../../../coaching/data/services/coach_evaluation_service.dart';
 import '../../data/models/court_slot_model.dart';
 import '../../data/models/booking_pass_model.dart';
 import '../../data/services/booking_service.dart';
@@ -72,13 +73,22 @@ class CourtBookingController extends GetxController {
   bool get isCoach =>
       userRole.value.toLowerCase().trim() == 'coach' ||
       userRole.value.toLowerCase().trim() == 'trainer';
-  bool get isStudentOrCoach => isStudent || isCoach;
+  bool get isMember => userRole.value.toLowerCase().trim() == 'member';
+  bool get isPrivilegedRole => isStudent || isCoach || isMember;
+  bool get isStudentOrCoach => isStudent || isCoach || isMember;
 
-  // Student Personal Booking State (Contract: JWT extracted, optional sibling selection, 'upi')
+  // Student & Member Personal Booking State (Contract: JWT extracted, optional sibling selection, 'upi')
   final RxList<SiblingStudentModel> familySiblings = <SiblingStudentModel>[].obs;
   final Rx<SiblingStudentModel?> selectedSibling = Rx<SiblingStudentModel?>(null);
   final RxString selectedPaymentMethod = 'upi'.obs;
   final RxString bookingNotes = 'Personal training practice'.obs;
+
+  // Coach Booking State: 'personal' (Case A) vs 'forStudent' (Case B)
+  final RxString coachBookingMode = 'personal'.obs;
+  final RxList<Map<String, dynamic>> coachEnrolledStudents = <Map<String, dynamic>>[].obs;
+  final Rx<Map<String, dynamic>?> coachSelectedStudent = Rx<Map<String, dynamic>?>(null);
+  final RxBool isLoadingCoachStudents = false.obs;
+  final RxString coachManualStudentId = ''.obs;
 
   String get holdTimeFormatted {
     final mins = (holdSecondsRemaining.value ~/ 60).toString().padLeft(2, '0');
@@ -201,6 +211,13 @@ class CourtBookingController extends GetxController {
 
         if (isStudent) {
           loadFamilySiblings();
+        } else if (isCoach) {
+          loadCoachStudents();
+          selectedPaymentMethod.value = 'free';
+          bookingNotes.value = 'Coach personal training session';
+        } else if (isMember) {
+          selectedPaymentMethod.value = 'upi';
+          bookingNotes.value = 'Member slot booking';
         }
       }
     } catch (_) {}
@@ -220,6 +237,34 @@ class CourtBookingController extends GetxController {
         selectedSibling.value = match ?? profile.siblings.first;
       }
     } catch (_) {}
+  }
+
+  /// Load enrolled students across coach's assigned batches for Case B booking
+  Future<void> loadCoachStudents() async {
+    if (!isCoach) return;
+    isLoadingCoachStudents.value = true;
+    try {
+      final service = CoachEvaluationService();
+      final batches = await service.getCoachBatches();
+      final Set<String> seenIds = {};
+      final List<Map<String, dynamic>> allStudents = [];
+
+      for (final b in batches) {
+        final batchId = (b['_id'] ?? b['id'] ?? '').toString();
+        if (batchId.isEmpty) continue;
+        final students = await service.getBatchStudents(batchId);
+        for (final s in students) {
+          final sId = (s['_id'] ?? s['id'] ?? s['studentId'] ?? '').toString();
+          if (sId.isNotEmpty && !seenIds.contains(sId)) {
+            seenIds.add(sId);
+            allStudents.add(s);
+          }
+        }
+      }
+      coachEnrolledStudents.assignAll(allStudents);
+    } catch (_) {} finally {
+      isLoadingCoachStudents.value = false;
+    }
   }
 
   void _initRazorpay() {
@@ -926,6 +971,148 @@ class CourtBookingController extends GetxController {
         paymentMethod: paymentMethod ?? selectedPaymentMethod.value,
         notes: (notes != null && notes.isNotEmpty) ? notes : bookingNotes.value,
         siblingStudentId: siblingId,
+      );
+
+      _holdTimer?.cancel();
+      isHoldingSlot.value = false;
+      activeHoldId.value = '';
+      selectedSlots.clear();
+      selectedSlot.value = null;
+      pricingQuote.value = null;
+
+      if (selectedCourt.value != null) {
+        loadSlotsForCourt(selectedCourt.value!);
+      }
+
+      return pass;
+    } catch (e) {
+      Get.snackbar(
+        'Booking Notice',
+        e.toString().replaceAll('Exception: ', ''),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFFEF2F2),
+        colorText: const Color(0xFF991B1B),
+      );
+      return null;
+    } finally {
+      isSubmitting.value = false;
+    }
+  }
+
+  /// Direct Member Booking via POST /api/v1/bookings or /bookings/multi
+  /// Passes paymentMethod ('upi', 'card', 'wallet', 'free', 'cash', 'razorpay') and notes.
+  Future<BookingPassModel?> confirmMemberBooking({
+    String? paymentMethod,
+    String? notes,
+  }) async {
+    if (selectedSlots.isEmpty && (selectedCourt.value == null || selectedSlot.value == null)) {
+      return null;
+    }
+
+    if (selectedSlots.isEmpty && selectedCourt.value != null && selectedSlot.value != null) {
+      final court = selectedCourt.value!;
+      final slot = selectedSlot.value!;
+      final dateStr = DateFormat('yyyy-MM-dd').format(selectedDate.value);
+      selectedSlots.add(SelectedSlot(
+        resourceId: court.id,
+        courtName: court.name,
+        sportName: court.sport,
+        date: dateStr,
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        timeText: slot.timeText,
+        price: slot.price,
+      ));
+    }
+
+    isSubmitting.value = true;
+    try {
+      final pass = await _bookingService.confirmMemberBooking(
+        slots: selectedSlots,
+        holdId: activeHoldId.value,
+        paymentMethod: paymentMethod ?? selectedPaymentMethod.value,
+        notes: (notes != null && notes.isNotEmpty) ? notes : bookingNotes.value,
+      );
+
+      _holdTimer?.cancel();
+      isHoldingSlot.value = false;
+      activeHoldId.value = '';
+      selectedSlots.clear();
+      selectedSlot.value = null;
+      pricingQuote.value = null;
+
+      if (selectedCourt.value != null) {
+        loadSlotsForCourt(selectedCourt.value!);
+      }
+
+      return pass;
+    } catch (e) {
+      Get.snackbar(
+        'Booking Notice',
+        e.toString().replaceAll('Exception: ', ''),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFFEF2F2),
+        colorText: const Color(0xFF991B1B),
+      );
+      return null;
+    } finally {
+      isSubmitting.value = false;
+    }
+  }
+
+  /// Direct Coach Booking via POST /api/v1/bookings or /bookings/multi
+  /// Supports:
+  /// - Case A: Coach personal session (no studentId, paymentMethod 'free' | 'cash' | 'upi' | 'card')
+  /// - Case B: Coach booking for student (studentId passed, provisions pass & WhatsApp)
+  Future<BookingPassModel?> confirmCoachBooking({
+    String? paymentMethod,
+    String? notes,
+    String? targetStudentId,
+  }) async {
+    if (selectedSlots.isEmpty && (selectedCourt.value == null || selectedSlot.value == null)) {
+      return null;
+    }
+
+    if (selectedSlots.isEmpty && selectedCourt.value != null && selectedSlot.value != null) {
+      final court = selectedCourt.value!;
+      final slot = selectedSlot.value!;
+      final dateStr = DateFormat('yyyy-MM-dd').format(selectedDate.value);
+      selectedSlots.add(SelectedSlot(
+        resourceId: court.id,
+        courtName: court.name,
+        sportName: court.sport,
+        date: dateStr,
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        timeText: slot.timeText,
+        price: slot.price,
+      ));
+    }
+
+    isSubmitting.value = true;
+    try {
+      String? resolvedStudentId = targetStudentId;
+      if (coachBookingMode.value == 'forStudent') {
+        resolvedStudentId = coachSelectedStudent.value?['_id']?.toString() ??
+            coachSelectedStudent.value?['id']?.toString() ??
+            coachSelectedStudent.value?['studentId']?.toString() ??
+            coachManualStudentId.value.trim();
+        if (resolvedStudentId.isEmpty) {
+          throw Exception('Please select or specify an enrolled student for private coaching booking');
+        }
+      }
+
+      final resolvedMethod = paymentMethod ?? selectedPaymentMethod.value;
+      final defaultNotes = (coachBookingMode.value == 'forStudent')
+          ? '1-on-1 private coaching with student'
+          : 'Coach personal training session';
+
+      final pass = await _bookingService.confirmCoachBooking(
+        slots: selectedSlots,
+        holdId: activeHoldId.value,
+        paymentMethod: resolvedMethod,
+        notes: (notes != null && notes.isNotEmpty) ? notes : defaultNotes,
+        studentId: resolvedStudentId,
       );
 
       _holdTimer?.cancel();

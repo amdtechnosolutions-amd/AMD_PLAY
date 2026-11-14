@@ -393,6 +393,146 @@ class BookingService {
     }
   }
 
+  /// 7b. Direct Member Booking via POST /api/v1/bookings (single) or POST /api/v1/bookings/multi (multi)
+  /// Backend automatically detects role: "member" from JWT token and applies configured Member Discounts / Member Pricing.
+  /// Supported payment methods: 'upi', 'card', 'wallet', 'free', 'cash', 'razorpay'
+  Future<BookingPassModel> confirmMemberBooking({
+    required List<SelectedSlot> slots,
+    String? holdId,
+    String paymentMethod = 'upi',
+    String notes = 'Member slot booking',
+  }) async {
+    final bool isSingle = slots.length == 1;
+    final String endpoint = isSingle ? ApiEndpoints.bookings : ApiEndpoints.bookingsMulti;
+
+    Map<String, dynamic> payload;
+    if (isSingle) {
+      final s = slots.first;
+      payload = {
+        'resourceId': s.resourceId,
+        'date': s.date,
+        'startTime': s.startTime,
+        'endTime': s.endTime,
+        'paymentMethod': paymentMethod,
+        'notes': notes,
+        if (holdId != null && holdId.isNotEmpty) 'holdId': holdId,
+      };
+    } else {
+      payload = {
+        'slots': slots.map((s) => {
+          'resourceId': s.resourceId,
+          'date': s.date,
+          'startTime': s.startTime,
+          'endTime': s.endTime,
+        }).toList(),
+        'paymentMethod': paymentMethod,
+        'notes': notes,
+        if (holdId != null && holdId.isNotEmpty) 'holdId': holdId,
+      };
+    }
+
+    try {
+      dynamic res;
+      try {
+        res = await _apiClient.dio.post(endpoint, data: payload);
+      } on DioException catch (dioErr) {
+        if (!isSingle && dioErr.response?.statusCode == 404) {
+          res = await _apiClient.dio.post(ApiEndpoints.bookings, data: payload);
+        } else {
+          rethrow;
+        }
+      }
+
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        final bkgData = res.data['data'] ?? res.data;
+        if (bkgData is Map) {
+          return BookingPassModel.fromJson(Map<String, dynamic>.from(bkgData));
+        }
+      }
+
+      throw Exception(res.data?['message'] ?? 'Failed to confirm member booking');
+    } on DioException catch (dioErr) {
+      final msg = dioErr.response?.data is Map
+          ? (dioErr.response?.data['message'] ??
+              dioErr.response?.data['error'] ??
+              'Member booking request failed')
+          : 'Unable to connect to booking server';
+      throw Exception(msg);
+    }
+  }
+
+  /// 7c. Direct Coach Booking via POST /api/v1/bookings or POST /api/v1/bookings/multi
+  /// Supports:
+  /// - Case A: Coach booking for personal practice / session (studentId = null, paymentMethod defaults to 'free')
+  /// - Case B: Coach booking on behalf of a student for private coaching (studentId passed, provisions pass & WhatsApp to student)
+  Future<BookingPassModel> confirmCoachBooking({
+    required List<SelectedSlot> slots,
+    String? holdId,
+    String paymentMethod = 'free',
+    String notes = 'Coach personal training session',
+    String? studentId,
+  }) async {
+    final bool isSingle = slots.length == 1;
+    final String endpoint = isSingle ? ApiEndpoints.bookings : ApiEndpoints.bookingsMulti;
+
+    Map<String, dynamic> payload;
+    if (isSingle) {
+      final s = slots.first;
+      payload = {
+        'resourceId': s.resourceId,
+        'date': s.date,
+        'startTime': s.startTime,
+        'endTime': s.endTime,
+        'paymentMethod': paymentMethod,
+        'notes': notes,
+        if (studentId != null && studentId.isNotEmpty) 'studentId': studentId,
+        if (holdId != null && holdId.isNotEmpty) 'holdId': holdId,
+      };
+    } else {
+      payload = {
+        'slots': slots.map((s) => {
+          'resourceId': s.resourceId,
+          'date': s.date,
+          'startTime': s.startTime,
+          'endTime': s.endTime,
+        }).toList(),
+        'paymentMethod': paymentMethod,
+        'notes': notes,
+        if (studentId != null && studentId.isNotEmpty) 'studentId': studentId,
+        if (holdId != null && holdId.isNotEmpty) 'holdId': holdId,
+      };
+    }
+
+    try {
+      dynamic res;
+      try {
+        res = await _apiClient.dio.post(endpoint, data: payload);
+      } on DioException catch (dioErr) {
+        if (!isSingle && dioErr.response?.statusCode == 404) {
+          res = await _apiClient.dio.post(ApiEndpoints.bookings, data: payload);
+        } else {
+          rethrow;
+        }
+      }
+
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        final bkgData = res.data['data'] ?? res.data;
+        if (bkgData is Map) {
+          return BookingPassModel.fromJson(Map<String, dynamic>.from(bkgData));
+        }
+      }
+
+      throw Exception(res.data?['message'] ?? 'Failed to confirm coach booking');
+    } on DioException catch (dioErr) {
+      final msg = dioErr.response?.data is Map
+          ? (dioErr.response?.data['message'] ??
+              dioErr.response?.data['error'] ??
+              'Coach booking request failed')
+          : 'Unable to connect to booking server';
+      throw Exception(msg);
+    }
+  }
+
   /// 7b. Single-slot confirmCheckout backward compatibility
   Future<BookingPassModel> confirmCheckout({
     required CourtModel court,
@@ -572,8 +712,11 @@ class BookingService {
           if (Get.isRegistered<StorageService>() && token.isNotEmpty) {
             final storage = Get.find<StorageService>();
             final currentRole = await storage.getUserRole();
-            // NEVER overwrite an existing student or coach session with a guest customer session!
-            if (currentRole == 'student' || currentRole == 'coach' || currentRole == 'trainer') {
+            // NEVER overwrite an existing student, coach or member session with a guest customer session!
+            if (currentRole == 'student' ||
+                currentRole == 'coach' ||
+                currentRole == 'trainer' ||
+                currentRole == 'member') {
               debugPrint('ℹ️ [BOOKING SERVICE] Preserving authenticated $currentRole session. Refusing to overwrite with guest customer.');
               return body;
             }
@@ -656,10 +799,26 @@ class BookingService {
     return null;
   }
 
-  /// 8. Fetch My Bookings from `/api/v1/bookings/my`
-  Future<List<BookingPassModel>> getMyBookings() async {
+  /// 8. Fetch My Bookings from `/api/v1/bookings/my`, `/bookings/my?studentId=...` or `/bookings?date=...`
+  Future<List<BookingPassModel>> getMyBookings({
+    String? studentId,
+    String? date,
+  }) async {
     try {
-      final res = await _apiClient.dio.get(ApiEndpoints.myBookings);
+      final Map<String, dynamic> queryParams = {};
+      String endpoint = ApiEndpoints.myBookings;
+
+      if (date != null && date.trim().isNotEmpty) {
+        endpoint = ApiEndpoints.bookings;
+        queryParams['date'] = date.trim();
+      } else if (studentId != null && studentId.trim().isNotEmpty) {
+        queryParams['studentId'] = studentId.trim();
+      }
+
+      final res = await _apiClient.dio.get(
+        endpoint,
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
       if (res.statusCode == 200 && res.data != null) {
         final list = res.data['data'] ?? res.data;
         if (list is List && list.isNotEmpty) {

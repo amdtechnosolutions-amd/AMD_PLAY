@@ -584,7 +584,10 @@ class HomeController extends GetxController {
       final profileRes = await _apiClient.dio.get(endpoint);
       if (profileRes.data is Map && profileRes.data['success'] == true && profileRes.data['data'] is Map) {
         final data = profileRes.data['data'] as Map;
-        final student = data['student'] is Map ? data['student'] as Map : null;
+        final student = _findStudentInPayload(data, currentStudentId.value) ??
+            (currentStudentId.value.isEmpty && data['student'] is Map
+                ? data['student'] as Map
+                : null);
         if (student != null) {
           final sId = (student['studentId'] ?? student['_id'] ?? student['id'] ?? '').toString();
           if (sId.isNotEmpty) {
@@ -959,6 +962,68 @@ class HomeController extends GetxController {
     );
   }
 
+  Map<String, dynamic>? _findStudentInPayload(Map data, String targetId) {
+    if (targetId.isEmpty) {
+      if (data['selectedStudent'] is Map) {
+        return Map<String, dynamic>.from(data['selectedStudent'] as Map);
+      }
+      if (data['student'] is Map) {
+        return Map<String, dynamic>.from(data['student'] as Map);
+      }
+      return null;
+    }
+
+    // 1. Check data['selectedStudent']
+    if (data['selectedStudent'] is Map) {
+      final s = Map<String, dynamic>.from(data['selectedStudent'] as Map);
+      final id = (s['studentId'] is Map
+              ? s['studentId']['_id'] ?? s['studentId']['id']
+              : s['studentId'] ?? s['_id'] ?? s['id'])
+          ?.toString();
+      if (id == targetId) return s;
+    }
+
+    // 2. Check data['siblings'] or data['student']['siblings']
+    final sibList = data['siblings'] is List
+        ? data['siblings'] as List
+        : (data['student'] is Map && data['student']['siblings'] is List
+            ? data['student']['siblings'] as List
+            : null);
+    if (sibList != null) {
+      for (final item in sibList) {
+        if (item is Map) {
+          final id = (item['studentId'] is Map
+                  ? item['studentId']['_id'] ?? item['studentId']['id']
+                  : item['studentId'] ?? item['_id'] ?? item['id'])
+              ?.toString();
+          if (id == targetId) return Map<String, dynamic>.from(item);
+        }
+      }
+    }
+
+    // 3. Check data['student']
+    if (data['student'] is Map) {
+      final s = Map<String, dynamic>.from(data['student'] as Map);
+      final id = (s['studentId'] is Map
+              ? s['studentId']['_id'] ?? s['studentId']['id']
+              : s['studentId'] ?? s['_id'] ?? s['id'])
+          ?.toString();
+      if (id == targetId) return s;
+    }
+
+    // 4. Check root data if it has student fields matching targetId
+    final rootId = (data['studentId'] is Map
+            ? data['studentId']['_id'] ?? data['studentId']['id']
+            : data['studentId'] ?? data['_id'] ?? data['id'])
+        ?.toString();
+    if (rootId == targetId &&
+        (data.containsKey('fullName') || data.containsKey('firstName'))) {
+      return Map<String, dynamic>.from(data);
+    }
+
+    return null;
+  }
+
   /// Switch active student profile among siblings
   /// Endpoint 2: GET /api/v1/students/my/profile?studentId=`<siblingId>`
   Future<void> switchProfile(String targetStudentId) async {
@@ -985,18 +1050,32 @@ class HomeController extends GetxController {
         );
         if (getRes.data is Map && getRes.data['success'] == true && getRes.data['data'] is Map) {
           final data = getRes.data['data'] as Map;
-          studentData = data['student'] is Map
-              ? Map<String, dynamic>.from(data['student'] as Map)
-              : Map<String, dynamic>.from(data);
+          studentData = _findStudentInPayload(data, targetStudentId);
           tenantId = data['tenantId']?.toString();
-          switchSucceeded = true;
+          if (studentData != null) switchSucceeded = true;
           res = getRes;
         }
       } catch (getErr) {
-        debugPrint('[switchProfile] GET /students/my/profile?studentId error: $getErr, falling back to POST');
+        debugPrint('[switchProfile] GET /students/my/profile?studentId error: $getErr, falling back to direct');
       }
 
-      // 2. Fallback to POST /auth/student/switch-profile if GET not fulfilled
+      // 2. Direct endpoint: GET /api/v1/students/:id (Universal student endpoint)
+      if (!switchSucceeded) {
+        try {
+          final getDirectRes = await _apiClient.dio.get(
+            ApiEndpoints.studentById(targetStudentId),
+          );
+          if (getDirectRes.data is Map && getDirectRes.data['success'] == true && getDirectRes.data['data'] is Map) {
+            final data = getDirectRes.data['data'] as Map;
+            studentData = _findStudentInPayload(data, targetStudentId) ??
+                (data['student'] is Map ? Map<String, dynamic>.from(data['student'] as Map) : null);
+            if (studentData != null) switchSucceeded = true;
+            res = getDirectRes;
+          }
+        } catch (_) {}
+      }
+
+      // 3. Fallback to POST /auth/student/switch-profile if GET not fulfilled
       if (!switchSucceeded) {
         res = await _apiClient.dio.post(
           ApiEndpoints.switchStudentProfile,
@@ -1008,9 +1087,10 @@ class HomeController extends GetxController {
           refreshToken = data['refreshToken']?.toString();
           tenantId = data['tenantId']?.toString();
           role = (data['role'] ?? (data['user'] is Map ? data['user']['role'] : null))?.toString();
-          studentData = data['user'] is Map
-              ? Map<String, dynamic>.from(data['user'] as Map)
-              : Map<String, dynamic>.from(data);
+          studentData = _findStudentInPayload(data, targetStudentId) ??
+              (data['user'] is Map
+                  ? Map<String, dynamic>.from(data['user'] as Map)
+                  : Map<String, dynamic>.from(data));
           switchSucceeded = true;
         }
       }
