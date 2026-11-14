@@ -21,6 +21,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _notesController =
+      TextEditingController(text: 'Personal training practice');
 
   @override
   void initState() {
@@ -54,6 +56,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     _phoneController.dispose();
     _nameController.dispose();
     _emailController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -234,88 +237,150 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ? 'COACH'
                         : (widget.controller.isExistingCustomer.value ? 'CUSTOMER' : 'GUEST');
 
-                return Container(
-                  padding: EdgeInsets.all(14.w),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16.r),
-                    border: Border.all(
-                      color: isStudent ? const Color(0xFFD4AF37) : const Color(0xFF10B981),
-                      width: 1.2,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(8.w),
-                        decoration: BoxDecoration(
-                          color: isStudent ? const Color(0xFFFFFBEB) : const Color(0xFFECFDF5),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          isStudent ? Icons.school_rounded : Icons.verified_user_rounded,
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(14.w),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16.r),
+                        border: Border.all(
                           color: isStudent ? const Color(0xFFD4AF37) : const Color(0xFF10B981),
-                          size: 20.sp,
+                          width: 1.2,
                         ),
                       ),
-                      SizedBox(width: 12.w),
-                      Expanded(
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(8.w),
+                            decoration: BoxDecoration(
+                              color: isStudent ? const Color(0xFFFFFBEB) : const Color(0xFFECFDF5),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              isStudent ? Icons.school_rounded : Icons.verified_user_rounded,
+                              color: isStudent ? const Color(0xFFD4AF37) : const Color(0xFF10B981),
+                              size: 20.sp,
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        widget.controller.customerName.value.isNotEmpty
+                                            ? widget.controller.customerName.value
+                                            : (isStudent ? 'Academy Student' : 'Guest Player'),
+                                        style: TextStyle(
+                                          fontSize: 14.sp,
+                                          fontWeight: FontWeight.bold,
+                                          color: const Color(0xFF0F172A),
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    SizedBox(width: 6.w),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                                      decoration: BoxDecoration(
+                                        color: isStudent ? const Color(0xFFFEF3C7) : const Color(0xFFDCFCE7),
+                                        borderRadius: BorderRadius.circular(6.r),
+                                      ),
+                                      child: Text(
+                                        badgeLabel,
+                                        style: TextStyle(
+                                          fontSize: 9.5.sp,
+                                          fontWeight: FontWeight.w800,
+                                          color: isStudent ? const Color(0xFF92400E) : const Color(0xFF166534),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 2.h),
+                                Text(
+                                  widget.controller.customerPhone.value.isNotEmpty
+                                      ? '+91 ${widget.controller.customerPhone.value}'
+                                      : (isStudent ? 'Verified Student Account' : 'Account Authenticated'),
+                                  style: TextStyle(fontSize: 12.sp, color: const Color(0xFF64748B)),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (!widget.controller.isStudentOrCoach)
+                            TextButton(
+                              onPressed: () {
+                                widget.controller.isGuestRegistered.value = false;
+                              },
+                              child: Text('Edit', style: TextStyle(fontSize: 12.sp, color: AppColors.primary)),
+                            ),
+                        ],
+                      ),
+                    ),
+
+                    // Sibling Assignment Selector for family accounts
+                    if (isStudent && widget.controller.familySiblings.length > 1) ...[
+                      SizedBox(height: 10.h),
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(12.w),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFFDF5),
+                          borderRadius: BorderRadius.circular(14.r),
+                          border: Border.all(color: const Color(0x60D4AF37)),
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               children: [
-                                Flexible(
-                                  child: Text(
-                                    widget.controller.customerName.value.isNotEmpty
-                                        ? widget.controller.customerName.value
-                                        : (isStudent ? 'Academy Student' : 'Guest Player'),
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color(0xFF0F172A),
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
+                                Icon(Icons.family_restroom_rounded, color: const Color(0xFFD4AF37), size: 16.sp),
                                 SizedBox(width: 6.w),
-                                Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                                  decoration: BoxDecoration(
-                                    color: isStudent ? const Color(0xFFFEF3C7) : const Color(0xFFDCFCE7),
-                                    borderRadius: BorderRadius.circular(6.r),
-                                  ),
-                                  child: Text(
-                                    badgeLabel,
-                                    style: TextStyle(
-                                      fontSize: 9.5.sp,
-                                      fontWeight: FontWeight.w800,
-                                      color: isStudent ? const Color(0xFF92400E) : const Color(0xFF166534),
-                                    ),
+                                Text(
+                                  'Assign Booking To (Sibling Profile)',
+                                  style: TextStyle(
+                                    fontFamily: 'Nunito',
+                                    fontSize: 11.5.sp,
+                                    fontWeight: FontWeight.w800,
+                                    color: const Color(0xFF0F172A),
                                   ),
                                 ),
                               ],
                             ),
-                            SizedBox(height: 2.h),
-                            Text(
-                              widget.controller.customerPhone.value.isNotEmpty
-                                  ? '+91 ${widget.controller.customerPhone.value}'
-                                  : (isStudent ? 'Verified Student Account' : 'Account Authenticated'),
-                              style: TextStyle(fontSize: 12.sp, color: const Color(0xFF64748B)),
+                            SizedBox(height: 8.h),
+                            Wrap(
+                              spacing: 8.w,
+                              runSpacing: 6.h,
+                              children: widget.controller.familySiblings.map((sib) {
+                                final isSel = widget.controller.selectedSibling.value?.studentId == sib.studentId;
+                                return ChoiceChip(
+                                  label: Text(sib.fullName.isNotEmpty ? sib.fullName : 'Sibling'),
+                                  selected: isSel,
+                                  selectedColor: const Color(0xFFD4AF37),
+                                  backgroundColor: const Color(0xFFF1F5F9),
+                                  labelStyle: TextStyle(
+                                    fontFamily: 'Nunito',
+                                    fontSize: 11.sp,
+                                    fontWeight: isSel ? FontWeight.w800 : FontWeight.w600,
+                                    color: isSel ? Colors.white : const Color(0xFF334155),
+                                  ),
+                                  onSelected: (_) {
+                                    widget.controller.selectedSibling.value = sib;
+                                  },
+                                );
+                              }).toList(),
                             ),
                           ],
                         ),
                       ),
-                      if (!widget.controller.isStudentOrCoach)
-                        TextButton(
-                          onPressed: () {
-                            widget.controller.isGuestRegistered.value = false;
-                          },
-                          child: Text('Edit', style: TextStyle(fontSize: 12.sp, color: AppColors.primary)),
-                        ),
                     ],
-                  ),
+                  ],
                 );
               }
 
@@ -388,121 +453,86 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             }),
             SizedBox(height: 24.h),
 
-            // 3. Payment Gateway (Razorpay Exclusive)
-            Text('Payment Gateway', style: AppTypography.sectionTitle),
+            // 3. Payment Method Section
+            Text('Payment Method', style: AppTypography.sectionTitle),
             SizedBox(height: 10.h),
-            Container(
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(color: const Color(0xFF0F172A), width: 1.5),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x0A000000),
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF0C2340),
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.flash_on_rounded, color: Color(0xFF528FF0), size: 16),
-                            SizedBox(width: 4.w),
-                            Text(
-                              'RAZORPAY',
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white,
-                                letterSpacing: 0.8,
-                              ),
-                            ),
-                          ],
-                        ),
+            Obx(() {
+              if (widget.controller.isStudent) {
+                final selectedMethod = widget.controller.selectedPaymentMethod.value;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(14.w),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16.r),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
                       ),
-                      SizedBox(width: 10.w),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Razorpay Payment Gateway',
-                              style: TextStyle(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF0F172A),
-                              ),
-                            ),
-                            Text(
-                              'Official Payment Channel',
-                              style: TextStyle(
-                                fontSize: 11.sp,
-                                color: const Color(0xFF64748B),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 22),
-                    ],
-                  ),
-                  SizedBox(height: 14.h),
-                  const Divider(height: 1, color: Color(0xFFE2E8F0)),
-                  SizedBox(height: 12.h),
-                  Text(
-                    'Accepted payment channels in gateway:',
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF64748B),
-                    ),
-                  ),
-                  SizedBox(height: 8.h),
-                  _buildGatewayFeature(Icons.qr_code_2_rounded, 'UPI: GPay, PhonePe, Paytm, BHIM, CRED'),
-                  SizedBox(height: 6.h),
-                  _buildGatewayFeature(Icons.credit_card_rounded, 'Cards: Visa, MasterCard, RuPay, Maestro'),
-                  SizedBox(height: 6.h),
-                  _buildGatewayFeature(Icons.account_balance_rounded, 'NetBanking & Wallets (50+ banks)'),
-                  SizedBox(height: 12.h),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(8.r),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.shield_outlined, color: Color(0xFF10B981), size: 16),
-                        SizedBox(width: 8.w),
-                        Expanded(
-                          child: Text(
-                            '100% Secure 256-Bit SSL Encrypted. Direct payments disabled.',
-                            style: TextStyle(
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFF334155),
-                            ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildPaymentOption(
+                            id: 'upi',
+                            title: 'UPI (GPay / PhonePe / Paytm / BHIM)',
+                            subtitle: 'Instant confirmation directly linked to your student identity',
+                            icon: Icons.qr_code_2_rounded,
+                            badge: 'RECOMMENDED',
+                            isSelected: selectedMethod == 'upi',
+                            onTap: () => widget.controller.selectedPaymentMethod.value = 'upi',
                           ),
-                        ),
-                      ],
+                          SizedBox(height: 10.h),
+                          _buildPaymentOption(
+                            id: 'razorpay',
+                            title: 'Razorpay Payment Gateway',
+                            subtitle: 'Cards, NetBanking, and all online channels',
+                            icon: Icons.credit_card_rounded,
+                            badge: 'GATEWAY',
+                            isSelected: selectedMethod == 'razorpay',
+                            onTap: () => widget.controller.selectedPaymentMethod.value = 'razorpay',
+                          ),
+                          SizedBox(height: 10.h),
+                          _buildPaymentOption(
+                            id: 'cash',
+                            title: 'Pay at Academy Desk',
+                            subtitle: 'Pay offline during facility entry check-in',
+                            icon: Icons.storefront_rounded,
+                            badge: 'DESK',
+                            isSelected: selectedMethod == 'cash',
+                            onTap: () => widget.controller.selectedPaymentMethod.value = 'cash',
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
+                    SizedBox(height: 14.h),
+                    Text('Booking Notes', style: AppTypography.sectionTitle),
+                    SizedBox(height: 8.h),
+                    TextField(
+                      controller: _notesController,
+                      style: TextStyle(fontSize: 13.sp, color: const Color(0xFF0F172A)),
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.edit_note_rounded, size: 20, color: Color(0xFF64748B)),
+                        hintText: 'e.g. Personal training practice',
+                        contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
+
+              // Default Customer Razorpay Box
+              return _buildRazorpayGatewayBox();
+            }),
             SizedBox(height: 24.h),
 
             // 4. Itemized Price Breakdown
@@ -541,58 +571,301 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             SizedBox(height: 32.h),
 
-            // 5. Submit Button (Razorpay Exclusive)
+            // 5. Submit Button (Adaptive for Student Direct Contract vs. Gateway)
             Obx(
-              () => AppButton(
-                text: 'PAY ₹${total.toInt()} VIA RAZORPAY',
-                isLoading: widget.controller.isSubmitting.value || widget.controller.isRegisteringGuest.value,
-                onPressed: () async {
-                  // Step 1: Only auto-register if completely unauthenticated guest
-                  if (!widget.controller.isGuestRegistered.value &&
-                      !widget.controller.isStudentOrCoach) {
-                    final phone = _phoneController.text.trim();
-                    final name = _nameController.text.trim();
-                    final email = _emailController.text.trim();
+              () {
+                final isStudent = widget.controller.isStudent;
+                final isRazorpay = widget.controller.selectedPaymentMethod.value == 'razorpay';
+                final buttonText = isStudent
+                    ? (isRazorpay
+                        ? 'PAY ₹${total.toInt()} VIA RAZORPAY'
+                        : 'CONFIRM & BOOK SLOT (₹${total.toInt()})')
+                    : 'PAY ₹${total.toInt()} VIA RAZORPAY';
 
-                    if (phone.length < 10) {
-                      Get.snackbar(
-                        'Mobile Number Required',
-                        'Please enter your 10-digit mobile number to generate access PIN pass',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: const Color(0xFFFEF2F2),
-                        colorText: const Color(0xFF991B1B),
+                return AppButton(
+                  text: buttonText,
+                  isLoading: widget.controller.isSubmitting.value ||
+                      widget.controller.isRegisteringGuest.value,
+                  onPressed: () async {
+                    // For student booking with UPI or Cash: use direct confirmStudentBooking
+                    if (isStudent && !isRazorpay) {
+                      final pass = await widget.controller.confirmStudentBooking(
+                        notes: _notesController.text.trim(),
                       );
-                      return;
-                    }
-                    if (name.isEmpty) {
-                      Get.snackbar(
-                        'Full Name Required',
-                        'Please enter player name for facility check-in',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: const Color(0xFFFEF2F2),
-                        colorText: const Color(0xFF991B1B),
-                      );
+                      if (pass != null) {
+                        Get.off(() => DigitalPassScreen(pass: pass));
+                      }
                       return;
                     }
 
-                    final registered = await widget.controller.registerGuestCustomer(
-                      phone: phone,
-                      name: name,
-                      email: email.isNotEmpty ? email : null,
-                    );
-                    if (!registered) return;
-                  }
+                    // Otherwise, for customer or student choosing Razorpay gateway
+                    if (!widget.controller.isGuestRegistered.value &&
+                        !widget.controller.isStudentOrCoach) {
+                      final phone = _phoneController.text.trim();
+                      final name = _nameController.text.trim();
+                      final email = _emailController.text.trim();
 
-                  // Step 2: Launch Razorpay Gateway & finalize booking pass
-                  final pass = await widget.controller.payWithRazorpay();
-                  if (pass != null) {
-                    Get.off(() => DigitalPassScreen(pass: pass));
-                  }
-                },
+                      if (phone.length < 10) {
+                        Get.snackbar(
+                          'Mobile Number Required',
+                          'Please enter your 10-digit mobile number to generate access PIN pass',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: const Color(0xFFFEF2F2),
+                          colorText: const Color(0xFF991B1B),
+                        );
+                        return;
+                      }
+                      if (name.isEmpty) {
+                        Get.snackbar(
+                          'Full Name Required',
+                          'Please enter player name for facility check-in',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: const Color(0xFFFEF2F2),
+                          colorText: const Color(0xFF991B1B),
+                        );
+                        return;
+                      }
+
+                      final registered = await widget.controller.registerGuestCustomer(
+                        phone: phone,
+                        name: name,
+                        email: email.isNotEmpty ? email : null,
+                      );
+                      if (!registered) return;
+                    }
+
+                    // Launch Razorpay Gateway & finalize booking pass
+                    final pass = await widget.controller.payWithRazorpay();
+                    if (pass != null) {
+                      Get.off(() => DigitalPassScreen(pass: pass));
+                    }
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPaymentOption({
+    required String id,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required String badge,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12.r),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFFFFDF5) : Colors.white,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(
+            color: isSelected ? const Color(0xFFD4AF37) : const Color(0xFFE2E8F0),
+            width: isSelected ? 1.5 : 1.0,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(8.w),
+              decoration: BoxDecoration(
+                color: isSelected ? const Color(0xFFFEF3C7) : const Color(0xFFF1F5F9),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                size: 18.sp,
+                color: isSelected ? const Color(0xFFB45309) : const Color(0xFF475569),
+              ),
+            ),
+            SizedBox(width: 10.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          title,
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 12.5.sp,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF0F172A),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      SizedBox(width: 6.w),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.5.h),
+                        decoration: BoxDecoration(
+                          color: isSelected ? const Color(0xFFFEF3C7) : const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(4.r),
+                        ),
+                        child: Text(
+                          badge,
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 8.5.sp,
+                            fontWeight: FontWeight.w900,
+                            color: isSelected ? const Color(0xFF92400E) : const Color(0xFF64748B),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 2.h),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 10.5.sp,
+                      color: const Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              width: 20.w,
+              height: 20.w,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? const Color(0xFFD4AF37) : const Color(0xFFCBD5E1),
+                  width: isSelected ? 5.5.w : 2.w,
+                ),
+                color: Colors.white,
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildRazorpayGatewayBox() {
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: const Color(0xFF0F172A), width: 1.5),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0A000000),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0C2340),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.flash_on_rounded, color: Color(0xFF528FF0), size: 16),
+                    SizedBox(width: 4.w),
+                    Text(
+                      'RAZORPAY',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Razorpay Payment Gateway',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF0F172A),
+                      ),
+                    ),
+                    Text(
+                      'Official Payment Channel',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: const Color(0xFF64748B),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 22),
+            ],
+          ),
+          SizedBox(height: 14.h),
+          const Divider(height: 1, color: Color(0xFFE2E8F0)),
+          SizedBox(height: 12.h),
+          Text(
+            'Accepted payment channels in gateway:',
+            style: TextStyle(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF64748B),
+            ),
+          ),
+          SizedBox(height: 8.h),
+          _buildGatewayFeature(Icons.qr_code_2_rounded, 'UPI: GPay, PhonePe, Paytm, BHIM, CRED'),
+          SizedBox(height: 6.h),
+          _buildGatewayFeature(Icons.credit_card_rounded, 'Cards: Visa, MasterCard, RuPay, Maestro'),
+          SizedBox(height: 6.h),
+          _buildGatewayFeature(Icons.account_balance_rounded, 'NetBanking & Wallets (50+ banks)'),
+          SizedBox(height: 12.h),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(8.r),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.shield_outlined, color: Color(0xFF10B981), size: 16),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Text(
+                    '100% Secure 256-Bit SSL Encrypted. Direct payments disabled.',
+                    style: TextStyle(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF334155),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

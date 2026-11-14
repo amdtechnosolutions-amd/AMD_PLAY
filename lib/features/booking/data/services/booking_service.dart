@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Response;
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/storage/storage_service.dart';
@@ -275,14 +275,29 @@ class BookingService {
     String? holdId,
     required String paymentMethod,
     String notes = 'Direct mobile booking',
+    String? studentId,
   }) async {
     try {
-      final res = await _apiClient.dio.post(ApiEndpoints.bookings, data: {
-        'paymentMethod': paymentMethod,
-        if (holdId != null && holdId.isNotEmpty) 'holdId': holdId,
-        'slots': slots.map((s) => s.toJson()).toList(),
-        'notes': notes,
-      });
+      final Map<String, dynamic> payload = slots.length == 1
+          ? {
+              'resourceId': slots.first.resourceId,
+              'date': slots.first.date,
+              'startTime': slots.first.startTime,
+              'endTime': slots.first.endTime,
+              'paymentMethod': paymentMethod,
+              'notes': notes,
+              if (holdId != null && holdId.isNotEmpty) 'holdId': holdId,
+              if (studentId != null && studentId.isNotEmpty) 'studentId': studentId,
+            }
+          : {
+              'paymentMethod': paymentMethod,
+              if (holdId != null && holdId.isNotEmpty) 'holdId': holdId,
+              'slots': slots.map((s) => s.toJson()).toList(),
+              'notes': notes,
+              if (studentId != null && studentId.isNotEmpty) 'studentId': studentId,
+            };
+
+      final res = await _apiClient.dio.post(ApiEndpoints.bookings, data: payload);
 
       if (res.statusCode == 200 || res.statusCode == 201) {
         final bkgData = res.data['data'] ?? res.data;
@@ -295,6 +310,84 @@ class BookingService {
     } on DioException catch (dioErr) {
       final msg = dioErr.response?.data is Map
           ? (dioErr.response?.data['message'] ?? dioErr.response?.data['error'] ?? 'Booking request failed')
+          : 'Unable to connect to booking server';
+      throw Exception(msg);
+    }
+  }
+
+  /// 7a. Direct Student Personal Booking via POST /api/v1/bookings (single) or POST /api/v1/bookings/multi (multi)
+  /// Adheres strictly to backend student booking contract:
+  /// - Student identity automatically extracted from Authorization JWT
+  /// - Clean request body without userId or customer contact fields
+  /// - Supports sibling assignment via optional studentId
+  Future<BookingPassModel> confirmStudentBooking({
+    required List<SelectedSlot> slots,
+    String? holdId,
+    String paymentMethod = 'upi',
+    String notes = 'Personal training practice',
+    String? siblingStudentId,
+  }) async {
+    final bool isSingle = slots.length == 1;
+    final String endpoint = isSingle ? ApiEndpoints.bookings : ApiEndpoints.bookingsMulti;
+
+    Map<String, dynamic> payload;
+    if (isSingle) {
+      final s = slots.first;
+      payload = {
+        'resourceId': s.resourceId,
+        'date': s.date,
+        'startTime': s.startTime,
+        'endTime': s.endTime,
+        'paymentMethod': paymentMethod,
+        'notes': notes,
+        if (siblingStudentId != null && siblingStudentId.isNotEmpty)
+          'studentId': siblingStudentId,
+        if (holdId != null && holdId.isNotEmpty)
+          'holdId': holdId,
+      };
+    } else {
+      payload = {
+        'slots': slots.map((s) => {
+          'resourceId': s.resourceId,
+          'date': s.date,
+          'startTime': s.startTime,
+          'endTime': s.endTime,
+        }).toList(),
+        'paymentMethod': paymentMethod,
+        'notes': notes,
+        if (siblingStudentId != null && siblingStudentId.isNotEmpty)
+          'studentId': siblingStudentId,
+        if (holdId != null && holdId.isNotEmpty)
+          'holdId': holdId,
+      };
+    }
+
+    try {
+      Response res;
+      try {
+        res = await _apiClient.dio.post(endpoint, data: payload);
+      } on DioException catch (dioErr) {
+        // Fallback: If /bookings/multi returns 404, try /bookings
+        if (!isSingle && dioErr.response?.statusCode == 404) {
+          res = await _apiClient.dio.post(ApiEndpoints.bookings, data: payload);
+        } else {
+          rethrow;
+        }
+      }
+
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        final bkgData = res.data['data'] ?? res.data;
+        if (bkgData is Map) {
+          return BookingPassModel.fromJson(Map<String, dynamic>.from(bkgData));
+        }
+      }
+
+      throw Exception(res.data?['message'] ?? 'Failed to confirm student booking');
+    } on DioException catch (dioErr) {
+      final msg = dioErr.response?.data is Map
+          ? (dioErr.response?.data['message'] ??
+              dioErr.response?.data['error'] ??
+              'Student booking request failed')
           : 'Unable to connect to booking server';
       throw Exception(msg);
     }

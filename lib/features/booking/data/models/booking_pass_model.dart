@@ -62,8 +62,12 @@ class BookingPassModel {
     final grpId = json['groupId']?.toString();
     final grpNum = json['groupBookingNumber']?.toString();
 
-    final res = json['resourceId'] is Map ? json['resourceId'] as Map<String, dynamic> : null;
-    final sport = json['sportId'] is Map ? json['sportId'] as Map<String, dynamic> : null;
+    final res = json['resource'] is Map
+        ? json['resource'] as Map<String, dynamic>
+        : (json['resourceId'] is Map ? json['resourceId'] as Map<String, dynamic> : null);
+    final sport = json['sport'] is Map
+        ? json['sport'] as Map<String, dynamic>
+        : (json['sportId'] is Map ? json['sportId'] as Map<String, dynamic> : null);
     final branch = json['branchId'] is Map ? json['branchId'] as Map<String, dynamic> : null;
     final pricing = json['pricing'] is Map ? json['pricing'] as Map<String, dynamic> : null;
     final payment = json['payment'] is Map ? json['payment'] as Map<String, dynamic> : null;

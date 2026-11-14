@@ -8,6 +8,8 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../../../core/services/razorpay_bridge.dart';
 import '../../../../core/storage/storage_service.dart';
 import '../../../home/presentation/controllers/home_controller.dart';
+import '../../../siblings/data/models/sibling_models.dart';
+import '../../../siblings/data/services/sibling_service.dart';
 import '../../data/models/court_slot_model.dart';
 import '../../data/models/booking_pass_model.dart';
 import '../../data/services/booking_service.dart';
@@ -71,6 +73,12 @@ class CourtBookingController extends GetxController {
       userRole.value.toLowerCase().trim() == 'coach' ||
       userRole.value.toLowerCase().trim() == 'trainer';
   bool get isStudentOrCoach => isStudent || isCoach;
+
+  // Student Personal Booking State (Contract: JWT extracted, optional sibling selection, 'upi')
+  final RxList<SiblingStudentModel> familySiblings = <SiblingStudentModel>[].obs;
+  final Rx<SiblingStudentModel?> selectedSibling = Rx<SiblingStudentModel?>(null);
+  final RxString selectedPaymentMethod = 'upi'.obs;
+  final RxString bookingNotes = 'Personal training practice'.obs;
 
   String get holdTimeFormatted {
     final mins = (holdSecondsRemaining.value ~/ 60).toString().padLeft(2, '0');
@@ -190,6 +198,26 @@ class CourtBookingController extends GetxController {
             userRole.value = homeCtrl.userRole.value;
           }
         }
+
+        if (isStudent) {
+          loadFamilySiblings();
+        }
+      }
+    } catch (_) {}
+  }
+
+  /// Load linked family siblings for student booking assignment
+  Future<void> loadFamilySiblings() async {
+    try {
+      final service = SiblingService();
+      final profile = await service.getMyProfile();
+      if (profile.hasSiblings && profile.siblings.isNotEmpty) {
+        familySiblings.assignAll(profile.siblings);
+        final currentId = await _storage.getStudentId();
+        final match = profile.siblings.firstWhereOrNull(
+          (s) => s.studentId == currentId || s.isCurrent,
+        );
+        selectedSibling.value = match ?? profile.siblings.first;
       }
     } catch (_) {}
   }
@@ -848,6 +876,77 @@ class CourtBookingController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFFEF3F2),
         colorText: const Color(0xFFD92D20),
+      );
+      return null;
+    } finally {
+      isSubmitting.value = false;
+    }
+  }
+
+  /// Direct Student Personal Booking via POST /api/v1/bookings or /api/v1/bookings/multi
+  /// Follows exact backend contract: JWT authentication, clean body, optional sibling assignment
+  Future<BookingPassModel?> confirmStudentBooking({
+    String? paymentMethod,
+    String? notes,
+  }) async {
+    if (selectedSlots.isEmpty && (selectedCourt.value == null || selectedSlot.value == null)) {
+      return null;
+    }
+
+    if (selectedSlots.isEmpty && selectedCourt.value != null && selectedSlot.value != null) {
+      final court = selectedCourt.value!;
+      final slot = selectedSlot.value!;
+      final dateStr = DateFormat('yyyy-MM-dd').format(selectedDate.value);
+      selectedSlots.add(SelectedSlot(
+        resourceId: court.id,
+        courtName: court.name,
+        sportName: court.sport,
+        date: dateStr,
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        timeText: slot.timeText,
+        price: slot.price,
+      ));
+    }
+
+    isSubmitting.value = true;
+    try {
+      // Sibling assignment check
+      String? siblingId;
+      final currentPrimaryId = await _storage.getStudentId();
+      if (selectedSibling.value != null &&
+          selectedSibling.value!.studentId.isNotEmpty &&
+          selectedSibling.value!.studentId != currentPrimaryId) {
+        siblingId = selectedSibling.value!.studentId;
+      }
+
+      final pass = await _bookingService.confirmStudentBooking(
+        slots: selectedSlots,
+        holdId: activeHoldId.value,
+        paymentMethod: paymentMethod ?? selectedPaymentMethod.value,
+        notes: (notes != null && notes.isNotEmpty) ? notes : bookingNotes.value,
+        siblingStudentId: siblingId,
+      );
+
+      _holdTimer?.cancel();
+      isHoldingSlot.value = false;
+      activeHoldId.value = '';
+      selectedSlots.clear();
+      selectedSlot.value = null;
+      pricingQuote.value = null;
+
+      if (selectedCourt.value != null) {
+        loadSlotsForCourt(selectedCourt.value!);
+      }
+
+      return pass;
+    } catch (e) {
+      Get.snackbar(
+        'Booking Notice',
+        e.toString().replaceAll('Exception: ', ''),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFFEF2F2),
+        colorText: const Color(0xFF991B1B),
       );
       return null;
     } finally {
