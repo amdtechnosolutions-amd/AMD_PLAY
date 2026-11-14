@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../../home/presentation/controllers/home_controller.dart';
+import '../../../profile/presentation/controllers/profile_controller.dart';
 import '../../data/models/sibling_models.dart';
 import '../../data/services/sibling_service.dart';
 
@@ -123,7 +124,11 @@ class StudentSiblingSwitcherSheet {
                           onTap: () {
                             if (!isCurrent && profile.studentId.isNotEmpty) {
                               Get.back();
-                              homeCtrl.switchProfile(profile.studentId);
+                              if (Get.isRegistered<ProfileController>()) {
+                                Get.find<ProfileController>().switchStudentProfile(profile.studentId, homeCtrl);
+                              } else {
+                                homeCtrl.switchProfile(profile.studentId);
+                              }
                             }
                           },
                           child: Container(

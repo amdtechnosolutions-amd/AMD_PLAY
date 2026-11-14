@@ -118,31 +118,44 @@ class ProfileController extends GetxController {
               return;
             }
 
-            _populateFromUserMap(user);
+            // Check if a specific student is already active/selected
+            final storedStudentId = await _storage.getStudentId();
+            if (selectedStudentId.value.isEmpty &&
+                storedStudentId != null &&
+                storedStudentId.isNotEmpty) {
+              selectedStudentId.value = storedStudentId;
+            }
+            final activeStudentId = selectedStudentId.value;
+
+            // Only populate name/memberId from /auth/me if NO specific student has been switched yet
+            if (activeStudentId.isEmpty) {
+              _populateFromUserMap(user);
+              await _storage.saveUserSession(
+                accessToken: token,
+                refreshToken: token,
+                tenantId: tenantId.value,
+                role: role.value,
+                userName: fullName.value,
+                studentId: memberId.value,
+                userJson: jsonEncode(user),
+              );
+              if (Get.isRegistered<HomeController>()) {
+                final homeCtrl = Get.find<HomeController>();
+                if (fullName.value.isNotEmpty) {
+                  homeCtrl.updateUserName(fullName.value);
+                }
+                if (role.value.isNotEmpty) {
+                  homeCtrl.userRole.value = role.value;
+                }
+              }
+            } else {
+              rawUser.value = user;
+              role.value = (user['role'] ?? 'student').toString().trim();
+              status.value = (user['status'] ?? 'active').toString().trim();
+            }
+
             isRegistered.value = true;
             hasError.value = false;
-
-            // Persist updated user profile to storage
-            await _storage.saveUserSession(
-              accessToken: token,
-              refreshToken: token,
-              tenantId: tenantId.value,
-              role: role.value,
-              userName: fullName.value,
-              studentId: memberId.value,
-              userJson: jsonEncode(user),
-            );
-
-            // Keep HomeController in sync with real user name
-            if (Get.isRegistered<HomeController>()) {
-              final homeCtrl = Get.find<HomeController>();
-              if (fullName.value.isNotEmpty) {
-                homeCtrl.updateUserName(fullName.value);
-              }
-              if (role.value.isNotEmpty) {
-                homeCtrl.userRole.value = role.value;
-              }
-            }
 
             // For student role, fetch recommended /students/my/profile
             final roleStr = role.value.toLowerCase().trim();
@@ -150,19 +163,16 @@ class ProfileController extends GetxController {
                 roleStr == 'student' ||
                 roleStr.contains('student') ||
                 roleStr.contains('trainee');
-            final storedStudentId = await _storage.getStudentId();
 
             if (isStudent ||
+                activeStudentId.isNotEmpty ||
                 (storedStudentId != null && storedStudentId.isNotEmpty)) {
-              if (selectedStudentId.value.isEmpty &&
-                  storedStudentId != null &&
-                  storedStudentId.isNotEmpty) {
-                selectedStudentId.value = storedStudentId;
-              }
+              final targetId = activeStudentId.isNotEmpty
+                  ? activeStudentId
+                  : (storedStudentId ?? '');
               try {
-                final endpoint = (selectedStudentId.value.isNotEmpty &&
-                        selectedStudentId.value != storedStudentId)
-                    ? ApiEndpoints.studentProfileSwitch(selectedStudentId.value)
+                final endpoint = targetId.isNotEmpty
+                    ? ApiEndpoints.studentProfileSwitch(targetId)
                     : ApiEndpoints.studentProfile;
                 final profileRes = await _apiClient.dio.get(
                   endpoint,
@@ -173,16 +183,24 @@ class ProfileController extends GetxController {
                   final pData = profileRes.data['data'] as Map;
                   final student = pData['student'] is Map
                       ? pData['student'] as Map
-                      : null;
+                      : (pData['user'] is Map
+                          ? pData['user'] as Map
+                          : (pData.containsKey('fullName') ||
+                                  pData.containsKey('firstName')
+                              ? pData
+                              : null));
                   if (student != null) {
-                    final sId =
-                        (student['studentId'] ??
-                                student['_id'] ??
-                                student['id'] ??
-                                '')
-                            .toString();
+                    final rawSId = student['studentId'] is Map
+                        ? (student['studentId']['_id'] ??
+                            student['studentId']['id'])
+                        : (student['studentId'] ??
+                            student['_id'] ??
+                            student['id'] ??
+                            targetId);
+                    final sId = (rawSId ?? targetId).toString();
                     if (sId.isNotEmpty) {
                       selectedStudentId.value = sId;
+                      memberId.value = sId;
                     }
                     final sFullName = (student['fullName'] ?? '')
                         .toString()
@@ -199,7 +217,11 @@ class ProfileController extends GetxController {
                       email.value = student['email'].toString().trim();
                     }
 
-                    regNo.value = (student['regNo'] ?? '').toString().trim();
+                    regNo.value = (student['regNo'] ??
+                            student['employeeNo'] ??
+                            '')
+                        .toString()
+                        .trim();
                     parentName.value =
                         (student['parentName'] ?? pData['parentName'] ?? '')
                             .toString()
@@ -220,6 +242,17 @@ class ProfileController extends GetxController {
                               .toString()
                               .trim();
                     }
+
+                    // Save session with active selected student details
+                    await _storage.saveUserSession(
+                      accessToken: token,
+                      refreshToken: token,
+                      tenantId: tenantId.value,
+                      role: role.value,
+                      userName: fullName.value,
+                      studentId: sId.isNotEmpty ? sId : targetId,
+                      userJson: jsonEncode(student),
+                    );
                   }
                   final sibList = pData['siblings'] is List
                       ? pData['siblings'] as List
@@ -227,12 +260,22 @@ class ProfileController extends GetxController {
                             ? student['siblings'] as List
                             : []);
                   if (sibList.isNotEmpty) {
+                    final currentId = selectedStudentId.value.isNotEmpty
+                        ? selectedStudentId.value
+                        : targetId;
                     final parsed = sibList
                         .whereType<Map>()
                         .map(
-                          (s) => SiblingStudentModel.fromJson(
-                            Map<String, dynamic>.from(s),
-                          ),
+                          (s) {
+                            final model = SiblingStudentModel.fromJson(
+                              Map<String, dynamic>.from(s),
+                            );
+                            final isSel = model.studentId == currentId;
+                            return model.copyWith(
+                              isSelected: isSel,
+                              isCurrent: isSel,
+                            );
+                          },
                         )
                         .toList();
                     siblings.assignAll(parsed);
@@ -385,150 +428,191 @@ class ProfileController extends GetxController {
     String targetStudentId, [
     HomeController? homeCtrl,
   ]) async {
-    if (targetStudentId.isEmpty || targetStudentId == selectedStudentId.value) {
-      return;
+    if (targetStudentId.isEmpty) return;
+
+    // 1. Immediately apply cached sibling info so UI updates instantly!
+    final cached = siblings.firstWhereOrNull((s) => s.studentId == targetStudentId);
+    if (cached != null) {
+      selectedStudentId.value = cached.studentId;
+      memberId.value = cached.studentId;
+      if (cached.fullName.isNotEmpty) fullName.value = cached.fullName;
+      if (cached.phone.isNotEmpty) phone.value = cached.phone;
+      if (cached.email.isNotEmpty) email.value = cached.email;
+      if (cached.regNo.isNotEmpty) regNo.value = cached.regNo;
+      if (cached.parentName.isNotEmpty) parentName.value = cached.parentName;
+      if (cached.parentPhone.isNotEmpty) parentPhone.value = cached.parentPhone;
+      if (cached.batchName.isNotEmpty) batchName.value = cached.batchName;
+      if (cached.sportName.isNotEmpty) sportName.value = cached.sportName;
+
+      // Update switcher bar selection state immediately
+      final updated = siblings.map((s) {
+        final isSel = s.studentId == targetStudentId;
+        return s.copyWith(isSelected: isSel, isCurrent: isSel);
+      }).toList();
+      siblings.assignAll(updated);
+    } else {
+      selectedStudentId.value = targetStudentId;
     }
 
     isLoading.value = true;
     try {
-      final res = await _apiClient.dio.get(
-        ApiEndpoints.studentProfileSwitch(targetStudentId),
-      );
+      Map? studentData;
+      String? tenantIdStr;
+      String? roleStr;
 
-      if (res.data is Map &&
-          res.data['success'] == true &&
-          res.data['data'] is Map) {
-        final data = res.data['data'] as Map;
-        final student = data['student'] is Map ? data['student'] as Map : null;
+      // 1. Recommended: GET /api/v1/students/my/profile?studentId=<siblingId>
+      try {
+        final res = await _apiClient.dio.get(
+          ApiEndpoints.studentProfileSwitch(targetStudentId),
+        );
+        if (res.data is Map && res.data['success'] == true && res.data['data'] is Map) {
+          final data = res.data['data'] as Map;
+          studentData = data['student'] is Map
+              ? data['student'] as Map
+              : (data['user'] is Map
+                  ? data['user'] as Map
+                  : (data.containsKey('fullName') || data.containsKey('firstName') ? data : null));
+          tenantIdStr = data['tenantId']?.toString();
+          roleStr = data['role']?.toString();
 
-        if (student != null) {
-          final sId =
-              (student['studentId'] ??
-                      student['_id'] ??
-                      student['id'] ??
-                      targetStudentId)
-                  .toString();
-          selectedStudentId.value = sId;
-
-          final fName = (student['firstName'] ?? '').toString().trim();
-          final lName = (student['lastName'] ?? '').toString().trim();
-          final combinedName = '$fName $lName'.trim();
-          final name =
-              (student['fullName']?.toString().trim().isNotEmpty == true)
-              ? student['fullName'].toString().trim()
-              : (combinedName.isNotEmpty ? combinedName : 'Trainee');
-          fullName.value = name;
-
-          if (student['email'] != null &&
-              student['email'].toString().trim().isNotEmpty) {
-            email.value = student['email'].toString().trim();
-          }
-          if (student['phone'] != null &&
-              student['phone'].toString().trim().isNotEmpty) {
-            phone.value = student['phone'].toString().trim();
-          }
-
-          regNo.value = (student['regNo'] ?? student['employeeNo'] ?? '')
-              .toString()
-              .trim();
-          parentName.value = (student['parentName'] ?? data['parentName'] ?? '')
-              .toString()
-              .trim();
-          parentPhone.value =
-              (student['parentPhone'] ?? data['familyPhone'] ?? '')
-                  .toString()
-                  .trim();
-
-          final enrollments = student['enrollments'] as List? ?? [];
-          if (enrollments.isNotEmpty && enrollments.first is Map) {
-            final enr = enrollments.first as Map;
-            final b = enr['batchId'] is Map ? enr['batchId'] as Map : null;
-            batchName.value = (b?['name'] ?? '').toString().trim();
-            sportName.value =
-                (b?['sportId'] is Map ? b!['sportId']['name'] : '')
-                    .toString()
-                    .trim();
-          }
-
-          final storedToken = await _storage.getAccessToken() ?? '';
-          final tenantId = (data['tenantId'] ?? await _storage.getTenantId())
-              ?.toString();
-          final roleStr =
-              (data['role'] ?? await _storage.getUserRole())?.toString() ??
-              'student';
-
-          await _storage.saveUserSession(
-            accessToken: storedToken,
-            refreshToken: storedToken,
-            tenantId: tenantId,
-            studentId: sId,
-            role: roleStr,
-            userName: name,
-            userJson: jsonEncode(student),
-          );
-
-          // Sync HomeController if registered
-          final hCtrl =
-              homeCtrl ??
-              (Get.isRegistered<HomeController>()
-                  ? Get.find<HomeController>()
-                  : null);
-          if (hCtrl != null) {
-            hCtrl.currentStudentId.value = sId;
-            hCtrl.userName.value = name;
-            hCtrl.greetingName.value = (fName.isNotEmpty ? fName : name)
-                .toUpperCase();
-            hCtrl.refreshDashboard();
-          }
-
-          // Sync AttendanceController if registered
-          if (Get.isRegistered<AttendanceController>()) {
-            Get.find<AttendanceController>().fetchLiveAttendance(
-              studentId: sId,
-            );
-          }
-
-          // Parse siblings list from response to update selection state
           final sibList = data['siblings'] is List
               ? data['siblings'] as List
-              : (student['siblings'] is List
-                    ? student['siblings'] as List
-                    : []);
+              : (studentData != null && studentData['siblings'] is List
+                  ? studentData['siblings'] as List
+                  : []);
           if (sibList.isNotEmpty) {
             final parsed = sibList
                 .whereType<Map>()
-                .map(
-                  (s) => SiblingStudentModel.fromJson(
-                    Map<String, dynamic>.from(s),
-                  ),
-                )
+                .map((s) {
+                  final model = SiblingStudentModel.fromJson(Map<String, dynamic>.from(s));
+                  final isSel = model.studentId == targetStudentId;
+                  return model.copyWith(isSelected: isSel, isCurrent: isSel);
+                })
                 .toList();
             siblings.assignAll(parsed);
             hasSiblings.value = parsed.length > 1;
             siblingCount.value = parsed.length;
           }
+        }
+      } catch (e) {
+        debugPrint('[ProfileController] GET switch error: $e');
+      }
 
-          Get.snackbar(
-            'Profile Switched',
-            'Switched active profile to $name',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: const Color(0xFF0F172A),
-            colorText: Colors.white,
-            margin: const EdgeInsets.all(16),
-            borderRadius: 12,
+      // 2. Fallback: GET /api/v1/students/:id (Universal student endpoint)
+      if (studentData == null) {
+        try {
+          final res = await _apiClient.dio.get(
+            ApiEndpoints.studentById(targetStudentId),
           );
+          if (res.data is Map && res.data['success'] == true && res.data['data'] is Map) {
+            final data = res.data['data'] as Map;
+            studentData = data['student'] is Map
+                ? data['student'] as Map
+                : (data.containsKey('fullName') || data.containsKey('firstName') ? data : null);
+          }
+        } catch (e) {
+          debugPrint('[ProfileController] GET studentById error: $e');
         }
       }
-    } catch (e) {
-      debugPrint('[ProfileController] switchStudentProfile error: $e');
-      final hCtrl =
-          homeCtrl ??
-          (Get.isRegistered<HomeController>()
-              ? Get.find<HomeController>()
-              : null);
-      if (hCtrl != null) {
-        await hCtrl.switchProfile(targetStudentId);
+
+      // 3. Fallback: POST /api/v1/auth/student/switch-profile
+      if (studentData == null) {
+        try {
+          final res = await _apiClient.dio.post(
+            ApiEndpoints.switchStudentProfile,
+            data: {'targetStudentId': targetStudentId},
+          );
+          if (res.data is Map && res.data['success'] == true && res.data['data'] is Map) {
+            final data = res.data['data'] as Map;
+            studentData = data['user'] is Map
+                ? data['user'] as Map
+                : (data['student'] is Map ? data['student'] as Map : null);
+            tenantIdStr = data['tenantId']?.toString();
+            roleStr = data['role']?.toString();
+          }
+        } catch (e) {
+          debugPrint('[ProfileController] POST switch error: $e');
+        }
       }
+
+      // Populate resolved student details
+      if (studentData != null) {
+        final rawSId = studentData['studentId'] is Map
+            ? (studentData['studentId']['_id'] ?? studentData['studentId']['id'])
+            : (studentData['studentId'] ?? studentData['_id'] ?? studentData['id'] ?? targetStudentId);
+        final sId = (rawSId ?? targetStudentId).toString();
+        selectedStudentId.value = sId;
+        memberId.value = sId;
+
+        final fName = (studentData['firstName'] ?? '').toString().trim();
+        final lName = (studentData['lastName'] ?? '').toString().trim();
+        final combinedName = '$fName $lName'.trim();
+        final name = (studentData['fullName']?.toString().trim().isNotEmpty == true)
+            ? studentData['fullName'].toString().trim()
+            : (combinedName.isNotEmpty ? combinedName : (cached?.fullName ?? 'Trainee'));
+        fullName.value = name;
+
+        if (studentData['email'] != null && studentData['email'].toString().trim().isNotEmpty) {
+          email.value = studentData['email'].toString().trim();
+        }
+        if (studentData['phone'] != null && studentData['phone'].toString().trim().isNotEmpty) {
+          phone.value = studentData['phone'].toString().trim();
+        }
+
+        regNo.value = (studentData['regNo'] ?? studentData['employeeNo'] ?? cached?.regNo ?? '').toString().trim();
+        parentName.value = (studentData['parentName'] ?? cached?.parentName ?? '').toString().trim();
+        parentPhone.value = (studentData['parentPhone'] ?? cached?.parentPhone ?? '').toString().trim();
+
+        final enrollments = studentData['enrollments'] as List? ?? [];
+        if (enrollments.isNotEmpty && enrollments.first is Map) {
+          final enr = enrollments.first as Map;
+          final b = enr['batchId'] is Map ? enr['batchId'] as Map : null;
+          batchName.value = (b?['name'] ?? '').toString().trim();
+          sportName.value = (b?['sportId'] is Map ? b!['sportId']['name'] : '').toString().trim();
+        } else if (studentData['batchName'] != null && studentData['batchName'].toString().isNotEmpty) {
+          batchName.value = studentData['batchName'].toString().trim();
+          sportName.value = (studentData['sportName'] ?? 'Badminton').toString().trim();
+        }
+
+        final storedToken = await _storage.getAccessToken() ?? '';
+        final resolvedTenant = tenantIdStr ?? await _storage.getTenantId();
+        final resolvedRole = roleStr ?? await _storage.getUserRole() ?? 'student';
+
+        await _storage.saveUserSession(
+          accessToken: storedToken,
+          refreshToken: storedToken,
+          tenantId: resolvedTenant,
+          studentId: sId,
+          role: resolvedRole,
+          userName: name,
+          userJson: jsonEncode(studentData),
+        );
+
+        // Sync HomeController state safely without full auth reset
+        final hCtrl = homeCtrl ?? (Get.isRegistered<HomeController>() ? Get.find<HomeController>() : null);
+        if (hCtrl != null) {
+          hCtrl.currentStudentId.value = sId;
+          hCtrl.userName.value = name;
+          hCtrl.greetingName.value = (fName.isNotEmpty ? fName : name).toUpperCase();
+        }
+
+        // Sync AttendanceController
+        if (Get.isRegistered<AttendanceController>()) {
+          Get.find<AttendanceController>().fetchLiveAttendance(studentId: sId);
+        }
+
+        Get.snackbar(
+          'Profile Switched',
+          'Switched active profile to $name',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFF0F172A),
+          colorText: Colors.white,
+          margin: const EdgeInsets.all(16),
+          borderRadius: 12,
+        );
+      }
+    } catch (e) {
+      debugPrint('[ProfileController] switchStudentProfile unexpected error: $e');
     } finally {
       isLoading.value = false;
     }

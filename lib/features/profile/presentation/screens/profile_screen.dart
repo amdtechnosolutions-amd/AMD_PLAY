@@ -246,7 +246,10 @@ class ProfileScreen extends StatelessWidget {
                     : (homeCtrl.currentStudentId.value.isNotEmpty
                         ? homeCtrl.currentStudentId.value
                         : controller.memberId.value);
-                final isSelected = sib.studentId == currentId ||
+                final isSelected =
+                    (sib.studentId.isNotEmpty && sib.studentId == currentId) ||
+                    (sib.regNo.isNotEmpty &&
+                        sib.regNo == controller.regNo.value) ||
                     (currentId.isEmpty && (sib.isCurrent || sib.isSelected));
                 final initial = sib.fullName.isNotEmpty
                     ? sib.fullName[0].toUpperCase()
@@ -257,8 +260,10 @@ class ProfileScreen extends StatelessWidget {
 
                 return GestureDetector(
                   onTap: () {
-                    if (!isSelected && sib.studentId.isNotEmpty) {
-                      controller.switchStudentProfile(sib.studentId, homeCtrl);
+                    final targetId =
+                        sib.studentId.isNotEmpty ? sib.studentId : sib.regNo;
+                    if (targetId.isNotEmpty) {
+                      controller.switchStudentProfile(targetId, homeCtrl);
                     }
                   },
                   child: Container(

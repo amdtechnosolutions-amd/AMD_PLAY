@@ -81,6 +81,58 @@ void main() {
       expect(sibling.regNo, 'isabd003');
       expect(sibling.studentId, '6ae3bfa56989d6280874ef35');
     });
+
+    test('shifts active sibling profile using copyWith and maps selection correctly', () {
+      final s1 = const SiblingStudentModel(
+        studentId: '6af1e2ae185e913f71898a76',
+        fullName: 'RUTHVI PANDIAN',
+        regNo: 'isabd006',
+        isCurrent: true,
+        isSelected: true,
+      );
+      final s2 = const SiblingStudentModel(
+        studentId: '6ae3bfa56989d6280874ef35',
+        fullName: 'keshika devan',
+        regNo: 'isabd003',
+        isCurrent: false,
+        isSelected: false,
+      );
+
+      final list = [s1, s2];
+      const targetStudentId = '6ae3bfa56989d6280874ef35';
+
+      final shifted = list.map((s) {
+        final isSel = s.studentId == targetStudentId;
+        return s.copyWith(isSelected: isSel, isCurrent: isSel);
+      }).toList();
+
+      expect(shifted[0].isSelected, isFalse);
+      expect(shifted[0].isCurrent, isFalse);
+      expect(shifted[1].isSelected, isTrue);
+      expect(shifted[1].isCurrent, isTrue);
+      expect(shifted[1].fullName, 'keshika devan');
+      expect(shifted[1].regNo, 'isabd003');
+    });
+
+    test('parses studentId whether represented as String or Map', () {
+      final itemWithString = {
+        'studentId': '6ae3bfa56989d6280874ef35',
+        'fullName': 'keshika devan',
+      };
+      final itemWithMap = {
+        'studentId': {
+          '_id': '6ae3bfa56989d6280874ef35',
+          'firstName': 'keshika',
+        },
+        'fullName': 'keshika devan',
+      };
+
+      final m1 = SiblingStudentModel.fromJson(itemWithString);
+      final m2 = SiblingStudentModel.fromJson(itemWithMap);
+
+      expect(m1.studentId, '6ae3bfa56989d6280874ef35');
+      expect(m2.studentId, '6ae3bfa56989d6280874ef35');
+    });
   });
 }
 

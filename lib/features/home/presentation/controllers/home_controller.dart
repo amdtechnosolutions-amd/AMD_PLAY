@@ -350,9 +350,11 @@ class HomeController extends GetxController {
             final lName = (user['lastName'] ?? '').toString().trim();
             final full = (user['fullName'] ?? user['name'] ?? (fName.isNotEmpty ? '$fName $lName' : '')).toString().trim();
             if (full.isNotEmpty && (!isPayAndPlay || full.toLowerCase() != 'trainee')) {
-              updateUserName(full);
+              if (currentStudentId.value.isEmpty || currentStudentId.value == (user['id'] ?? user['_id'])?.toString()) {
+                updateUserName(full);
+              }
             }
-            if (user['id'] != null) {
+            if (user['id'] != null && currentStudentId.value.isEmpty) {
               currentStudentId.value = user['id'].toString();
             }
             if (user['role'] != null && user['role'].toString().isNotEmpty) {
@@ -554,7 +556,10 @@ class HomeController extends GetxController {
 
     // 1. Fetch live recommended student profile & siblings via GET /students/my/profile
     try {
-      final profileRes = await _apiClient.dio.get(ApiEndpoints.studentProfile);
+      final endpoint = currentStudentId.value.isNotEmpty
+          ? ApiEndpoints.studentProfileSwitch(currentStudentId.value)
+          : ApiEndpoints.studentProfile;
+      final profileRes = await _apiClient.dio.get(endpoint);
       if (profileRes.data is Map && profileRes.data['success'] == true && profileRes.data['data'] is Map) {
         final data = profileRes.data['data'] as Map;
         final student = data['student'] is Map ? data['student'] as Map : null;
@@ -1034,7 +1039,7 @@ class HomeController extends GetxController {
           Get.find<AttendanceController>().fetchLiveAttendance(studentId: targetStudentId);
         }
         if (Get.isRegistered<ProfileController>()) {
-          Get.find<ProfileController>().loadProfile();
+          Get.find<ProfileController>().switchStudentProfile(targetStudentId);
         }
       } else {
         if (Get.isDialogOpen ?? false) {

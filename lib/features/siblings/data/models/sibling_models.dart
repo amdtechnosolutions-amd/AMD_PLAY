@@ -132,7 +132,52 @@ class SiblingStudentModel {
     this.enrollments = const [],
   });
 
+  SiblingStudentModel copyWith({
+    String? studentId,
+    String? firstName,
+    String? lastName,
+    String? fullName,
+    String? regNo,
+    String? cardNo,
+    String? phone,
+    String? email,
+    String? parentPhone,
+    String? parentName,
+    String? siblingGroupId,
+    String? batchId,
+    String? batchName,
+    String? sportName,
+    String? status,
+    bool? isCurrent,
+    bool? isSelected,
+    List<SiblingEnrollmentModel>? enrollments,
+  }) {
+    return SiblingStudentModel(
+      studentId: studentId ?? this.studentId,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      fullName: fullName ?? this.fullName,
+      regNo: regNo ?? this.regNo,
+      cardNo: cardNo ?? this.cardNo,
+      phone: phone ?? this.phone,
+      email: email ?? this.email,
+      parentPhone: parentPhone ?? this.parentPhone,
+      parentName: parentName ?? this.parentName,
+      siblingGroupId: siblingGroupId ?? this.siblingGroupId,
+      batchId: batchId ?? this.batchId,
+      batchName: batchName ?? this.batchName,
+      sportName: sportName ?? this.sportName,
+      status: status ?? this.status,
+      isCurrent: isCurrent ?? this.isCurrent,
+      isSelected: isSelected ?? this.isSelected,
+      enrollments: enrollments ?? this.enrollments,
+    );
+  }
+
   factory SiblingStudentModel.fromJson(Map<String, dynamic> json) {
+    final rawStudentId = json['studentId'] is Map
+        ? (json['studentId']['_id'] ?? json['studentId']['id'] ?? '')
+        : (json['studentId'] ?? json['id'] ?? json['_id'] ?? '');
     final fName = (json['firstName'] ?? '').toString().trim();
     final lName = (json['lastName'] ?? '').toString().trim();
     final combined = '$fName $lName'.trim();
@@ -163,7 +208,7 @@ class SiblingStudentModel {
     final isSel = json['isSelected'] == true || isCur;
 
     return SiblingStudentModel(
-      studentId: (json['studentId'] ?? json['id'] ?? json['_id'] ?? '').toString(),
+      studentId: rawStudentId.toString(),
       firstName: fName,
       lastName: lName,
       fullName: resolvedFull,
