@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import '../../../../core/network/api_client.dart';
@@ -477,6 +478,12 @@ class BookingService {
 
           if (Get.isRegistered<StorageService>() && token.isNotEmpty) {
             final storage = Get.find<StorageService>();
+            final currentRole = await storage.getUserRole();
+            // NEVER overwrite an existing student or coach session with a guest customer session!
+            if (currentRole == 'student' || currentRole == 'coach' || currentRole == 'trainer') {
+              debugPrint('ℹ️ [BOOKING SERVICE] Preserving authenticated $currentRole session. Refusing to overwrite with guest customer.');
+              return body;
+            }
             await storage.saveUserSession(
               accessToken: token,
               refreshToken: token,

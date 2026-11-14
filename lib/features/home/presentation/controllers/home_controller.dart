@@ -274,9 +274,10 @@ class HomeController extends GetxController {
   /// 1. Load Live User Profile Info
   Future<void> _loadUserProfile() async {
     var name = await _storage.getUserName();
-    final role = await _storage.getUserRole();
+    var role = await _storage.getUserRole();
     final stId = await _storage.getStudentId();
     final userJson = await _storage.getUserJson();
+    final token = await _storage.getAccessToken();
 
     // Discard legacy mock debug data
     if (name != null &&
@@ -296,6 +297,27 @@ class HomeController extends GetxController {
     if (stId != null && stId.isNotEmpty) {
       currentStudentId.value = stId;
     }
+
+    // Auto-heal session if an academy student was accidentally downgraded to customer
+    if (role == 'customer' && userJson != null && userJson.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(userJson);
+        if (decoded is Map &&
+            (decoded['regNo'] != null && decoded['regNo'].toString().trim().isNotEmpty)) {
+          role = 'student';
+          _storage.saveUserSession(
+            accessToken: token ?? '',
+            refreshToken: token ?? '',
+            tenantId: await _storage.getTenantId(),
+            studentId: stId,
+            role: 'student',
+            userName: name,
+            userJson: userJson,
+          );
+        }
+      } catch (_) {}
+    }
+
     if (role != null && role.isNotEmpty) {
       userRole.value = role;
     } else {

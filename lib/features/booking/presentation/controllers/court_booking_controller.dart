@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -6,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../../../core/services/razorpay_bridge.dart';
 import '../../../../core/storage/storage_service.dart';
+import '../../../home/presentation/controllers/home_controller.dart';
 import '../../data/models/court_slot_model.dart';
 import '../../data/models/booking_pass_model.dart';
 import '../../data/services/booking_service.dart';
@@ -62,6 +64,13 @@ class CourtBookingController extends GetxController {
   final RxBool isGuestRegistered = false.obs;
   final RxBool isExistingCustomer = false.obs;
   final RxBool isRegisteringGuest = false.obs;
+  final RxString userRole = ''.obs;
+
+  bool get isStudent => userRole.value.toLowerCase().trim() == 'student';
+  bool get isCoach =>
+      userRole.value.toLowerCase().trim() == 'coach' ||
+      userRole.value.toLowerCase().trim() == 'trainer';
+  bool get isStudentOrCoach => isStudent || isCoach;
 
   String get holdTimeFormatted {
     final mins = (holdSecondsRemaining.value ~/ 60).toString().padLeft(2, '0');
@@ -107,21 +116,79 @@ class CourtBookingController extends GetxController {
   void onInit() {
     super.onInit();
     _initRazorpay();
-    _checkCustomerSession();
+    checkCustomerSession();
     _initRollingDates();
     loadSports();
   }
 
-  Future<void> _checkCustomerSession() async {
+  Future<void> checkCustomerSession() async {
     try {
       final token = await _storage.getAccessToken();
       final role = await _storage.getUserRole();
       final name = await _storage.getUserName();
-      if (token != null && token.isNotEmpty && role == 'customer') {
+      final userJson = await _storage.getUserJson();
+
+      if (role != null && role.isNotEmpty) {
+        userRole.value = role;
+      }
+
+      if (token != null && token.isNotEmpty) {
+        // Any authenticated user (student, coach, or customer) has an active identity
         isGuestRegistered.value = true;
-        if (name != null && name.isNotEmpty && name != 'Pay & Play Guest') {
+
+        if (name != null &&
+            name.isNotEmpty &&
+            name != 'Pay & Play Guest' &&
+            name != 'Trainee' &&
+            name != 'Player') {
           customerName.value = name;
-          await _storage.saveUserName(name);
+        }
+
+        if (userJson != null && userJson.isNotEmpty) {
+          try {
+            final decoded = jsonDecode(userJson);
+            if (decoded is Map) {
+              final phone = (decoded['phone'] ??
+                      decoded['parentPhone'] ??
+                      decoded['mobile'] ??
+                      '')
+                  .toString()
+                  .trim();
+              if (phone.isNotEmpty && customerPhone.value.isEmpty) {
+                customerPhone.value = phone;
+              }
+
+              final email = (decoded['email'] ?? '').toString().trim();
+              if (email.isNotEmpty && customerEmail.value.isEmpty) {
+                customerEmail.value = email;
+              }
+
+              final fName = (decoded['firstName'] ?? '').toString().trim();
+              final lName = (decoded['lastName'] ?? '').toString().trim();
+              final fullName = (decoded['fullName'] ??
+                      decoded['name'] ??
+                      (fName.isNotEmpty ? '$fName $lName' : ''))
+                  .toString()
+                  .trim();
+              if (fullName.isNotEmpty && customerName.value.isEmpty) {
+                customerName.value = fullName;
+              }
+            }
+          } catch (_) {}
+        }
+
+        // Cross-sync with live HomeController if available
+        if (Get.isRegistered<HomeController>()) {
+          final homeCtrl = Get.find<HomeController>();
+          if (customerName.value.isEmpty &&
+              homeCtrl.userName.value.isNotEmpty &&
+              homeCtrl.userName.value != 'Trainee' &&
+              homeCtrl.userName.value != 'Player') {
+            customerName.value = homeCtrl.userName.value;
+          }
+          if (homeCtrl.userRole.value.isNotEmpty) {
+            userRole.value = homeCtrl.userRole.value;
+          }
         }
       }
     } catch (_) {}
@@ -657,6 +724,20 @@ class CourtBookingController extends GetxController {
     required String name,
     String? email,
   }) async {
+    // If currently authenticated as a student or coach, NEVER register as guest customer or overwrite session
+    final currentRole = await _storage.getUserRole();
+    if (currentRole == 'student' ||
+        currentRole == 'coach' ||
+        currentRole == 'trainer' ||
+        isStudentOrCoach) {
+      debugPrint('ℹ️ [BOOKING] Authenticated $currentRole session active. Skipping guest registration.');
+      customerPhone.value = phone.trim();
+      customerName.value = name.trim();
+      if (email != null && email.trim().isNotEmpty) customerEmail.value = email.trim();
+      isGuestRegistered.value = true;
+      return true;
+    }
+
     if (phone.trim().length < 10) {
       Get.snackbar(
         'Invalid Mobile',

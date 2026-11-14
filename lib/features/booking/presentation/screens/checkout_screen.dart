@@ -25,6 +25,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   @override
   void initState() {
     super.initState();
+    widget.controller.checkCustomerSession().then((_) {
+      if (mounted) {
+        if (_phoneController.text.isEmpty && widget.controller.customerPhone.value.isNotEmpty) {
+          _phoneController.text = widget.controller.customerPhone.value;
+        }
+        if (_nameController.text.isEmpty && widget.controller.customerName.value.isNotEmpty) {
+          _nameController.text = widget.controller.customerName.value;
+        }
+        if (_emailController.text.isEmpty && widget.controller.customerEmail.value.isNotEmpty) {
+          _emailController.text = widget.controller.customerEmail.value;
+        }
+      }
+    });
     if (widget.controller.customerPhone.value.isNotEmpty) {
       _phoneController.text = widget.controller.customerPhone.value;
     }
@@ -212,51 +225,95 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             Text('Player Details', style: AppTypography.sectionTitle),
             SizedBox(height: 10.h),
             Obx(() {
-              if (widget.controller.isGuestRegistered.value) {
+              if (widget.controller.isGuestRegistered.value || widget.controller.isStudentOrCoach) {
+                final isStudent = widget.controller.isStudent;
+                final isCoach = widget.controller.isCoach;
+                final badgeLabel = isStudent
+                    ? 'STUDENT'
+                    : isCoach
+                        ? 'COACH'
+                        : (widget.controller.isExistingCustomer.value ? 'CUSTOMER' : 'GUEST');
+
                 return Container(
                   padding: EdgeInsets.all(14.w),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16.r),
-                    border: Border.all(color: const Color(0xFF10B981), width: 1.2),
+                    border: Border.all(
+                      color: isStudent ? const Color(0xFFD4AF37) : const Color(0xFF10B981),
+                      width: 1.2,
+                    ),
                   ),
                   child: Row(
                     children: [
                       Container(
                         padding: EdgeInsets.all(8.w),
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFECFDF5),
+                        decoration: BoxDecoration(
+                          color: isStudent ? const Color(0xFFFFFBEB) : const Color(0xFFECFDF5),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.verified_user_rounded, color: Color(0xFF10B981), size: 20),
+                        child: Icon(
+                          isStudent ? Icons.school_rounded : Icons.verified_user_rounded,
+                          color: isStudent ? const Color(0xFFD4AF37) : const Color(0xFF10B981),
+                          size: 20.sp,
+                        ),
                       ),
                       SizedBox(width: 12.w),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              widget.controller.customerName.value.isNotEmpty
-                                  ? widget.controller.customerName.value
-                                  : 'Guest Player',
-                              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A)),
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    widget.controller.customerName.value.isNotEmpty
+                                        ? widget.controller.customerName.value
+                                        : (isStudent ? 'Academy Student' : 'Guest Player'),
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color(0xFF0F172A),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                SizedBox(width: 6.w),
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                                  decoration: BoxDecoration(
+                                    color: isStudent ? const Color(0xFFFEF3C7) : const Color(0xFFDCFCE7),
+                                    borderRadius: BorderRadius.circular(6.r),
+                                  ),
+                                  child: Text(
+                                    badgeLabel,
+                                    style: TextStyle(
+                                      fontSize: 9.5.sp,
+                                      fontWeight: FontWeight.w800,
+                                      color: isStudent ? const Color(0xFF92400E) : const Color(0xFF166534),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             SizedBox(height: 2.h),
                             Text(
                               widget.controller.customerPhone.value.isNotEmpty
                                   ? '+91 ${widget.controller.customerPhone.value}'
-                                  : 'Account Authenticated',
+                                  : (isStudent ? 'Verified Student Account' : 'Account Authenticated'),
                               style: TextStyle(fontSize: 12.sp, color: const Color(0xFF64748B)),
                             ),
                           ],
                         ),
                       ),
-                      TextButton(
-                        onPressed: () {
-                          widget.controller.isGuestRegistered.value = false;
-                        },
-                        child: Text('Edit', style: TextStyle(fontSize: 12.sp, color: AppColors.primary)),
-                      ),
+                      if (!widget.controller.isStudentOrCoach)
+                        TextButton(
+                          onPressed: () {
+                            widget.controller.isGuestRegistered.value = false;
+                          },
+                          child: Text('Edit', style: TextStyle(fontSize: 12.sp, color: AppColors.primary)),
+                        ),
                     ],
                   ),
                 );
@@ -490,8 +547,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 text: 'PAY ₹${total.toInt()} VIA RAZORPAY',
                 isLoading: widget.controller.isSubmitting.value || widget.controller.isRegisteringGuest.value,
                 onPressed: () async {
-                  // Step 1: If player session not authenticated, auto-register / match first
-                  if (!widget.controller.isGuestRegistered.value) {
+                  // Step 1: Only auto-register if completely unauthenticated guest
+                  if (!widget.controller.isGuestRegistered.value &&
+                      !widget.controller.isStudentOrCoach) {
                     final phone = _phoneController.text.trim();
                     final name = _nameController.text.trim();
                     final email = _emailController.text.trim();

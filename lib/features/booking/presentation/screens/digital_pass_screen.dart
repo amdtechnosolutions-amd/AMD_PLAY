@@ -5,8 +5,8 @@ import 'package:get/get.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../data/models/booking_pass_model.dart';
-import '../../../main_nav/presentation/controllers/main_nav_controller.dart';
 import '../../../home/presentation/widgets/payment_receipt_dialog.dart';
+import 'bookings_history_screen.dart';
 
 class DigitalPassScreen extends StatelessWidget {
   final BookingPassModel pass;
@@ -24,10 +24,7 @@ class DigitalPassScreen extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.close_rounded, color: Colors.white),
           onPressed: () {
-            // Navigate back to main nav
-            if (Get.isRegistered<MainNavController>()) {
-              Get.find<MainNavController>().changeTab(1); // Bookings tab
-            }
+            // Navigate back to main nav root without altering user role or tabs
             Get.until((route) => route.isFirst);
           },
         ),
@@ -362,10 +359,8 @@ class DigitalPassScreen extends StatelessWidget {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                     ),
                     onPressed: () {
-                      if (Get.isRegistered<MainNavController>()) {
-                        Get.find<MainNavController>().changeTab(1); // Bookings tab
-                      }
                       Get.until((route) => route.isFirst);
+                      Get.to(() => const BookingsHistoryScreen());
                     },
                     child: Text(
                       'MY BOOKINGS',

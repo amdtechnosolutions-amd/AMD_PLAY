@@ -308,6 +308,7 @@ void main() {
     Get.put<CourtBookingController>(controller);
 
     await controller.loadSports();
+    controller.selectedDate.value = DateTime.now().add(const Duration(days: 1));
     expect(controller.courts.isNotEmpty, isTrue);
 
     const slot = SlotModel(
@@ -386,6 +387,7 @@ void main() {
     Get.put<CourtBookingController>(controller);
 
     await controller.loadSports();
+    controller.selectedDate.value = DateTime.now().add(const Duration(days: 1));
 
     const slot1 = SlotModel(
       courtId: 'crt-1',
