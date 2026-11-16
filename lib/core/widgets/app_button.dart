@@ -89,7 +89,7 @@ class AppButton extends StatelessWidget {
         break;
       case AppButtonVariant.primary:
         bg = AppColors.primary;
-        fg = AppColors.textInverse;
+        fg = AppColors.textPrimary;
         break;
     }
 

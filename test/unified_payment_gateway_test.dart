@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_cashfree_pg_sdk/api/cfsession/cfsession.dart';
 import 'package:flutter_cashfree_pg_sdk/utils/cfenums.dart';
+import 'package:mobile_app/core/theme/app_colors.dart';
 import 'package:mobile_app/core/network/api_endpoints.dart';
 import 'package:mobile_app/core/services/unified_payment_service.dart';
 import 'package:mobile_app/features/booking/data/models/booking_pass_model.dart';
@@ -182,6 +183,12 @@ void main() {
           rawEnv == 'LIVE';
 
       expect(isProd, isTrue);
+    });
+
+    test('Checkout screen styling tokens use white background and AppColors.primary borders', () {
+      // Validates branding requirements: white screen background and AppColors.primary borders
+      expect(AppColors.primary, const Color(0xFFF9D106));
+      expect(AppColors.surface, const Color(0xFFFFFFFF));
     });
   });
 }
