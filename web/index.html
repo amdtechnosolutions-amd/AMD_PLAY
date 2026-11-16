@@ -42,24 +42,42 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
-    /* Cashfree & Payment Gateway Merchant Legal Compliance Footer */
+    /* Cashfree & Payment Gateway Merchant Legal Compliance Floating Badge */
     #inertia-legal-bar {
       position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      bottom: 8px;
+      right: 12px;
       z-index: 99999;
-      background: rgba(15, 23, 42, 0.95);
+      background: rgba(15, 23, 42, 0.92);
       backdrop-filter: blur(8px);
-      border-top: 1px solid rgba(212, 175, 55, 0.4);
-      padding: 6px 16px;
+      border: 1px solid rgba(212, 175, 55, 0.5);
+      border-radius: 30px;
+      padding: 5px 12px;
       font-size: 11px;
       color: #94A3B8;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.4);
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
       pointer-events: auto;
+      max-width: calc(100vw - 24px);
+    }
+
+    #inertia-legal-bar .desktop-legal-info {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    @media (max-width: 640px) {
+      #inertia-legal-bar .desktop-legal-info {
+        display: none;
+      }
+      #inertia-legal-bar {
+        bottom: 8px;
+        right: 8px;
+        padding: 4px 10px;
+      }
     }
 
     #inertia-legal-bar strong {
@@ -72,12 +90,13 @@
       text-decoration: none;
       background: none;
       border: 1px solid rgba(212, 175, 55, 0.5);
-      border-radius: 4px;
-      padding: 2px 8px;
+      border-radius: 20px;
+      padding: 3px 10px;
       cursor: pointer;
       font-size: 10.5px;
-      font-weight: 600;
+      font-weight: 700;
       transition: all 0.2s ease;
+      white-space: nowrap;
     }
 
     #inertia-legal-bar button:hover {
@@ -205,20 +224,18 @@
     </div>
   </noscript>
 
-  <!-- Pinned Cashfree & Regulatory Merchant Legal Information Bar -->
+  <!-- Cashfree & Regulatory Merchant Legal Information Floating Badge -->
   <div id="inertia-legal-bar">
-    <div>
+    <div class="desktop-legal-info">
       <span>Entity: <strong>TEAM INERTIA ENTERPRISES</strong></span>
-      <span style="margin: 0 6px;">•</span>
+      <span>•</span>
       <span>Proprietor: <strong>KRISHNAN ROHITH KUMAR</strong></span>
-      <span style="margin: 0 6px;">•</span>
+      <span>•</span>
       <span>Email: <strong>Teaminertia3499@gmail.com</strong></span>
-      <span style="margin: 0 6px;">•</span>
+      <span>•</span>
       <span>Phone: <strong>9789006925</strong></span>
     </div>
-    <div>
-      <button onclick="document.getElementById('inertia-legal-modal').style.display='flex'">Merchant Details & Policies</button>
-    </div>
+    <button onclick="document.getElementById('inertia-legal-modal').style.display='flex'">⚖️ Legal & Policies</button>
   </div>
 
   <!-- Interactive Modal for Full Legal Compliance & Policies -->

@@ -57,6 +57,19 @@ void main() async {
   runApp(const SportsAcademyApp());
 }
 
+class AppScrollBehavior extends MaterialScrollBehavior {
+  const AppScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.unknown,
+      };
+}
+
 class SportsAcademyApp extends StatelessWidget {
   const SportsAcademyApp({super.key});
 
@@ -71,6 +84,7 @@ class SportsAcademyApp extends StatelessWidget {
           title: 'Inertia Sports Academy',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
+          scrollBehavior: const AppScrollBehavior(),
           initialRoute: AppPages.initial,
           getPages: AppPages.routes,
           unknownRoute: GetPage(
