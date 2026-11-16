@@ -559,11 +559,43 @@ class BookingService {
     );
   }
 
+  /// 7a. Detect active payment gateway from server settings or court configuration
+  Future<String?> fetchActivePaymentGateway({String? resourceId}) async {
+    try {
+      final res = await _apiClient.dio.get('/settings');
+      if (res.statusCode == 200 && res.data != null) {
+        final data = res.data['data'] ?? res.data;
+        if (data is Map) {
+          final pg = data['paymentGateways'];
+          if (pg is Map && pg['activeGateway'] != null) {
+            return pg['activeGateway'].toString().toLowerCase();
+          }
+          if (data['activeGateway'] != null) {
+            return data['activeGateway'].toString().toLowerCase();
+          }
+        }
+      }
+    } catch (_) {}
+
+    try {
+      final res = await _apiClient.dio.get('/settings/payment-gateway');
+      if (res.statusCode == 200 && res.data != null) {
+        final data = res.data['data'] ?? res.data;
+        if (data is Map && data['activeGateway'] != null) {
+          return data['activeGateway'].toString().toLowerCase();
+        }
+      }
+    } catch (_) {}
+
+    return null;
+  }
+
   /// 7b. Unified Multi-Tenant Payment Order (Cashfree or Razorpay via POST /api/v1/bookings/payment/order)
   Future<Map<String, dynamic>?> createUnifiedPaymentOrder({
     required List<SelectedSlot> slots,
     String? holdId,
     required Map<String, dynamic> customer,
+    String? preferredGateway,
     String? returnUrl,
   }) async {
     try {
@@ -576,6 +608,7 @@ class BookingService {
         if (holdId != null && holdId.isNotEmpty) 'holdId': holdId,
         'slots': slots.map((s) => s.toJson()).toList(),
         'customer': customer,
+        if (preferredGateway != null && preferredGateway.isNotEmpty) 'gateway': preferredGateway,
         if (returnUrl != null && returnUrl.isNotEmpty) 'returnUrl': returnUrl,
       };
 

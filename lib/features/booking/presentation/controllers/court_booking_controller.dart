@@ -66,6 +66,11 @@ class CourtBookingController extends GetxController {
   Map<String, dynamic>? _pendingOrder;
   Completer<BookingPassModel?>? _pendingBookingCompleter;
 
+  // Multi-Tenant Payment Gateway State ('auto' | 'cashfree' | 'razorpay')
+  final RxString activeGateway = ''.obs;
+  final RxString selectedGateway = 'auto'.obs;
+  final RxBool isLoadingGateway = false.obs;
+
   // Guest Customer Registration State (Step 1)
   final RxString customerPhone = ''.obs;
   final RxString customerName = ''.obs;
@@ -288,6 +293,21 @@ class CourtBookingController extends GetxController {
     try {
       _cfService = CFPaymentGatewayService();
     } catch (_) {}
+  }
+
+  /// Detect active payment gateway configured by the academy on backend
+  Future<void> detectActiveGateway() async {
+    final resId = selectedSlots.isNotEmpty ? selectedSlots.first.resourceId : selectedCourt.value?.id;
+    isLoadingGateway.value = true;
+    try {
+      final gw = await _bookingService.fetchActivePaymentGateway(resourceId: resId);
+      if (gw != null && gw.isNotEmpty) {
+        activeGateway.value = gw.toLowerCase();
+        debugPrint('🎯 [ACTIVE GATEWAY DETECTED]: ${activeGateway.value}');
+      }
+    } catch (_) {} finally {
+      isLoadingGateway.value = false;
+    }
   }
 
   void _initRollingDates() {
@@ -629,10 +649,13 @@ class CourtBookingController extends GetxController {
         if (prefillEmail.isNotEmpty) 'email': prefillEmail,
       };
 
+      final String? preferredGw = selectedGateway.value != 'auto' ? selectedGateway.value : null;
+
       final orderData = await _bookingService.createUnifiedPaymentOrder(
         slots: selectedSlots,
         holdId: activeHoldId.value,
         customer: customerData,
+        preferredGateway: preferredGw,
         returnUrl: 'https://admin.inertiasportsacademy.com/booking-status?order_id={order_id}',
       );
 
@@ -640,7 +663,8 @@ class CourtBookingController extends GetxController {
         throw Exception('Failed to generate booking payment order from server');
       }
 
-      final String gateway = (orderData['gateway'] ?? 'razorpay').toString().toLowerCase();
+      final String gateway = (orderData['gateway'] ?? (preferredGw ?? 'razorpay')).toString().toLowerCase();
+      activeGateway.value = gateway;
       final String orderId = (orderData['orderId'] ?? orderData['cfOrderId'] ?? '').toString();
 
       _pendingOrder = {
