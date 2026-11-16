@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:mobile_app/features/legal/presentation/screens/merchant_legal_info_screen.dart';
+
 import '../../../../core/routes/app_routes.dart';
 import '../controllers/auth_controller.dart';
 
@@ -32,7 +34,11 @@ class LoginV2Screen extends GetView<AuthController> {
               errorBuilder: (context, error, stackTrace) => Container(
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Color(0xFF0A0D14), Color(0xFF141926), Color(0xFF090B10)],
+                    colors: [
+                      Color(0xFF0A0D14),
+                      Color(0xFF141926),
+                      Color(0xFF090B10),
+                    ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),
@@ -78,7 +84,8 @@ class LoginV2Screen extends GetView<AuthController> {
                   Text(
                     'PLAY   |   TRAIN   |   GROW   |   TOGETHER',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontFamily: 'Nunito', 
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
                       fontSize: 10.5.sp,
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF94A3B8),
@@ -122,10 +129,7 @@ class LoginV2Screen extends GetView<AuthController> {
             height: 100.h,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(
-                color: const Color(0x55F59E0B),
-                width: 1.5,
-              ),
+              border: Border.all(color: const Color(0x55F59E0B), width: 1.5),
             ),
           ),
 
@@ -136,10 +140,7 @@ class LoginV2Screen extends GetView<AuthController> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.black,
-              border: Border.all(
-                color: Colors.white,
-                width: 2.0,
-              ),
+              border: Border.all(color: Colors.white, width: 2.0),
             ),
             child: ClipOval(
               child: Image.asset(
@@ -169,7 +170,8 @@ class LoginV2Screen extends GetView<AuthController> {
         children: [
           TextSpan(
             text: 'SPORTS ',
-            style: TextStyle(fontFamily: 'Nunito', 
+            style: TextStyle(
+              fontFamily: 'Nunito',
               fontSize: 24.sp,
               fontWeight: FontWeight.w900,
               color: Colors.white,
@@ -178,7 +180,8 @@ class LoginV2Screen extends GetView<AuthController> {
           ),
           TextSpan(
             text: 'ACADEMY',
-            style: TextStyle(fontFamily: 'Nunito', 
+            style: TextStyle(
+              fontFamily: 'Nunito',
               fontSize: 24.sp,
               fontWeight: FontWeight.w900,
               color: const Color(0xFFF59E0B),
@@ -249,10 +252,12 @@ class LoginV2Screen extends GetView<AuthController> {
                       SizedBox(height: 5.h),
                       Text(
                         title,
-                        style: TextStyle(fontFamily: 'Nunito', 
+                        style: TextStyle(
+                          fontFamily: 'Nunito',
                           fontSize: 12.sp,
-                          fontWeight:
-                              isSelected ? FontWeight.w800 : FontWeight.w600,
+                          fontWeight: isSelected
+                              ? FontWeight.w800
+                              : FontWeight.w600,
                           color: isSelected
                               ? const Color(0xFF0F172A)
                               : const Color(0xFFCBD5E1),
@@ -280,10 +285,7 @@ class LoginV2Screen extends GetView<AuthController> {
       decoration: BoxDecoration(
         color: const Color(0xFF121622),
         borderRadius: BorderRadius.circular(22.r),
-        border: Border.all(
-          color: const Color(0xFF263044),
-          width: 1.2,
-        ),
+        border: Border.all(color: const Color(0xFF263044), width: 1.2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -291,7 +293,8 @@ class LoginV2Screen extends GetView<AuthController> {
           // Title: Welcome Back
           Text(
             'Welcome Back',
-            style: TextStyle(fontFamily: 'Nunito', 
+            style: TextStyle(
+              fontFamily: 'Nunito',
               fontSize: 22.sp,
               fontWeight: FontWeight.w900,
               color: Colors.white,
@@ -303,7 +306,8 @@ class LoginV2Screen extends GetView<AuthController> {
           // Subtitle
           Text(
             'Login to access your dashboard, bookings, trainings and more.',
-            style: TextStyle(fontFamily: 'Nunito', 
+            style: TextStyle(
+              fontFamily: 'Nunito',
               fontSize: 12.5.sp,
               fontWeight: FontWeight.w400,
               color: const Color(0xFF94A3B8),
@@ -379,7 +383,8 @@ class LoginV2Screen extends GetView<AuthController> {
                       SizedBox(width: 8.w),
                       Text(
                         'Remember me',
-                        style: TextStyle(fontFamily: 'Nunito', 
+                        style: TextStyle(
+                          fontFamily: 'Nunito',
                           fontSize: 12.5.sp,
                           fontWeight: FontWeight.w500,
                           color: const Color(0xFFCBD5E1),
@@ -403,7 +408,8 @@ class LoginV2Screen extends GetView<AuthController> {
                 },
                 child: Text(
                   'Forgot Password?',
-                  style: TextStyle(fontFamily: 'Nunito', 
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
                     fontSize: 12.5.sp,
                     fontWeight: FontWeight.w700,
                     color: const Color(0xFFF59E0B),
@@ -436,8 +442,9 @@ class LoginV2Screen extends GetView<AuthController> {
                           height: 22.w,
                           child: const CircularProgressIndicator(
                             strokeWidth: 2.8,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Color(0xFF0F172A)),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Color(0xFF0F172A),
+                            ),
                           ),
                         )
                       : Row(
@@ -445,7 +452,8 @@ class LoginV2Screen extends GetView<AuthController> {
                           children: [
                             Text(
                               'Login',
-                              style: TextStyle(fontFamily: 'Nunito', 
+                              style: TextStyle(
+                                fontFamily: 'Nunito',
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w900,
                                 color: const Color(0xFF0F172A),
@@ -469,16 +477,14 @@ class LoginV2Screen extends GetView<AuthController> {
           Row(
             children: [
               Expanded(
-                child: Container(
-                  height: 1,
-                  color: const Color(0xFF263044),
-                ),
+                child: Container(height: 1, color: const Color(0xFF263044)),
               ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 12.w),
                 child: Text(
                   'OR CONTINUE WITH',
-                  style: TextStyle(fontFamily: 'Nunito', 
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
                     fontSize: 10.5.sp,
                     fontWeight: FontWeight.w700,
                     color: const Color(0xFF64748B),
@@ -487,10 +493,7 @@ class LoginV2Screen extends GetView<AuthController> {
                 ),
               ),
               Expanded(
-                child: Container(
-                  height: 1,
-                  color: const Color(0xFF263044),
-                ),
+                child: Container(height: 1, color: const Color(0xFF263044)),
               ),
             ],
           ),
@@ -549,7 +552,8 @@ class LoginV2Screen extends GetView<AuthController> {
           Center(
             child: Text(
               'New to Sports Academy?',
-              style: TextStyle(fontFamily: 'Nunito', 
+              style: TextStyle(
+                fontFamily: 'Nunito',
                 fontSize: 12.5.sp,
                 fontWeight: FontWeight.w500,
                 color: const Color(0xFF94A3B8),
@@ -569,17 +573,15 @@ class LoginV2Screen extends GetView<AuthController> {
               decoration: BoxDecoration(
                 color: const Color(0xFF0D1017),
                 borderRadius: BorderRadius.circular(14.r),
-                border: Border.all(
-                  color: const Color(0xFFF59E0B),
-                  width: 1.2,
-                ),
+                border: Border.all(color: const Color(0xFFF59E0B), width: 1.2),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     'Create Account',
-                    style: TextStyle(fontFamily: 'Nunito', 
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
                       fontSize: 14.5.sp,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
@@ -595,46 +597,34 @@ class LoginV2Screen extends GetView<AuthController> {
               ),
             ),
           ),
-          SizedBox(height: 24.h),
+          SizedBox(height: 20.h),
 
-          // Legal & Merchant Information Footer (Cashfree & Regulatory Compliance)
+          // Merchant Details Link (Pops up full merchant details modal on tap)
           Center(
             child: InkWell(
-              onTap: () => Get.toNamed(AppRoutes.merchantLegalInfo),
+              onTap: () =>
+                  MerchantLegalInfoScreen.showMerchantDetailsModal(context),
               borderRadius: BorderRadius.circular(8.r),
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                child: Column(
+                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
+                    Icon(
+                      Icons.verified_outlined,
+                      size: 14.sp,
+                      color: const Color(0xFFF59E0B),
+                    ),
+                    SizedBox(width: 6.w),
                     Text(
-                      'TEAM INERTIA ENTERPRISES',
+                      'Merchant Details',
                       style: TextStyle(
                         fontFamily: 'Nunito',
                         fontSize: 11.5.sp,
-                        fontWeight: FontWeight.w800,
-                        color: const Color(0xFF94A3B8),
-                        letterSpacing: 0.3,
-                      ),
-                    ),
-                    SizedBox(height: 2.h),
-                    Text(
-                      'Proprietor: KRISHNAN ROHITH KUMAR • Teaminertia3499@gmail.com • 9789006925',
-                      style: TextStyle(
-                        fontFamily: 'Nunito',
-                        fontSize: 10.sp,
-                        color: const Color(0xFF64748B),
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 3.h),
-                    Text(
-                      'About Us & Legal Policies',
-                      style: TextStyle(
-                        fontFamily: 'Nunito',
-                        fontSize: 10.sp,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFFF59E0B),
+                        color: const Color(0xFF94A3B8),
                         decoration: TextDecoration.underline,
+                        decorationColor: const Color(0xFF475569),
                       ),
                     ),
                   ],
@@ -664,26 +654,28 @@ class LoginV2Screen extends GetView<AuthController> {
       decoration: BoxDecoration(
         color: const Color(0xFF0D1017),
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(
-          color: const Color(0xFF263044),
-          width: 1.2,
-        ),
+        border: Border.all(color: const Color(0xFF263044), width: 1.2),
       ),
       child: TextField(
         controller: controller,
         obscureText: obscureText,
         keyboardType: keyboardType,
-        style: TextStyle(fontFamily: 'Nunito', 
+        style: TextStyle(
+          fontFamily: 'Nunito',
           fontSize: 14.sp,
           fontWeight: FontWeight.w600,
           color: Colors.white,
         ),
         decoration: InputDecoration(
           isDense: true,
-          contentPadding: EdgeInsets.symmetric(vertical: 13.h, horizontal: 14.w),
+          contentPadding: EdgeInsets.symmetric(
+            vertical: 13.h,
+            horizontal: 14.w,
+          ),
           border: InputBorder.none,
           hintText: hintText,
-          hintStyle: TextStyle(fontFamily: 'Nunito', 
+          hintStyle: TextStyle(
+            fontFamily: 'Nunito',
             fontSize: 13.5.sp,
             fontWeight: FontWeight.w400,
             color: const Color(0xFF64748B),
@@ -718,10 +710,7 @@ class LoginV2Screen extends GetView<AuthController> {
         decoration: BoxDecoration(
           color: const Color(0xFF161C28),
           borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color: const Color(0xFF263044),
-            width: 1.2,
-          ),
+          border: Border.all(color: const Color(0xFF263044), width: 1.2),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -730,7 +719,8 @@ class LoginV2Screen extends GetView<AuthController> {
             SizedBox(width: 8.w),
             Text(
               label,
-              style: TextStyle(fontFamily: 'Nunito', 
+              style: TextStyle(
+                fontFamily: 'Nunito',
                 fontSize: 13.5.sp,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
@@ -752,7 +742,8 @@ class LoginV2Screen extends GetView<AuthController> {
         children: [
           Text(
             'G',
-            style: TextStyle(fontFamily: 'Nunito', 
+            style: TextStyle(
+              fontFamily: 'Nunito',
               fontSize: 14.sp,
               fontWeight: FontWeight.w900,
               color: const Color(0xFF4285F4),
@@ -818,10 +809,7 @@ class LoginV2Screen extends GetView<AuthController> {
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(
-                color: const Color(0xFFF59E0B),
-                width: 1.2,
-              ),
+              border: Border.all(color: const Color(0xFFF59E0B), width: 1.2),
             ),
             padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 8.h),
             child: Column(
@@ -848,7 +836,8 @@ class LoginV2Screen extends GetView<AuthController> {
                   children: [
                     Text(
                       title,
-                      style: TextStyle(fontFamily: 'Nunito', 
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
                         fontSize: 9.5.sp,
                         fontWeight: FontWeight.w900,
                         color: Colors.white,

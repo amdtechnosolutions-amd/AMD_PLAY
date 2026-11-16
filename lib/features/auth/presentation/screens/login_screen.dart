@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../../../../core/routes/app_routes.dart';
+import '../../../legal/presentation/screens/merchant_legal_info_screen.dart';
 import '../controllers/auth_controller.dart';
 
 /// Clean, luxury Login Screen for INERTIA SPORTS ACADEMY
@@ -478,47 +479,33 @@ class LoginScreen extends GetView<AuthController> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 24.h),
+                  SizedBox(height: 20.h),
 
-                  // Legal & Merchant Information Footer (Cashfree & Regulatory Compliance)
+                  // Merchant Details Link (Pops up full merchant details modal on tap)
                   Center(
                     child: InkWell(
-                      onTap: () => Get.toNamed(AppRoutes.merchantLegalInfo),
-                      borderRadius: BorderRadius.circular(10.r),
+                      onTap: () => MerchantLegalInfoScreen.showMerchantDetailsModal(context),
+                      borderRadius: BorderRadius.circular(20.r),
                       child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
-                        child: Column(
+                        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              'TEAM INERTIA ENTERPRISES',
-                              style: TextStyle(
-                                fontFamily: 'Nunito',
-                                fontSize: 11.sp,
-                                fontWeight: FontWeight.w800,
-                                color: const Color(0xFF334155),
-                                letterSpacing: 0.3,
-                              ),
+                            Icon(
+                              Icons.verified_outlined,
+                              size: 14.sp,
+                              color: goldAccent,
                             ),
-                            SizedBox(height: 2.h),
+                            SizedBox(width: 6.w),
                             Text(
-                              'Proprietor: KRISHNAN ROHITH KUMAR • Teaminertia3499@gmail.com • 9789006925',
+                              'Merchant Details',
                               style: TextStyle(
                                 fontFamily: 'Nunito',
-                                fontSize: 9.5.sp,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF64748B),
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            SizedBox(height: 3.h),
-                            Text(
-                              'About Us & Legal Policies',
-                              style: TextStyle(
-                                fontFamily: 'Nunito',
-                                fontSize: 10.sp,
+                                fontSize: 11.5.sp,
                                 fontWeight: FontWeight.w700,
-                                color: goldAccent,
+                                color: const Color(0xFF475569),
                                 decoration: TextDecoration.underline,
+                                decorationColor: const Color(0xFFCBD5E1),
                               ),
                             ),
                           ],

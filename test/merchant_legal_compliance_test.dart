@@ -28,18 +28,21 @@ void main() {
           reason: 'web/index.html must not contain fixed floating bar that blocks scrolling');
     });
 
-    test('Login screen contains legal merchant details footer', () {
+    test('Login screen contains clean Merchant Details popup trigger and modal contains all legal details', () {
       final loginScreen = File('lib/features/auth/presentation/screens/login_screen.dart').readAsStringSync();
-      expect(loginScreen.contains('TEAM INERTIA ENTERPRISES'), isTrue);
-      expect(loginScreen.contains('KRISHNAN ROHITH KUMAR'), isTrue);
-      expect(loginScreen.contains('Teaminertia3499@gmail.com'), isTrue);
-      expect(loginScreen.contains('9789006925'), isTrue);
+      expect(loginScreen.contains('Merchant Details'), isTrue);
+      expect(loginScreen.contains('showMerchantDetailsModal'), isTrue);
 
       final loginV2Screen = File('lib/features/auth/presentation/screens/login_v2_screen.dart').readAsStringSync();
-      expect(loginV2Screen.contains('TEAM INERTIA ENTERPRISES'), isTrue);
-      expect(loginV2Screen.contains('KRISHNAN ROHITH KUMAR'), isTrue);
-      expect(loginV2Screen.contains('Teaminertia3499@gmail.com'), isTrue);
-      expect(loginV2Screen.contains('9789006925'), isTrue);
+      expect(loginV2Screen.contains('Merchant Details'), isTrue);
+      expect(loginV2Screen.contains('showMerchantDetailsModal'), isTrue);
+
+      final modalFile = File('lib/features/legal/presentation/screens/merchant_legal_info_screen.dart').readAsStringSync();
+      expect(modalFile.contains('showMerchantDetailsModal'), isTrue);
+      expect(modalFile.contains('TEAM INERTIA ENTERPRISES'), isTrue);
+      expect(modalFile.contains('KRISHNAN ROHITH KUMAR'), isTrue);
+      expect(modalFile.contains('Teaminertia3499@gmail.com'), isTrue);
+      expect(modalFile.contains('9789006925'), isTrue);
     });
   });
 }
