@@ -559,6 +559,73 @@ class BookingService {
     );
   }
 
+  /// 7b. Unified Multi-Tenant Payment Order (Cashfree or Razorpay via POST /api/v1/bookings/payment/order)
+  Future<Map<String, dynamic>?> createUnifiedPaymentOrder({
+    required List<SelectedSlot> slots,
+    String? holdId,
+    required Map<String, dynamic> customer,
+    String? returnUrl,
+  }) async {
+    try {
+      final firstSlot = slots.isNotEmpty ? slots.first : null;
+      final payload = {
+        if (firstSlot != null) 'resourceId': firstSlot.resourceId,
+        if (firstSlot != null) 'date': firstSlot.date,
+        if (firstSlot != null) 'startTime': firstSlot.startTime,
+        if (firstSlot != null) 'endTime': firstSlot.endTime,
+        if (holdId != null && holdId.isNotEmpty) 'holdId': holdId,
+        'slots': slots.map((s) => s.toJson()).toList(),
+        'customer': customer,
+        if (returnUrl != null && returnUrl.isNotEmpty) 'returnUrl': returnUrl,
+      };
+
+      final res = await _apiClient.dio.post(ApiEndpoints.bookingPaymentOrder, data: payload);
+      if ((res.statusCode == 200 || res.statusCode == 201) && res.data != null) {
+        final data = res.data['data'] ?? res.data;
+        if (data is Map) {
+          return Map<String, dynamic>.from(data);
+        }
+      }
+    } catch (e) {
+      debugPrint('⚠️ [UNIFIED PAYMENT ORDER FALLBACK]: $e. Attempting legacy razorpay order endpoint...');
+      // Fallback to legacy razorpay endpoint if new endpoint not yet deployed
+      return createMultiSlotRazorpayOrder(slots: slots, holdId: holdId);
+    }
+    return null;
+  }
+
+  /// 7c. Unified Multi-Tenant Payment Verification (Cashfree or Razorpay via POST /api/v1/bookings/payment/verify)
+  Future<BookingPassModel?> verifyUnifiedPayment({
+    required Map<String, dynamic> verifyPayload,
+  }) async {
+    try {
+      final res = await _apiClient.dio.post(ApiEndpoints.bookingPaymentVerify, data: verifyPayload);
+      if ((res.statusCode == 200 || res.statusCode == 201) && res.data != null) {
+        final bkgData = res.data['data'] ?? res.data;
+        if (bkgData is Map) {
+          return BookingPassModel.fromJson(Map<String, dynamic>.from(bkgData));
+        }
+      }
+    } catch (e) {
+      debugPrint('⚠️ [UNIFIED VERIFY FALLBACK]: $e. Attempting legacy verify...');
+      if (verifyPayload['gateway'] == 'razorpay' || verifyPayload.containsKey('razorpay_signature')) {
+        final slots = (verifyPayload['slots'] as List<dynamic>?)
+                ?.map((s) => s is SelectedSlot ? s : SelectedSlot.fromJson(Map<String, dynamic>.from(s)))
+                .toList() ??
+            [];
+        return verifyMultiSlotRazorpayPayment(
+          slots: slots,
+          holdId: verifyPayload['holdId']?.toString(),
+          razorpayOrderId: verifyPayload['razorpay_order_id']?.toString() ?? verifyPayload['orderId']?.toString() ?? '',
+          razorpayPaymentId: verifyPayload['razorpay_payment_id']?.toString() ?? '',
+          razorpaySignature: verifyPayload['razorpay_signature']?.toString() ?? '',
+          notes: verifyPayload['notes']?.toString() ?? '',
+        );
+      }
+    }
+    return null;
+  }
+
   /// 8. Create Razorpay Booking Order for Multiple Slots
   Future<Map<String, dynamic>?> createMultiSlotRazorpayOrder({
     required List<SelectedSlot> slots,

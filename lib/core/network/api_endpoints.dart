@@ -88,6 +88,8 @@ class ApiEndpoints {
   static const String bookingsMulti = '/bookings/multi';
   static const String myBookings = '/bookings/my';
   static const String bookingGroup = '/bookings/group';
+  static const String bookingPaymentOrder = '/bookings/payment/order';
+  static const String bookingPaymentVerify = '/bookings/payment/verify';
   static const String razorpayBookingOrder = '/bookings/razorpay/order';
   static const String razorpayBookingVerify = '/bookings/razorpay/verify';
   static const String registerAndBook = '/auth/register-and-book';

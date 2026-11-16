@@ -294,6 +294,19 @@ class SelectedSlot {
     'endTime': endTime,
   };
 
+  factory SelectedSlot.fromJson(Map<String, dynamic> json) {
+    return SelectedSlot(
+      resourceId: json['resourceId']?.toString() ?? '',
+      courtName: json['courtName']?.toString() ?? '',
+      sportName: json['sportName']?.toString() ?? '',
+      date: json['date']?.toString() ?? '',
+      startTime: json['startTime']?.toString() ?? '',
+      endTime: json['endTime']?.toString() ?? '',
+      timeText: json['timeText']?.toString() ?? '',
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+
   SelectedSlot copyWith({
     String? resourceId,
     String? courtName,

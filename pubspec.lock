@@ -198,6 +198,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "3.4.5"
+  flutter_cashfree_pg_sdk:
+    dependency: "direct main"
+    description:
+      name: flutter_cashfree_pg_sdk
+      sha256: af3aa7d989130294a9411620293ed29ae13f53c911af7877aed5c75820ca2fd0
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.6.0+54"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -305,7 +313,7 @@ packages:
     source: hosted
     version: "2.2.0"
   http:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: http
       sha256: "87721a4a50b19c7f1d49001e51409bddc46303966ce89a65af4f4e6004896412"

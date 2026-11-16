@@ -49,6 +49,8 @@ dependencies:
   pdf: ^3.13.1
   printing: ^5.15.1
   path_provider: ^2.1.6
+  flutter_cashfree_pg_sdk: ^2.6.0+54
+  http: ^1.6.0
   
 dev_dependencies:
   flutter_test:

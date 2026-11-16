@@ -5,6 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:flutter_cashfree_pg_sdk/api/cfsession/cfsession.dart';
+import 'package:flutter_cashfree_pg_sdk/api/cfpaymentgateway/cfpaymentgatewayservice.dart';
+import 'package:flutter_cashfree_pg_sdk/api/cfpayment/cfwebcheckoutpayment.dart';
+import 'package:flutter_cashfree_pg_sdk/utils/cfenums.dart';
+import 'package:flutter_cashfree_pg_sdk/api/cferrorresponse/cferrorresponse.dart';
 import '../../../../core/services/razorpay_bridge.dart';
 import '../../../../core/storage/storage_service.dart';
 import '../../../home/presentation/controllers/home_controller.dart';
@@ -56,6 +61,7 @@ class CourtBookingController extends GetxController {
   final RxBool isHoldingSlot = false.obs;
 
   Razorpay? _razorpay;
+  CFPaymentGatewayService? _cfService;
   final StorageService _storage = Get.isRegistered<StorageService>() ? Get.find<StorageService>() : StorageService();
   Map<String, dynamic>? _pendingOrder;
   Completer<BookingPassModel?>? _pendingBookingCompleter;
@@ -134,6 +140,7 @@ class CourtBookingController extends GetxController {
   void onInit() {
     super.onInit();
     _initRazorpay();
+    _initCashfree();
     checkCustomerSession();
     _initRollingDates();
     loadSports();
@@ -274,6 +281,12 @@ class CourtBookingController extends GetxController {
       _razorpay?.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handleNativePaymentSuccess);
       _razorpay?.on(Razorpay.EVENT_PAYMENT_ERROR, _handleNativePaymentError);
       _razorpay?.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleNativeExternalWallet);
+    } catch (_) {}
+  }
+
+  void _initCashfree() {
+    try {
+      _cfService = CFPaymentGatewayService();
     } catch (_) {}
   }
 
@@ -556,7 +569,10 @@ class CourtBookingController extends GetxController {
     pricingQuote.value = null;
   }
 
-  /// Primary: Initialize Razorpay Gateway Order for multi-slot checkout
+  /// Unified alias for multi-tenant gateway payments
+  Future<BookingPassModel?> payWithUnifiedGateway() => payWithRazorpay();
+
+  /// Primary: Initialize Dynamic Gateway Order (Cashfree or Razorpay) for multi-slot checkout
   Future<BookingPassModel?> payWithRazorpay() async {
     if (selectedSlots.isEmpty) {
       if (selectedCourt.value != null && selectedSlot.value != null) {
@@ -587,22 +603,6 @@ class CourtBookingController extends GetxController {
         await acquireHoldForSelectedSlots();
       }
 
-      // 4a. Razorpay Order: Create unified checkout order via POST /api/v1/bookings/razorpay/order
-      final orderData = await _bookingService.createMultiSlotRazorpayOrder(
-        slots: selectedSlots,
-        holdId: activeHoldId.value,
-      );
-
-      if (orderData == null || orderData['orderId'] == null) {
-        throw Exception('Failed to generate Razorpay booking order from server');
-      }
-
-      final String orderId = orderData['orderId'].toString();
-      final String keyId = (orderData['keyId'] ?? '').toString();
-      final int amountInPaise = orderData['amountInPaise'] != null
-          ? (orderData['amountInPaise'] as num).toInt()
-          : (grandTotalAmount * 100).round();
-
       String prefillName = 'Arena Player';
       String prefillEmail = customerEmail.value;
       String prefillPhone = customerPhone.value;
@@ -610,13 +610,128 @@ class CourtBookingController extends GetxController {
       try {
         final savedName = await _storage.getUserName();
         if (savedName != null && savedName.isNotEmpty) prefillName = savedName;
+        final userRaw = await _storage.getUserJson();
+        if (userRaw != null && userRaw.isNotEmpty) {
+          final userMap = jsonDecode(userRaw);
+          if (userMap is Map) {
+            final ph = userMap['phone']?.toString();
+            final em = userMap['email']?.toString();
+            if (ph != null && ph.isNotEmpty && prefillPhone.isEmpty) prefillPhone = ph;
+            if (em != null && em.isNotEmpty && prefillEmail.isEmpty) prefillEmail = em;
+          }
+        }
       } catch (_) {}
 
+      // 4a. Unified Order: Create order via POST /api/v1/bookings/payment/order (or fallback to legacy)
+      final customerData = {
+        'name': prefillName,
+        'phone': prefillPhone,
+        if (prefillEmail.isNotEmpty) 'email': prefillEmail,
+      };
+
+      final orderData = await _bookingService.createUnifiedPaymentOrder(
+        slots: selectedSlots,
+        holdId: activeHoldId.value,
+        customer: customerData,
+        returnUrl: 'https://admin.inertiasportsacademy.com/booking-status?order_id={order_id}',
+      );
+
+      if (orderData == null || (orderData['orderId'] == null && orderData['cfOrderId'] == null)) {
+        throw Exception('Failed to generate booking payment order from server');
+      }
+
+      final String gateway = (orderData['gateway'] ?? 'razorpay').toString().toLowerCase();
+      final String orderId = (orderData['orderId'] ?? orderData['cfOrderId'] ?? '').toString();
+
       _pendingOrder = {
+        'gateway': gateway,
         'orderId': orderId,
         'holdId': activeHoldId.value,
         'slots': List<SelectedSlot>.from(selectedSlots),
+        'name': prefillName,
+        'phone': prefillPhone,
+        'email': prefillEmail,
       };
+
+      // -------------------------------------------------------------
+      // 1. Tenant configured CASHFREE
+      // -------------------------------------------------------------
+      if (gateway == 'cashfree') {
+        final String paymentSessionId = (orderData['paymentSessionId'] ?? '').toString();
+        final bool isProd = (orderData['environment']?.toString().toUpperCase() == 'PROD');
+
+        if (paymentSessionId.contains('mock') || orderId.contains('mock') || paymentSessionId.isEmpty) {
+          debugPrint('🧪 [MOCK CASHFREE] Completing test checkout directly...');
+          final pass = await _verifyAndFinalizeUnifiedBooking({
+            'gateway': 'cashfree',
+            'orderId': orderId,
+            'resourceId': selectedSlots.first.resourceId,
+            'date': selectedSlots.first.date,
+            'startTime': selectedSlots.first.startTime,
+            'endTime': selectedSlots.first.endTime,
+            'slots': selectedSlots.map((s) => s.toJson()).toList(),
+            'name': prefillName,
+            'phone': prefillPhone,
+            'email': prefillEmail,
+          });
+          isSubmitting.value = false;
+          return pass;
+        }
+
+        _cfService?.setCallback(
+          (String cfOrderId) async {
+            final pass = await _verifyAndFinalizeUnifiedBooking({
+              'gateway': 'cashfree',
+              'orderId': cfOrderId.isNotEmpty ? cfOrderId : orderId,
+              'resourceId': selectedSlots.first.resourceId,
+              'date': selectedSlots.first.date,
+              'startTime': selectedSlots.first.startTime,
+              'endTime': selectedSlots.first.endTime,
+              'slots': selectedSlots.map((s) => s.toJson()).toList(),
+              'name': prefillName,
+              'phone': prefillPhone,
+              'email': prefillEmail,
+            });
+            if (_pendingBookingCompleter != null && !_pendingBookingCompleter!.isCompleted) {
+              _pendingBookingCompleter!.complete(pass);
+            }
+          },
+          (CFErrorResponse error, String cfOrderId) {
+            isSubmitting.value = false;
+            Get.snackbar(
+              'Payment Notice',
+              error.getMessage() ?? 'Cashfree payment was cancelled or failed',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: const Color(0xFFFEF2F2),
+              colorText: const Color(0xFF991B1B),
+            );
+            if (_pendingBookingCompleter != null && !_pendingBookingCompleter!.isCompleted) {
+              _pendingBookingCompleter!.complete(null);
+            }
+          },
+        );
+
+        final CFSession session = CFSessionBuilder()
+            .setEnvironment(isProd ? CFEnvironment.PRODUCTION : CFEnvironment.SANDBOX)
+            .setOrderId(orderId)
+            .setPaymentSessionId(paymentSessionId)
+            .build();
+
+        final CFWebCheckoutPayment cfPayment = CFWebCheckoutPaymentBuilder()
+            .setSession(session)
+            .build();
+
+        _cfService?.doPayment(cfPayment);
+        return await _pendingBookingCompleter!.future;
+      }
+
+      // -------------------------------------------------------------
+      // 2. Tenant configured RAZORPAY
+      // -------------------------------------------------------------
+      final String keyId = (orderData['keyId'] ?? '').toString();
+      final int amountInPaise = orderData['amountInPaise'] != null
+          ? (orderData['amountInPaise'] as num).toInt()
+          : (grandTotalAmount * 100).round();
 
       final firstSlot = selectedSlots.first;
       final slotDesc = selectedSlots.length == 1
@@ -659,7 +774,6 @@ class CourtBookingController extends GetxController {
       debugPrint('💳 [RAZORPAY GATEWAY CHECKOUT] Launching options: $options');
 
       // 2. Open Razorpay Checkout Modal
-
       if (kIsWeb) {
         openWebRazorpay(
           options: options,
@@ -707,26 +821,20 @@ class CourtBookingController extends GetxController {
     }
   }
 
-  /// 4b. Verification & Settlement Callback via POST /api/v1/bookings/razorpay/verify
-  Future<BookingPassModel?> _verifyAndFinalizeBooking({
-    required String razorpayOrderId,
-    required String razorpayPaymentId,
-    required String razorpaySignature,
-  }) async {
+  /// Unified Verification & Settlement Callback via POST /api/v1/bookings/payment/verify
+  Future<BookingPassModel?> _verifyAndFinalizeUnifiedBooking(Map<String, dynamic> verifyPayload) async {
     final pending = _pendingOrder;
-    if (pending == null) return null;
-
-    final List<SelectedSlot> slots = (pending['slots'] as List<SelectedSlot>?) ?? List.from(selectedSlots);
-    final String holdId = (pending['holdId'] as String?) ?? activeHoldId.value;
+    final List<SelectedSlot> slots = (pending?['slots'] as List<SelectedSlot>?) ?? List.from(selectedSlots);
+    final String holdId = (pending?['holdId'] as String?) ?? activeHoldId.value;
 
     try {
-      debugPrint('🚀 [RAZORPAY VERIFY] order: $razorpayOrderId, payId: $razorpayPaymentId, slots: ${slots.length}');
-      final pass = await _bookingService.verifyMultiSlotRazorpayPayment(
-        slots: slots,
-        holdId: holdId,
-        razorpayOrderId: razorpayOrderId,
-        razorpayPaymentId: razorpayPaymentId,
-        razorpaySignature: razorpaySignature,
+      debugPrint('🚀 [UNIFIED PAYMENT VERIFY] Payload: $verifyPayload');
+      final pass = await _bookingService.verifyUnifiedPayment(
+        verifyPayload: {
+          ...verifyPayload,
+          if (holdId.isNotEmpty) 'holdId': holdId,
+          'slots': slots.map((s) => s.toJson()).toList(),
+        },
       );
 
       _holdTimer?.cancel();
@@ -747,13 +855,36 @@ class CourtBookingController extends GetxController {
       isSubmitting.value = false;
       Get.snackbar(
         'Verification Notice',
-        'Could not verify Razorpay signature: $e',
+        'Could not complete payment verification: $e',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red.shade50,
         colorText: Colors.red.shade900,
       );
       return null;
     }
+  }
+
+  /// 4b. Verification & Settlement Callback via POST /api/v1/bookings/razorpay/verify
+  Future<BookingPassModel?> _verifyAndFinalizeBooking({
+    required String razorpayOrderId,
+    required String razorpayPaymentId,
+    required String razorpaySignature,
+  }) async {
+    final pending = _pendingOrder;
+    final firstSlot = selectedSlots.isNotEmpty ? selectedSlots.first : null;
+    return _verifyAndFinalizeUnifiedBooking({
+      'gateway': 'razorpay',
+      'razorpay_order_id': razorpayOrderId,
+      'razorpay_payment_id': razorpayPaymentId,
+      'razorpay_signature': razorpaySignature,
+      if (firstSlot != null) 'resourceId': firstSlot.resourceId,
+      if (firstSlot != null) 'date': firstSlot.date,
+      if (firstSlot != null) 'startTime': firstSlot.startTime,
+      if (firstSlot != null) 'endTime': firstSlot.endTime,
+      'name': pending?['name'] ?? customerName.value,
+      'phone': pending?['phone'] ?? customerPhone.value,
+      'email': pending?['email'] ?? customerEmail.value,
+    });
   }
 
   void _handleNativePaymentSuccess(PaymentSuccessResponse response) async {

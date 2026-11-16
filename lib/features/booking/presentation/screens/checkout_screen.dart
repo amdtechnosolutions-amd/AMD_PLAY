@@ -800,11 +800,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           SizedBox(height: 10.h),
                           _buildPaymentOption(
                             id: 'razorpay',
-                            title: 'Razorpay Payment Gateway',
-                            subtitle: 'Debit/Credit Cards, NetBanking, and all online channels',
+                            title: 'Online Payment (Instant Gateway)',
+                            subtitle: 'UPI, Debit/Credit Cards, NetBanking (Cashfree / Razorpay)',
                             icon: Icons.credit_card_rounded,
                             badge: 'ONLINE',
-                            isSelected: selectedMethod == 'razorpay',
+                            isSelected: selectedMethod == 'razorpay' || selectedMethod == 'online',
                             onTap: () => widget.controller.selectedPaymentMethod.value = 'razorpay',
                           ),
                           SizedBox(height: 10.h),
@@ -883,11 +883,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           SizedBox(height: 10.h),
                           _buildPaymentOption(
                             id: 'razorpay',
-                            title: 'Razorpay Payment Gateway',
-                            subtitle: 'Cards, NetBanking, and all online channels',
+                            title: 'Online Payment Gateway',
+                            subtitle: 'UPI, Cards, NetBanking (Auto-routed by Academy)',
                             icon: Icons.credit_card_rounded,
-                            badge: 'GATEWAY',
-                            isSelected: selectedMethod == 'razorpay',
+                            badge: 'ONLINE',
+                            isSelected: selectedMethod == 'razorpay' || selectedMethod == 'online',
                             onTap: () => widget.controller.selectedPaymentMethod.value = 'razorpay',
                           ),
                           SizedBox(height: 10.h),
@@ -977,7 +977,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 final isMember = widget.controller.isMember;
                 final isCoach = widget.controller.isCoach;
                 final selectedMethod = widget.controller.selectedPaymentMethod.value;
-                final isRazorpay = selectedMethod == 'razorpay';
+                final isOnlineGateway = selectedMethod == 'razorpay' || selectedMethod == 'online';
                 final isFree = selectedMethod == 'free';
 
                 String buttonText;
@@ -987,19 +987,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ? 'BOOK FOR STUDENT & DISPATCH PIN'
                       : (isFree ? 'CONFIRM COACH SESSION (FREE)' : 'CONFIRM COACH SESSION (₹${total.toInt()})');
                 } else if (isMember) {
-                  buttonText = isRazorpay
-                      ? 'PAY ₹${total.toInt()} VIA RAZORPAY'
+                  buttonText = isOnlineGateway
+                      ? 'PAY ₹${total.toInt()} ONLINE'
                       : (isFree
                           ? 'CONFIRM WITH FREE QUOTA'
                           : (selectedMethod == 'wallet'
                               ? 'PAY ₹${total.toInt()} FROM WALLET'
                               : 'CONFIRM & BOOK SLOT (₹${total.toInt()})'));
                 } else if (isStudent) {
-                  buttonText = isRazorpay
-                      ? 'PAY ₹${total.toInt()} VIA RAZORPAY'
+                  buttonText = isOnlineGateway
+                      ? 'PAY ₹${total.toInt()} ONLINE'
                       : 'CONFIRM & BOOK SLOT (₹${total.toInt()})';
                 } else {
-                  buttonText = 'PAY ₹${total.toInt()} VIA RAZORPAY';
+                  buttonText = 'PAY ₹${total.toInt()} ONLINE';
                 }
 
                 return AppButton(
@@ -1019,7 +1019,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     }
 
                     // Member direct contract (wallet, free, upi, card, cash)
-                    if (isMember && !isRazorpay) {
+                    if (isMember && !isOnlineGateway) {
                       final pass = await widget.controller.confirmMemberBooking(
                         notes: _notesController.text.trim(),
                       );
@@ -1030,7 +1030,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     }
 
                     // Student direct contract (upi, cash)
-                    if (isStudent && !isRazorpay) {
+                    if (isStudent && !isOnlineGateway) {
                       final pass = await widget.controller.confirmStudentBooking(
                         notes: _notesController.text.trim(),
                       );
