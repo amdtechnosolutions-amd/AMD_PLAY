@@ -21,8 +21,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _notesController =
-      TextEditingController(text: 'Personal training practice');
 
   @override
   void initState() {
@@ -31,16 +29,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     widget.controller.checkCustomerSession().then((_) {
       if (mounted) {
-        if (widget.controller.isCoach) {
-          widget.controller.selectedPaymentMethod.value = 'free';
-          _notesController.text = 'Coach personal training session';
-        } else if (widget.controller.isMember) {
-          widget.controller.selectedPaymentMethod.value = 'wallet';
-          _notesController.text = 'Member slot booking';
-        } else if (widget.controller.isStudent) {
-          widget.controller.selectedPaymentMethod.value = 'upi';
-          _notesController.text = 'Personal training practice';
-        }
         if (_phoneController.text.isEmpty && widget.controller.customerPhone.value.isNotEmpty) {
           _phoneController.text = widget.controller.customerPhone.value;
         }
@@ -68,7 +56,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     _phoneController.dispose();
     _nameController.dispose();
     _emailController.dispose();
-    _notesController.dispose();
     super.dispose();
   }
 
@@ -466,8 +453,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     ),
                                     onSelected: (_) {
                                       widget.controller.coachBookingMode.value = 'personal';
-                                      widget.controller.selectedPaymentMethod.value = 'free';
-                                      _notesController.text = 'Coach personal training session';
                                     },
                                   ),
                                 ),
@@ -488,8 +473,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     ),
                                     onSelected: (_) {
                                       widget.controller.coachBookingMode.value = 'forStudent';
-                                      widget.controller.selectedPaymentMethod.value = 'cash';
-                                      _notesController.text = '1-on-1 private coaching with student';
                                     },
                                   ),
                                 ),
@@ -689,293 +672,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             }),
             SizedBox(height: 24.h),
 
-            // 3. Payment Method Section
+            // 3. Payment Method Section (Latest Dynamic Gateway Box across ALL roles)
             Text('Payment Method', style: AppTypography.sectionTitle),
             SizedBox(height: 10.h),
-            Obx(() {
-              if (widget.controller.isCoach) {
-                final selectedMethod = widget.controller.selectedPaymentMethod.value;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(14.w),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16.r),
-                        border: Border.all(color: AppColors.primary, width: 1.2),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x0A000000),
-                            blurRadius: 10,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildPaymentOption(
-                            id: 'free',
-                            title: 'Coach Facility Quota (Complimentary)',
-                            subtitle: 'Official coaching booking without court rental fee',
-                            icon: Icons.sports_rounded,
-                            badge: 'COMPLIMENTARY',
-                            isSelected: selectedMethod == 'free',
-                            onTap: () => widget.controller.selectedPaymentMethod.value = 'free',
-                          ),
-                          SizedBox(height: 10.h),
-                          _buildPaymentOption(
-                            id: 'cash',
-                            title: 'Pay at Desk (Cash / Facility Counter)',
-                            subtitle: 'Settle offline during facility entry check-in',
-                            icon: Icons.storefront_rounded,
-                            badge: 'DESK',
-                            isSelected: selectedMethod == 'cash',
-                            onTap: () => widget.controller.selectedPaymentMethod.value = 'cash',
-                          ),
-                          SizedBox(height: 10.h),
-                          _buildPaymentOption(
-                            id: 'upi',
-                            title: 'UPI (GPay / PhonePe / Paytm / BHIM)',
-                            subtitle: 'Instant direct confirmation for coach session',
-                            icon: Icons.qr_code_2_rounded,
-                            badge: 'UPI',
-                            isSelected: selectedMethod == 'upi',
-                            onTap: () => widget.controller.selectedPaymentMethod.value = 'upi',
-                          ),
-                          SizedBox(height: 10.h),
-                          _buildPaymentOption(
-                            id: 'card',
-                            title: 'Debit / Credit Card (POS Terminal)',
-                            subtitle: 'Swipe or tap card at the front desk terminal',
-                            icon: Icons.credit_card_rounded,
-                            badge: 'CARD',
-                            isSelected: selectedMethod == 'card',
-                            onTap: () => widget.controller.selectedPaymentMethod.value = 'card',
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 14.h),
-                    Text('Session Notes', style: AppTypography.sectionTitle),
-                    SizedBox(height: 8.h),
-                    TextField(
-                      controller: _notesController,
-                      style: TextStyle(fontSize: 13.sp, color: const Color(0xFF0F172A)),
-                      decoration: InputDecoration(
-                        prefixIcon: const Icon(Icons.edit_note_rounded, size: 20, color: Color(0xFF64748B)),
-                        hintText: 'e.g. 1-on-1 private coaching or drills practice',
-                        contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              }
-
-              if (widget.controller.isMember) {
-                final selectedMethod = widget.controller.selectedPaymentMethod.value;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(14.w),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16.r),
-                        border: Border.all(color: AppColors.primary, width: 1.2),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x0A000000),
-                            blurRadius: 10,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildPaymentOption(
-                            id: 'wallet',
-                            title: 'Member Wallet / Credits',
-                            subtitle: 'Deduct directly from your prepaid membership balance',
-                            icon: Icons.account_balance_wallet_rounded,
-                            badge: 'WALLET',
-                            isSelected: selectedMethod == 'wallet',
-                            onTap: () => widget.controller.selectedPaymentMethod.value = 'wallet',
-                          ),
-                          SizedBox(height: 10.h),
-                          _buildPaymentOption(
-                            id: 'free',
-                            title: 'Complimentary Quota (Zero Cost)',
-                            subtitle: 'Complimentary membership subscription hours',
-                            icon: Icons.card_membership_rounded,
-                            badge: 'QUOTA',
-                            isSelected: selectedMethod == 'free',
-                            onTap: () => widget.controller.selectedPaymentMethod.value = 'free',
-                          ),
-                          SizedBox(height: 10.h),
-                          _buildPaymentOption(
-                            id: 'upi',
-                            title: 'UPI (GPay / PhonePe / Paytm / BHIM)',
-                            subtitle: 'Instant direct confirmation linked to member identity',
-                            icon: Icons.qr_code_2_rounded,
-                            badge: 'INSTANT',
-                            isSelected: selectedMethod == 'upi',
-                            onTap: () => widget.controller.selectedPaymentMethod.value = 'upi',
-                          ),
-                          SizedBox(height: 10.h),
-                          _buildPaymentOption(
-                            id: 'razorpay',
-                            title: 'Online Payment (Instant Gateway)',
-                            subtitle: 'UPI, Debit/Credit Cards, NetBanking (Cashfree / Razorpay)',
-                            icon: Icons.credit_card_rounded,
-                            badge: 'ONLINE',
-                            isSelected: selectedMethod == 'razorpay' || selectedMethod == 'online',
-                            onTap: () => widget.controller.selectedPaymentMethod.value = 'razorpay',
-                          ),
-                          SizedBox(height: 10.h),
-                          _buildPaymentOption(
-                            id: 'card',
-                            title: 'Debit / Credit Card (POS Terminal)',
-                            subtitle: 'Swipe or tap card at reception terminal',
-                            icon: Icons.credit_card_outlined,
-                            badge: 'POS',
-                            isSelected: selectedMethod == 'card',
-                            onTap: () => widget.controller.selectedPaymentMethod.value = 'card',
-                          ),
-                          SizedBox(height: 10.h),
-                          _buildPaymentOption(
-                            id: 'cash',
-                            title: 'Pay at Front Desk',
-                            subtitle: 'Front-desk cash settlement during check-in',
-                            icon: Icons.storefront_rounded,
-                            badge: 'DESK',
-                            isSelected: selectedMethod == 'cash',
-                            onTap: () => widget.controller.selectedPaymentMethod.value = 'cash',
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 14.h),
-                    Text('Booking Notes', style: AppTypography.sectionTitle),
-                    SizedBox(height: 8.h),
-                    TextField(
-                      controller: _notesController,
-                      style: TextStyle(fontSize: 13.sp, color: const Color(0xFF0F172A)),
-                      decoration: InputDecoration(
-                        prefixIcon: const Icon(Icons.edit_note_rounded, size: 20, color: Color(0xFF64748B)),
-                        hintText: 'e.g. Member slot booking',
-                        contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              }
-
-              if (widget.controller.isStudent) {
-                final selectedMethod = widget.controller.selectedPaymentMethod.value;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(14.w),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16.r),
-                        border: Border.all(color: AppColors.primary, width: 1.2),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x0A000000),
-                            blurRadius: 10,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildPaymentOption(
-                            id: 'upi',
-                            title: 'UPI (GPay / PhonePe / Paytm / BHIM)',
-                            subtitle: 'Instant confirmation directly linked to your student identity',
-                            icon: Icons.qr_code_2_rounded,
-                            badge: 'RECOMMENDED',
-                            isSelected: selectedMethod == 'upi',
-                            onTap: () => widget.controller.selectedPaymentMethod.value = 'upi',
-                          ),
-                          SizedBox(height: 10.h),
-                          _buildPaymentOption(
-                            id: 'razorpay',
-                            title: 'Online Payment Gateway',
-                            subtitle: 'UPI, Cards, NetBanking (Auto-routed by Academy)',
-                            icon: Icons.credit_card_rounded,
-                            badge: 'ONLINE',
-                            isSelected: selectedMethod == 'razorpay' || selectedMethod == 'online',
-                            onTap: () => widget.controller.selectedPaymentMethod.value = 'razorpay',
-                          ),
-                          SizedBox(height: 10.h),
-                          _buildPaymentOption(
-                            id: 'cash',
-                            title: 'Pay at Academy Desk',
-                            subtitle: 'Pay offline during facility entry check-in',
-                            icon: Icons.storefront_rounded,
-                            badge: 'DESK',
-                            isSelected: selectedMethod == 'cash',
-                            onTap: () => widget.controller.selectedPaymentMethod.value = 'cash',
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 14.h),
-                    Text('Booking Notes', style: AppTypography.sectionTitle),
-                    SizedBox(height: 8.h),
-                    TextField(
-                      controller: _notesController,
-                      style: TextStyle(fontSize: 13.sp, color: const Color(0xFF0F172A)),
-                      decoration: InputDecoration(
-                        prefixIcon: const Icon(Icons.edit_note_rounded, size: 20, color: Color(0xFF64748B)),
-                        hintText: 'e.g. Personal training practice',
-                        contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              }
-
-              // Default Customer Dynamic Gateway Box
-              return _buildDynamicGatewayBox();
-            }),
+            _buildDynamicGatewayBox(),
             SizedBox(height: 24.h),
 
             // 4. Itemized Price Breakdown
@@ -1021,45 +721,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             SizedBox(height: 32.h),
 
-            // 5. Submit Button (Adaptive for Coach, Member, Student Direct Contract vs. Gateway)
+            // 5. Submit Button (Unified Dynamic Gateway across ALL roles)
             Obx(
               () {
-                final isStudent = widget.controller.isStudent;
-                final isMember = widget.controller.isMember;
-                final isCoach = widget.controller.isCoach;
-                final selectedMethod = widget.controller.selectedPaymentMethod.value;
-                final isOnlineGateway = selectedMethod == 'razorpay' || selectedMethod == 'online';
-                final isFree = selectedMethod == 'free';
-
+                final gw = widget.controller.selectedGateway.value != 'auto'
+                    ? widget.controller.selectedGateway.value
+                    : widget.controller.activeGateway.value;
                 String buttonText;
-                if (isCoach) {
-                  final isForStudent = widget.controller.coachBookingMode.value == 'forStudent';
-                  buttonText = isForStudent
-                      ? 'BOOK FOR STUDENT & DISPATCH PIN'
-                      : (isFree ? 'CONFIRM COACH SESSION (FREE)' : 'CONFIRM COACH SESSION (₹${total.toInt()})');
-                } else if (isMember) {
-                  buttonText = isOnlineGateway
-                      ? 'PAY ₹${total.toInt()} ONLINE'
-                      : (isFree
-                          ? 'CONFIRM WITH FREE QUOTA'
-                          : (selectedMethod == 'wallet'
-                              ? 'PAY ₹${total.toInt()} FROM WALLET'
-                              : 'CONFIRM & BOOK SLOT (₹${total.toInt()})'));
-                } else if (isStudent) {
-                  buttonText = isOnlineGateway
-                      ? 'PAY ₹${total.toInt()} ONLINE'
-                      : 'CONFIRM & BOOK SLOT (₹${total.toInt()})';
+                if (gw.toLowerCase() == 'cashfree') {
+                  buttonText = 'PAY ₹${total.toInt()} VIA CASHFREE';
+                } else if (gw.toLowerCase() == 'razorpay') {
+                  buttonText = 'PAY ₹${total.toInt()} VIA RAZORPAY';
                 } else {
-                  final gw = widget.controller.selectedGateway.value != 'auto'
-                      ? widget.controller.selectedGateway.value
-                      : widget.controller.activeGateway.value;
-                  if (gw.toLowerCase() == 'cashfree') {
-                    buttonText = 'PAY ₹${total.toInt()} VIA CASHFREE';
-                  } else if (gw.toLowerCase() == 'razorpay') {
-                    buttonText = 'PAY ₹${total.toInt()} VIA RAZORPAY';
-                  } else {
-                    buttonText = 'PAY ₹${total.toInt()} ONLINE';
-                  }
+                  buttonText = 'PAY ₹${total.toInt()} ONLINE';
                 }
 
                 return AppButton(
@@ -1067,40 +741,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   isLoading: widget.controller.isSubmitting.value ||
                       widget.controller.isRegisteringGuest.value,
                   onPressed: () async {
-                    // Coach flow: personal session or on behalf of student
-                    if (isCoach) {
-                      final pass = await widget.controller.confirmCoachBooking(
-                        notes: _notesController.text.trim(),
-                      );
-                      if (pass != null) {
-                        Get.off(() => DigitalPassScreen(pass: pass));
-                      }
-                      return;
-                    }
-
-                    // Member direct contract (wallet, free, upi, card, cash)
-                    if (isMember && !isOnlineGateway) {
-                      final pass = await widget.controller.confirmMemberBooking(
-                        notes: _notesController.text.trim(),
-                      );
-                      if (pass != null) {
-                        Get.off(() => DigitalPassScreen(pass: pass));
-                      }
-                      return;
-                    }
-
-                    // Student direct contract (upi, cash)
-                    if (isStudent && !isOnlineGateway) {
-                      final pass = await widget.controller.confirmStudentBooking(
-                        notes: _notesController.text.trim(),
-                      );
-                      if (pass != null) {
-                        Get.off(() => DigitalPassScreen(pass: pass));
-                      }
-                      return;
-                    }
-
-                    // Otherwise, for customer or member/student choosing Razorpay gateway
+                    // For unregistered guest: ensure mobile & name are provided
                     if (!widget.controller.isGuestRegistered.value &&
                         !widget.controller.isStudentOrCoach &&
                         !widget.controller.isMember) {
@@ -1137,7 +778,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       if (!registered) return;
                     }
 
-                    // Launch Razorpay Gateway & finalize booking pass
+                    // Launch Unified Dynamic Gateway (Cashfree or Razorpay) & finalize booking pass
                     final pass = await widget.controller.payWithRazorpay();
                     if (pass != null) {
                       Get.off(() => DigitalPassScreen(pass: pass));
@@ -1145,112 +786,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   },
                 );
               },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPaymentOption({
-    required String id,
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required String badge,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12.r),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFFFFDF5) : Colors.white,
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : const Color(0xFFE2E8F0),
-            width: isSelected ? 1.5 : 1.0,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(8.w),
-              decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFFFEF3C7) : const Color(0xFFF1F5F9),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                size: 18.sp,
-                color: isSelected ? const Color(0xFFB45309) : const Color(0xFF475569),
-              ),
-            ),
-            SizedBox(width: 10.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          title,
-                          style: TextStyle(
-                            fontFamily: 'Nunito',
-                            fontSize: 12.5.sp,
-                            fontWeight: FontWeight.w800,
-                            color: const Color(0xFF0F172A),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      SizedBox(width: 6.w),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.5.h),
-                        decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFFFEF3C7) : const Color(0xFFF1F5F9),
-                          borderRadius: BorderRadius.circular(4.r),
-                        ),
-                        child: Text(
-                          badge,
-                          style: TextStyle(
-                            fontFamily: 'Nunito',
-                            fontSize: 8.5.sp,
-                            fontWeight: FontWeight.w900,
-                            color: isSelected ? const Color(0xFF92400E) : const Color(0xFF64748B),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontFamily: 'Nunito',
-                      fontSize: 10.5.sp,
-                      color: const Color(0xFF64748B),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              width: 20.w,
-              height: 20.w,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected ? AppColors.primary : const Color(0xFFCBD5E1),
-                  width: isSelected ? 5.5.w : 2.w,
-                ),
-                color: Colors.white,
-              ),
             ),
           ],
         ),

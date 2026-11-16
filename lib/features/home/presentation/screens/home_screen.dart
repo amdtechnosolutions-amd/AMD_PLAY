@@ -106,6 +106,11 @@ class HomeScreen extends StatelessWidget {
                   // ========================================================
                   // COACH MODE: ASSIGNED BATCHES & STUDENT EVALUATIONS
                   // ========================================================
+                  if (controller.myBookings.isNotEmpty) ...[
+                    _buildActivePassesSection(controller),
+                    SizedBox(height: 24.h),
+                  ],
+
                   _buildCoachBatchesSection(controller, context),
                   SizedBox(height: 24.h),
 
@@ -127,6 +132,11 @@ class HomeScreen extends StatelessWidget {
                   // ========================================================
                   // STUDENT MODE: ACADEMY BATCHES, ATTENDANCE & MONTHLY FEES
                   // ========================================================
+                  if (controller.myBookings.isNotEmpty) ...[
+                    _buildActivePassesSection(controller),
+                    SizedBox(height: 24.h),
+                  ],
+
                   _buildMySportsSection(controller),
                   SizedBox(height: 24.h),
 
