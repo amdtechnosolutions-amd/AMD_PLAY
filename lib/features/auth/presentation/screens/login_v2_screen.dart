@@ -595,6 +595,53 @@ class LoginV2Screen extends GetView<AuthController> {
               ),
             ),
           ),
+          SizedBox(height: 24.h),
+
+          // Legal & Merchant Information Footer (Cashfree & Regulatory Compliance)
+          Center(
+            child: InkWell(
+              onTap: () => Get.toNamed(AppRoutes.merchantLegalInfo),
+              borderRadius: BorderRadius.circular(8.r),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                child: Column(
+                  children: [
+                    Text(
+                      'TEAM INERTIA ENTERPRISES',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 11.5.sp,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF94A3B8),
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      'Proprietor: KRISHNAN ROHITH KUMAR • Teaminertia3499@gmail.com • 9789006925',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 10.sp,
+                        color: const Color(0xFF64748B),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 3.h),
+                    Text(
+                      'About Us & Legal Policies',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFFF59E0B),
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

@@ -24,6 +24,22 @@ void main() {
           reason: 'web/index.html must contain 9789006925');
       expect(indexHtml.contains('Cancellation & Refund Policy'), isTrue,
           reason: 'web/index.html must contain Cancellation & Refund Policy');
+      expect(indexHtml.contains('id="inertia-legal-bar"'), isFalse,
+          reason: 'web/index.html must not contain fixed floating bar that blocks scrolling');
+    });
+
+    test('Login screen contains legal merchant details footer', () {
+      final loginScreen = File('lib/features/auth/presentation/screens/login_screen.dart').readAsStringSync();
+      expect(loginScreen.contains('TEAM INERTIA ENTERPRISES'), isTrue);
+      expect(loginScreen.contains('KRISHNAN ROHITH KUMAR'), isTrue);
+      expect(loginScreen.contains('Teaminertia3499@gmail.com'), isTrue);
+      expect(loginScreen.contains('9789006925'), isTrue);
+
+      final loginV2Screen = File('lib/features/auth/presentation/screens/login_v2_screen.dart').readAsStringSync();
+      expect(loginV2Screen.contains('TEAM INERTIA ENTERPRISES'), isTrue);
+      expect(loginV2Screen.contains('KRISHNAN ROHITH KUMAR'), isTrue);
+      expect(loginV2Screen.contains('Teaminertia3499@gmail.com'), isTrue);
+      expect(loginV2Screen.contains('9789006925'), isTrue);
     });
   });
 }

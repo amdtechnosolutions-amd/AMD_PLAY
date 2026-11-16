@@ -1086,47 +1086,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 );
               },
             ),
-            SizedBox(height: 16.h),
-
-            // Merchant Disclosure Banner (Cashfree & Compliance)
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
-                borderRadius: BorderRadius.circular(10.r),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.shield_outlined, size: 14, color: Color(0xFF10B981)),
-                      SizedBox(width: 6.w),
-                      Text(
-                        'Billing Entity: TEAM INERTIA ENTERPRISES',
-                        style: TextStyle(
-                          fontFamily: 'Nunito',
-                          fontSize: 10.5.sp,
-                          fontWeight: FontWeight.w800,
-                          color: const Color(0xFF0F172A),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 3.h),
-                  Text(
-                    'Proprietor: KRISHNAN ROHITH KUMAR • Support: Teaminertia3499@gmail.com | 9789006925',
-                    style: TextStyle(
-                      fontFamily: 'Nunito',
-                      fontSize: 10.sp,
-                      color: const Color(0xFF64748B),
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       ),

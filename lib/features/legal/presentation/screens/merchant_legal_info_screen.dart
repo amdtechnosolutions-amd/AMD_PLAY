@@ -24,7 +24,7 @@ class MerchantLegalInfoScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: Text(
-          'Merchant & Legal Information',
+          'About Us & Legal Information',
           style: TextStyle(
             fontFamily: 'Nunito',
             fontSize: 17.sp,

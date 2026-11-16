@@ -478,7 +478,55 @@ class LoginScreen extends GetView<AuthController> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 36.h),
+                  SizedBox(height: 24.h),
+
+                  // Legal & Merchant Information Footer (Cashfree & Regulatory Compliance)
+                  Center(
+                    child: InkWell(
+                      onTap: () => Get.toNamed(AppRoutes.merchantLegalInfo),
+                      borderRadius: BorderRadius.circular(10.r),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+                        child: Column(
+                          children: [
+                            Text(
+                              'TEAM INERTIA ENTERPRISES',
+                              style: TextStyle(
+                                fontFamily: 'Nunito',
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w800,
+                                color: const Color(0xFF334155),
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                            SizedBox(height: 2.h),
+                            Text(
+                              'Proprietor: KRISHNAN ROHITH KUMAR • Teaminertia3499@gmail.com • 9789006925',
+                              style: TextStyle(
+                                fontFamily: 'Nunito',
+                                fontSize: 9.5.sp,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF64748B),
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: 3.h),
+                            Text(
+                              'About Us & Legal Policies',
+                              style: TextStyle(
+                                fontFamily: 'Nunito',
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.w700,
+                                color: goldAccent,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
 
                   // Bottom Home Bar Indicator
                   Center(

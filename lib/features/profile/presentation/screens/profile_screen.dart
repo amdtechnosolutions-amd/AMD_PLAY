@@ -1146,8 +1146,8 @@ class ProfileScreen extends StatelessWidget {
             ),
             const Divider(color: Color(0x1AD4AF37), height: 1),
             _buildActionTile(
-              icon: Icons.verified_user_rounded,
-              title: 'Merchant & Legal Information',
+              icon: Icons.info_outline_rounded,
+              title: 'About Us & Legal Information',
               subtitle: 'TEAM INERTIA ENTERPRISES • KRISHNAN ROHITH KUMAR',
               onTap: () => Get.toNamed(AppRoutes.merchantLegalInfo),
             ),
