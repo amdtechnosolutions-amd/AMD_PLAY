@@ -1212,49 +1212,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget _buildDynamicGatewayBox() {
     return Obx(() {
       final active = widget.controller.activeGateway.value.toLowerCase().trim();
-      final selected = widget.controller.selectedGateway.value.toLowerCase().trim();
-      final isLoading = widget.controller.isLoadingGateway.value;
-
-      final effectiveGateway = selected != 'auto'
-          ? selected
-          : (active.isNotEmpty ? active : 'auto');
-
-      final bool isCashfree = effectiveGateway == 'cashfree';
-      final bool isRazorpay = effectiveGateway == 'razorpay';
-      final bool isAuto = effectiveGateway == 'auto';
-
-      final Color badgeBg = isCashfree
-          ? const Color(0xFF064E3B)
-          : (isRazorpay ? const Color(0xFF0C2340) : const Color(0xFF1E293B));
-
-      final Color badgeIconColor = isCashfree
-          ? const Color(0xFF10B981)
-          : (isRazorpay ? const Color(0xFF528FF0) : const Color(0xFFF59E0B));
-
-      final String badgeText = isCashfree
-          ? 'CASHFREE'
-          : (isRazorpay ? 'RAZORPAY' : 'MULTI-GATEWAY');
-
-      final String gatewayTitle = isCashfree
-          ? 'Cashfree Payment Gateway'
-          : (isRazorpay ? 'Razorpay Payment Gateway' : 'Dynamic Payment Gateway');
-
-      final String gatewaySubtitle = isAuto
-          ? 'Auto-routed by Academy (Cashfree / Razorpay)'
-          : (active.isNotEmpty && active == effectiveGateway
-              ? 'Active Academy Gateway (Auto-Detected)'
-              : 'Official Payment Gateway');
-
-      final Color borderColor = isCashfree
-          ? const Color(0xFF059669)
-          : (isRazorpay ? const Color(0xFF2563EB) : const Color(0xFF0F172A));
+      final bool isRazorpay = active == 'razorpay';
 
       return Container(
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: borderColor, width: 1.5),
+          border: Border.all(color: const Color(0xFF0F172A), width: 1.5),
           boxShadow: const [
             BoxShadow(
               color: Color(0x0A000000),
@@ -1266,58 +1231,25 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Gateway Selector Chips (Auto / Cashfree / Razorpay)
-            Row(
-              children: [
-                Expanded(
-                  child: _buildGatewayChip(
-                    label: active.isNotEmpty ? 'Auto ($active)' : 'Auto',
-                    value: 'auto',
-                    selectedValue: selected,
-                  ),
-                ),
-                SizedBox(width: 6.w),
-                Expanded(
-                  child: _buildGatewayChip(
-                    label: 'Cashfree',
-                    value: 'cashfree',
-                    selectedValue: selected,
-                  ),
-                ),
-                SizedBox(width: 6.w),
-                Expanded(
-                  child: _buildGatewayChip(
-                    label: 'Razorpay',
-                    value: 'razorpay',
-                    selectedValue: selected,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 14.h),
-
-            // Active Gateway Header Row
             Row(
               children: [
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                   decoration: BoxDecoration(
-                    color: badgeBg,
+                    color: const Color(0xFF0F172A),
                     borderRadius: BorderRadius.circular(8.r),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        isCashfree
-                            ? Icons.bolt_rounded
-                            : (isRazorpay ? Icons.flash_on_rounded : Icons.hub_rounded),
-                        color: badgeIconColor,
+                      const Icon(
+                        Icons.flash_on_rounded,
+                        color: Color(0xFFF9D106),
                         size: 16,
                       ),
                       SizedBox(width: 4.w),
                       Text(
-                        badgeText,
+                        isRazorpay ? 'RAZORPAY' : 'CASHFREE',
                         style: TextStyle(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w900,
@@ -1333,31 +1265,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              gatewayTitle,
-                              style: TextStyle(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF0F172A),
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          if (isLoading) ...[
-                            SizedBox(width: 6.w),
-                            SizedBox(
-                              width: 12.w,
-                              height: 12.h,
-                              child: const CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                          ],
-                        ],
+                      Text(
+                        isRazorpay ? 'Razorpay Payment Gateway' : 'Cashfree Payment Gateway',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF0F172A),
+                        ),
                       ),
                       Text(
-                        gatewaySubtitle,
+                        'Official Payment Channel',
                         style: TextStyle(
                           fontSize: 11.sp,
                           color: const Color(0xFF64748B),
@@ -1381,57 +1298,26 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ),
             ),
             SizedBox(height: 8.h),
-            _buildGatewayFeature(
-              Icons.qr_code_2_rounded,
-              isCashfree
-                  ? 'UPI: GPay, PhonePe, Paytm, BHIM, CRED & Auto-Collect'
-                  : 'UPI: GPay, PhonePe, Paytm, BHIM, CRED',
-            ),
+            _buildGatewayFeature(Icons.qr_code_2_rounded, 'UPI: GPay, PhonePe, Paytm, BHIM, CRED'),
             SizedBox(height: 6.h),
-            _buildGatewayFeature(
-              Icons.credit_card_rounded,
-              isCashfree
-                  ? 'Cards: Visa, MasterCard, RuPay, Maestro & Amex'
-                  : 'Cards: Visa, MasterCard, RuPay, Maestro',
-            ),
+            _buildGatewayFeature(Icons.credit_card_rounded, 'Cards: Visa, MasterCard, RuPay, Maestro'),
             SizedBox(height: 6.h),
-            _buildGatewayFeature(
-              Icons.account_balance_rounded,
-              isCashfree
-                  ? 'NetBanking & Wallets (60+ banks & top wallets)'
-                  : 'NetBanking & Wallets (50+ banks)',
-            ),
+            _buildGatewayFeature(Icons.account_balance_rounded, 'NetBanking & Wallets (50+ banks)'),
             SizedBox(height: 12.h),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
               decoration: BoxDecoration(
-                color: isCashfree
-                    ? const Color(0xFFF0FDF4)
-                    : const Color(0xFFF8FAFC),
+                color: const Color(0xFFF8FAFC),
                 borderRadius: BorderRadius.circular(8.r),
-                border: Border.all(
-                  color: isCashfree
-                      ? const Color(0xFFBBF7D0)
-                      : const Color(0xFFE2E8F0),
-                ),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.shield_outlined,
-                    color: isCashfree
-                        ? const Color(0xFF059669)
-                        : const Color(0xFF10B981),
-                    size: 16,
-                  ),
+                  const Icon(Icons.shield_outlined, color: Color(0xFF10B981), size: 16),
                   SizedBox(width: 8.w),
                   Expanded(
                     child: Text(
-                      isCashfree
-                          ? '100% Secure Cashfree SSL Encryption • Direct Settlement'
-                          : (isRazorpay
-                              ? '100% Secure Razorpay 256-Bit SSL Encrypted • Direct Channel'
-                              : '100% Secure Multi-Tenant 256-Bit SSL Encrypted Gateway'),
+                      '100% Secure 256-Bit SSL Encrypted. Direct payments disabled.',
                       style: TextStyle(
                         fontSize: 10.sp,
                         fontWeight: FontWeight.w600,
@@ -1446,51 +1332,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ),
       );
     });
-  }
-
-  Widget _buildGatewayChip({
-    required String label,
-    required String value,
-    required String selectedValue,
-  }) {
-    final bool isSelected = selectedValue == value;
-    final bool isCashfree = value == 'cashfree';
-    final bool isRazorpay = value == 'razorpay';
-
-    Color activeColor = const Color(0xFF0F172A);
-    if (isCashfree) activeColor = const Color(0xFF059669);
-    if (isRazorpay) activeColor = const Color(0xFF2563EB);
-
-    return InkWell(
-      onTap: () {
-        widget.controller.selectedGateway.value = value;
-      },
-      borderRadius: BorderRadius.circular(8.r),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 8.w),
-        decoration: BoxDecoration(
-          color: isSelected ? activeColor : const Color(0xFFF1F5F9),
-          borderRadius: BorderRadius.circular(8.r),
-          border: Border.all(
-            color: isSelected ? activeColor : const Color(0xFFCBD5E1),
-            width: isSelected ? 1.5 : 1.0,
-          ),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 11.sp,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-              color: isSelected ? Colors.white : const Color(0xFF475569),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   Widget _summaryRow(IconData icon, String text) {

@@ -126,8 +126,12 @@ class UnifiedPaymentService {
       },
     );
 
-    final String rawEnv = (orderData['environment'] ?? orderData['mode'] ?? '').toString().toUpperCase().trim();
-    final bool isProd = rawEnv == 'PRODUCTION' ||
+    final String rawEnv = (orderData['environment'] ??
+        orderData['cfEnvironment'] ??
+        orderData['mode'] ??
+        '').toString().toUpperCase().trim();
+    final bool isProd = orderData['isProduction'] == true ||
+        rawEnv == 'PRODUCTION' ||
         rawEnv == 'PROD' ||
         rawEnv == 'LIVE' ||
         (rawEnv.isEmpty && ApiEndpoints.isProduction);

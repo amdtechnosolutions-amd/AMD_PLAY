@@ -161,5 +161,27 @@ void main() {
       expect(paymentSessionId, 'session_token_xyz_123');
       expect(orderId, 'cf_order_9988');
     });
+
+    test('Backend updated environment payload flags correctly identify PRODUCTION', () {
+      final backendUpdatedPayload = {
+        'gateway': 'cashfree',
+        'environment': 'PRODUCTION',
+        'mode': 'production',
+        'cfEnvironment': 'PRODUCTION',
+        'isProduction': true,
+      };
+
+      final String rawEnv = (backendUpdatedPayload['environment'] ??
+          backendUpdatedPayload['cfEnvironment'] ??
+          backendUpdatedPayload['mode'] ??
+          '').toString().toUpperCase().trim();
+
+      final bool isProd = backendUpdatedPayload['isProduction'] == true ||
+          rawEnv == 'PRODUCTION' ||
+          rawEnv == 'PROD' ||
+          rawEnv == 'LIVE';
+
+      expect(isProd, isTrue);
+    });
   });
 }

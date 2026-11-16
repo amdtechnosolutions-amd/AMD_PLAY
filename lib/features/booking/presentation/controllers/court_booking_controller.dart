@@ -67,9 +67,9 @@ class CourtBookingController extends GetxController {
   Map<String, dynamic>? _pendingOrder;
   Completer<BookingPassModel?>? _pendingBookingCompleter;
 
-  // Multi-Tenant Payment Gateway State ('auto' | 'cashfree' | 'razorpay')
-  final RxString activeGateway = ''.obs;
-  final RxString selectedGateway = 'auto'.obs;
+  // Multi-Tenant Payment Gateway State (defaults to active Cashfree gateway)
+  final RxString activeGateway = 'cashfree'.obs;
+  final RxString selectedGateway = 'cashfree'.obs;
   final RxBool isLoadingGateway = false.obs;
 
   // Guest Customer Registration State (Step 1)
@@ -691,8 +691,12 @@ class CourtBookingController extends GetxController {
             orderData['token'] ??
             '').toString().trim();
 
-        final String rawEnv = (orderData['environment'] ?? orderData['mode'] ?? '').toString().toUpperCase().trim();
-        final bool isProd = rawEnv == 'PRODUCTION' ||
+        final String rawEnv = (orderData['environment'] ??
+            orderData['cfEnvironment'] ??
+            orderData['mode'] ??
+            '').toString().toUpperCase().trim();
+        final bool isProd = orderData['isProduction'] == true ||
+            rawEnv == 'PRODUCTION' ||
             rawEnv == 'PROD' ||
             rawEnv == 'LIVE' ||
             (rawEnv.isEmpty && ApiEndpoints.isProduction);
