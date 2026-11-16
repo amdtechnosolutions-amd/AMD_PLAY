@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_cashfree_pg_sdk/api/cfsession/cfsession.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_cashfree_pg_sdk/utils/cfenums.dart';
 import 'package:flutter_cashfree_pg_sdk/api/cferrorresponse/cferrorresponse.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../network/api_endpoints.dart';
+import 'razorpay_bridge.dart';
 
 /// Universal Multi-Tenant Payment Service (Cashfree + Razorpay)
 /// Dynamically routes to the tenant academy's configured active gateway.
@@ -163,7 +165,28 @@ class UnifiedPaymentService {
       return;
     }
 
-    debugPrint('🚀 [CASHFREE MOBILE CHECKOUT] session: $paymentSessionId, orderId: $orderId, env: ${isProd ? "PRODUCTION" : "SANDBOX"}');
+    debugPrint('🚀 [CASHFREE CHECKOUT] session: $paymentSessionId, orderId: $orderId, env: ${isProd ? "PRODUCTION" : "SANDBOX"}');
+
+    if (kIsWeb) {
+      openWebCashfree(
+        paymentSessionId: paymentSessionId,
+        orderId: orderId,
+        isProd: isProd,
+        onSuccess: (cfOrderId) async {
+          await _verifyPayment({
+            'gateway': 'cashfree',
+            'orderId': cfOrderId.isNotEmpty ? cfOrderId : orderId,
+            ...?_activeBookingData,
+          });
+        },
+        onFailure: (errorMessage) {
+          if (_onError != null) {
+            _onError!(errorMessage);
+          }
+        },
+      );
+      return;
+    }
 
     final CFSession session = CFSessionBuilder()
         .setEnvironment(isProd ? CFEnvironment.PRODUCTION : CFEnvironment.SANDBOX)

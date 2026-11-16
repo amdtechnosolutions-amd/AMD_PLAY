@@ -721,50 +721,89 @@ class CourtBookingController extends GetxController {
 
         debugPrint('🚀 [CASHFREE PAYMENT] session: $paymentSessionId, orderId: $orderId, env: ${isProd ? "PRODUCTION" : "SANDBOX"}');
 
-        _cfService?.setCallback(
-          (String cfOrderId) async {
-            final pass = await _verifyAndFinalizeUnifiedBooking({
-              'gateway': 'cashfree',
-              'orderId': cfOrderId.isNotEmpty ? cfOrderId : orderId,
-              'resourceId': selectedSlots.first.resourceId,
-              'date': selectedSlots.first.date,
-              'startTime': selectedSlots.first.startTime,
-              'endTime': selectedSlots.first.endTime,
-              'slots': selectedSlots.map((s) => s.toJson()).toList(),
-              'name': prefillName,
-              'phone': prefillPhone,
-              'email': prefillEmail,
-            });
-            if (_pendingBookingCompleter != null && !_pendingBookingCompleter!.isCompleted) {
-              _pendingBookingCompleter!.complete(pass);
-            }
-          },
-          (CFErrorResponse error, String cfOrderId) {
-            isSubmitting.value = false;
-            Get.snackbar(
-              'Payment Notice',
-              error.getMessage() ?? 'Cashfree payment was cancelled or failed',
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: const Color(0xFFFEF2F2),
-              colorText: const Color(0xFF991B1B),
-            );
-            if (_pendingBookingCompleter != null && !_pendingBookingCompleter!.isCompleted) {
-              _pendingBookingCompleter!.complete(null);
-            }
-          },
-        );
+        if (kIsWeb) {
+          debugPrint('🌐 [CASHFREE WEB CHECKOUT] Launching Cashfree JS v3 modal for session: $paymentSessionId');
+          openWebCashfree(
+            paymentSessionId: paymentSessionId,
+            orderId: orderId,
+            isProd: isProd,
+            onSuccess: (cfOrderId) async {
+              final pass = await _verifyAndFinalizeUnifiedBooking({
+                'gateway': 'cashfree',
+                'orderId': cfOrderId.isNotEmpty ? cfOrderId : orderId,
+                'resourceId': selectedSlots.first.resourceId,
+                'date': selectedSlots.first.date,
+                'startTime': selectedSlots.first.startTime,
+                'endTime': selectedSlots.first.endTime,
+                'slots': selectedSlots.map((s) => s.toJson()).toList(),
+                'name': prefillName,
+                'phone': prefillPhone,
+                'email': prefillEmail,
+              });
+              if (_pendingBookingCompleter != null && !_pendingBookingCompleter!.isCompleted) {
+                _pendingBookingCompleter!.complete(pass);
+              }
+            },
+            onFailure: (errorMsg) {
+              isSubmitting.value = false;
+              Get.snackbar(
+                'Payment Notice',
+                errorMsg,
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: const Color(0xFFFEF2F2),
+                colorText: const Color(0xFF991B1B),
+              );
+              if (_pendingBookingCompleter != null && !_pendingBookingCompleter!.isCompleted) {
+                _pendingBookingCompleter!.complete(null);
+              }
+            },
+          );
+        } else {
+          _cfService?.setCallback(
+            (String cfOrderId) async {
+              final pass = await _verifyAndFinalizeUnifiedBooking({
+                'gateway': 'cashfree',
+                'orderId': cfOrderId.isNotEmpty ? cfOrderId : orderId,
+                'resourceId': selectedSlots.first.resourceId,
+                'date': selectedSlots.first.date,
+                'startTime': selectedSlots.first.startTime,
+                'endTime': selectedSlots.first.endTime,
+                'slots': selectedSlots.map((s) => s.toJson()).toList(),
+                'name': prefillName,
+                'phone': prefillPhone,
+                'email': prefillEmail,
+              });
+              if (_pendingBookingCompleter != null && !_pendingBookingCompleter!.isCompleted) {
+                _pendingBookingCompleter!.complete(pass);
+              }
+            },
+            (CFErrorResponse error, String cfOrderId) {
+              isSubmitting.value = false;
+              Get.snackbar(
+                'Payment Notice',
+                error.getMessage() ?? 'Cashfree payment was cancelled or failed',
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: const Color(0xFFFEF2F2),
+                colorText: const Color(0xFF991B1B),
+              );
+              if (_pendingBookingCompleter != null && !_pendingBookingCompleter!.isCompleted) {
+                _pendingBookingCompleter!.complete(null);
+              }
+            },
+          );
 
-        final CFSession session = CFSessionBuilder()
-            .setEnvironment(isProd ? CFEnvironment.PRODUCTION : CFEnvironment.SANDBOX)
-            .setOrderId(orderId)
-            .setPaymentSessionId(paymentSessionId)
-            .build();
+          final CFSession session = CFSessionBuilder()
+              .setEnvironment(isProd ? CFEnvironment.PRODUCTION : CFEnvironment.SANDBOX)
+              .setOrderId(orderId)
+              .setPaymentSessionId(paymentSessionId)
+              .build();
 
-        final CFWebCheckoutPayment cfPayment = CFWebCheckoutPaymentBuilder()
-            .setSession(session)
-            .build();
+          final CFWebCheckoutPayment cfPayment = CFWebCheckoutPaymentBuilder()
+              .setSession(session)
+              .build();
 
-        _cfService?.doPayment(cfPayment);
+          _cfService?.doPayment(cfPayment);
+        }
         return await _pendingBookingCompleter!.future;
       }
 
