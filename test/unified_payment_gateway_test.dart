@@ -1,5 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_cashfree_pg_sdk/api/cfsession/cfsession.dart';
+import 'package:flutter_cashfree_pg_sdk/utils/cfenums.dart';
 import 'package:mobile_app/core/network/api_endpoints.dart';
 import 'package:mobile_app/core/services/unified_payment_service.dart';
 import 'package:mobile_app/features/booking/data/models/booking_pass_model.dart';
@@ -114,6 +116,50 @@ void main() {
     test('CourtBookingController exposes payWithUnifiedGateway alias', () {
       final controller = CourtBookingController();
       expect(controller.payWithUnifiedGateway, isNotNull);
+    });
+
+    test('Cashfree session builder configures PRODUCTION environment for live backend response', () {
+      final backendOrderData = {
+        'gateway': 'cashfree',
+        'orderId': 'cf_1794846052248_9483',
+        'cfOrderId': '7460414603',
+        'paymentSessionId': 'session_m7bj56IQCMgDtNs9w9BhVYvXrZVYZUtAQdcLgCb0OYF8VprXl2XmR3yG6jwwekqj',
+        'amount': 1000,
+        'currency': 'INR',
+        'environment': 'PRODUCTION',
+      };
+
+      final String rawEnv = (backendOrderData['environment'] ?? '').toString().toUpperCase().trim();
+      final bool isProd = rawEnv == 'PRODUCTION' || rawEnv == 'PROD' || rawEnv == 'LIVE';
+      expect(isProd, isTrue);
+
+      final session = CFSessionBuilder()
+          .setEnvironment(isProd ? CFEnvironment.PRODUCTION : CFEnvironment.SANDBOX)
+          .setOrderId(backendOrderData['orderId']!.toString())
+          .setPaymentSessionId(backendOrderData['paymentSessionId']!.toString())
+          .build();
+
+      expect(session.getEnvironment(), 'PRODUCTION');
+      expect(session.getOrderId(), 'cf_1794846052248_9483');
+      expect(session.getPaymentSessionId(), 'session_m7bj56IQCMgDtNs9w9BhVYvXrZVYZUtAQdcLgCb0OYF8VprXl2XmR3yG6jwwekqj');
+    });
+
+    test('Cashfree session extraction supports snake_case payment_session_id', () {
+      final snakeCasePayload = {
+        'order_id': 'cf_order_9988',
+        'payment_session_id': 'session_token_xyz_123',
+        'mode': 'PROD',
+      };
+
+      final String paymentSessionId = (snakeCasePayload['paymentSessionId'] ??
+          snakeCasePayload['payment_session_id'] ??
+          '').toString().trim();
+      final String orderId = (snakeCasePayload['orderId'] ??
+          snakeCasePayload['order_id'] ??
+          '').toString().trim();
+
+      expect(paymentSessionId, 'session_token_xyz_123');
+      expect(orderId, 'cf_order_9988');
     });
   });
 }

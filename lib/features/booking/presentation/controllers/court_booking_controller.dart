@@ -10,6 +10,7 @@ import 'package:flutter_cashfree_pg_sdk/api/cfpaymentgateway/cfpaymentgatewayser
 import 'package:flutter_cashfree_pg_sdk/api/cfpayment/cfwebcheckoutpayment.dart';
 import 'package:flutter_cashfree_pg_sdk/utils/cfenums.dart';
 import 'package:flutter_cashfree_pg_sdk/api/cferrorresponse/cferrorresponse.dart';
+import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/services/razorpay_bridge.dart';
 import '../../../../core/storage/storage_service.dart';
 import '../../../home/presentation/controllers/home_controller.dart';
@@ -681,10 +682,22 @@ class CourtBookingController extends GetxController {
       // 1. Tenant configured CASHFREE
       // -------------------------------------------------------------
       if (gateway == 'cashfree') {
-        final String paymentSessionId = (orderData['paymentSessionId'] ?? '').toString();
-        final bool isProd = (orderData['environment']?.toString().toUpperCase() == 'PROD');
+        final String paymentSessionId = (orderData['paymentSessionId'] ??
+            orderData['payment_session_id'] ??
+            orderData['paymentSessionToken'] ??
+            orderData['payment_session_token'] ??
+            orderData['session_id'] ??
+            orderData['sessionId'] ??
+            orderData['token'] ??
+            '').toString().trim();
 
-        if (paymentSessionId.contains('mock') || orderId.contains('mock') || paymentSessionId.isEmpty) {
+        final String rawEnv = (orderData['environment'] ?? orderData['mode'] ?? '').toString().toUpperCase().trim();
+        final bool isProd = rawEnv == 'PRODUCTION' ||
+            rawEnv == 'PROD' ||
+            rawEnv == 'LIVE' ||
+            (rawEnv.isEmpty && ApiEndpoints.isProduction);
+
+        if (paymentSessionId.contains('mock') || orderId.contains('mock')) {
           debugPrint('🧪 [MOCK CASHFREE] Completing test checkout directly...');
           final pass = await _verifyAndFinalizeUnifiedBooking({
             'gateway': 'cashfree',
@@ -701,6 +714,12 @@ class CourtBookingController extends GetxController {
           isSubmitting.value = false;
           return pass;
         }
+
+        if (paymentSessionId.isEmpty) {
+          throw Exception('Payment session token is missing from Cashfree server response');
+        }
+
+        debugPrint('🚀 [CASHFREE PAYMENT] session: $paymentSessionId, orderId: $orderId, env: ${isProd ? "PRODUCTION" : "SANDBOX"}');
 
         _cfService?.setCallback(
           (String cfOrderId) async {

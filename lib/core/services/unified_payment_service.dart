@@ -124,9 +124,26 @@ class UnifiedPaymentService {
       },
     );
 
-    final bool isProd = (orderData['environment']?.toString().toUpperCase() == 'PROD');
-    final String orderId = orderData['orderId']?.toString() ?? orderData['cfOrderId']?.toString() ?? '';
-    final String paymentSessionId = orderData['paymentSessionId']?.toString() ?? '';
+    final String rawEnv = (orderData['environment'] ?? orderData['mode'] ?? '').toString().toUpperCase().trim();
+    final bool isProd = rawEnv == 'PRODUCTION' ||
+        rawEnv == 'PROD' ||
+        rawEnv == 'LIVE' ||
+        (rawEnv.isEmpty && ApiEndpoints.isProduction);
+
+    final String orderId = (orderData['orderId'] ??
+        orderData['order_id'] ??
+        orderData['cfOrderId'] ??
+        orderData['cf_order_id'] ??
+        '').toString().trim();
+
+    final String paymentSessionId = (orderData['paymentSessionId'] ??
+        orderData['payment_session_id'] ??
+        orderData['paymentSessionToken'] ??
+        orderData['payment_session_token'] ??
+        orderData['session_id'] ??
+        orderData['sessionId'] ??
+        orderData['token'] ??
+        '').toString().trim();
 
     // Handle mock gateway if present
     if (paymentSessionId.contains('mock') || orderId.contains('mock')) {
@@ -138,6 +155,15 @@ class UnifiedPaymentService {
       });
       return;
     }
+
+    if (paymentSessionId.isEmpty) {
+      if (_onError != null) {
+        _onError!('Payment session token is missing from Cashfree server response');
+      }
+      return;
+    }
+
+    debugPrint('🚀 [CASHFREE MOBILE CHECKOUT] session: $paymentSessionId, orderId: $orderId, env: ${isProd ? "PRODUCTION" : "SANDBOX"}');
 
     final CFSession session = CFSessionBuilder()
         .setEnvironment(isProd ? CFEnvironment.PRODUCTION : CFEnvironment.SANDBOX)
