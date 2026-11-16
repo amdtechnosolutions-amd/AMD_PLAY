@@ -145,6 +145,10 @@ class ProfileScreen extends StatelessWidget {
                       _buildQuickActionsCard(context, controller, homeCtrl),
                       SizedBox(height: 16.h),
 
+                      // 3.5. Merchant & Legal Disclosure Card (Cashfree Compliance)
+                      _buildMerchantLegalDisclosureCard(context),
+                      SizedBox(height: 16.h),
+
                       // 4. System & API Status Card
                       _buildSystemInfoCard(controller),
                       SizedBox(height: 20.h),
@@ -1140,6 +1144,13 @@ class ProfileScreen extends StatelessWidget {
               subtitle: 'Download receipts & settlement history',
               onTap: () => Get.toNamed(AppRoutes.invoices),
             ),
+            const Divider(color: Color(0x1AD4AF37), height: 1),
+            _buildActionTile(
+              icon: Icons.verified_user_rounded,
+              title: 'Merchant & Legal Information',
+              subtitle: 'TEAM INERTIA ENTERPRISES • KRISHNAN ROHITH KUMAR',
+              onTap: () => Get.toNamed(AppRoutes.merchantLegalInfo),
+            ),
             Obx(() {
               if (homeCtrl.isCoach) {
                 return Column(
@@ -1295,6 +1306,145 @@ class ProfileScreen extends StatelessWidget {
           color: const Color(0xFF94A3B8),
         ),
         onTap: onTap,
+      ),
+    );
+  }
+
+  // ===========================================================================
+  // 3.5. MERCHANT & LEGAL DISCLOSURE CARD (CASHFREE COMPLIANCE)
+  // ===========================================================================
+
+  Widget _buildMerchantLegalDisclosureCard(BuildContext context) {
+    const goldAccent = Color(0xFFD4AF37);
+    const darkSlate = Color(0xFF0F172A);
+
+    return InkWell(
+      onTap: () => Get.toNamed(AppRoutes.merchantLegalInfo),
+      borderRadius: BorderRadius.circular(16.r),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(14.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: const Color(0x60D4AF37), width: 1.2),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x14D4AF37),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(7.w),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFFDF5),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: goldAccent, width: 1.2),
+                  ),
+                  child: Icon(Icons.verified_rounded, color: goldAccent, size: 18.sp),
+                ),
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              'TEAM INERTIA ENTERPRISES',
+                              style: TextStyle(
+                                fontFamily: 'Nunito',
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w900,
+                                color: darkSlate,
+                                letterSpacing: 0.3,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          SizedBox(width: 6.w),
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.5.h),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFECFDF5),
+                              borderRadius: BorderRadius.circular(4.r),
+                            ),
+                            child: Text(
+                              'LEGAL ENTITY',
+                              style: TextStyle(
+                                fontFamily: 'Nunito',
+                                fontSize: 8.5.sp,
+                                fontWeight: FontWeight.w800,
+                                color: const Color(0xFF059669),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        'Proprietor: KRISHNAN ROHITH KUMAR',
+                        style: TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF475569),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 13.sp,
+                  color: const Color(0xFF94A3B8),
+                ),
+              ],
+            ),
+            SizedBox(height: 10.h),
+            const Divider(color: Color(0x1AD4AF37), height: 1),
+            SizedBox(height: 8.h),
+            Row(
+              children: [
+                Icon(Icons.alternate_email_rounded, size: 12.sp, color: goldAccent),
+                SizedBox(width: 4.w),
+                Expanded(
+                  child: Text(
+                    'Teaminertia3499@gmail.com',
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 11.sp,
+                      color: const Color(0xFF64748B),
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                Icon(Icons.phone_outlined, size: 12.sp, color: goldAccent),
+                SizedBox(width: 4.w),
+                Text(
+                  '9789006925',
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 11.sp,
+                    color: const Color(0xFF0F172A),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

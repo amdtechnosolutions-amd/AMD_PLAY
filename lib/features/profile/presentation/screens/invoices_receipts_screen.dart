@@ -137,6 +137,36 @@ class _InvoicesReceiptsScreenState extends State<InvoicesReceiptsScreen> {
           // Category Filter Tabs
           _buildCategoryFilter(),
 
+          // Merchant Billing Banner (Cashfree & Legal Compliance)
+          Container(
+            margin: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 8.h),
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(8.r),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.verified_outlined, size: 14, color: Color(0xFF10B981)),
+                SizedBox(width: 6.w),
+                Expanded(
+                  child: Text(
+                    'Billing Entity: TEAM INERTIA ENTERPRISES (KRISHNAN ROHITH KUMAR) • Teaminertia3499@gmail.com • 9789006925',
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF475569),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
           // Receipts List Content
           Expanded(
             child: _isLoading

@@ -119,9 +119,17 @@ class PdfReceiptService {
                             ),
                           ),
                           pw.Text(
-                            'contact@inertiasports.in • www.inertiasports.in',
+                            'TEAM INERTIA ENTERPRISES (KRISHNAN ROHITH KUMAR)',
                             style: pw.TextStyle(
+                              font: ttfBold,
                               fontSize: 8.5,
+                              color: slateTextColor,
+                            ),
+                          ),
+                          pw.Text(
+                            'Teaminertia3499@gmail.com • +91 9789006925',
+                            style: pw.TextStyle(
+                              fontSize: 8,
                               color: slateTextColor,
                             ),
                           ),
@@ -441,7 +449,7 @@ class PdfReceiptService {
                         style: pw.TextStyle(fontSize: 8, color: slateTextColor),
                       ),
                       pw.Text(
-                        'No physical signature required • Authenticated via Razorpay Live Gateway',
+                        'Merchant: TEAM INERTIA ENTERPRISES • Proprietor: KRISHNAN ROHITH KUMAR • Helpline: 9789006925',
                         style: pw.TextStyle(fontSize: 7.5, color: slateTextColor),
                       ),
                     ],
